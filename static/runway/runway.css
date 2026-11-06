@@ -2,7 +2,8 @@ body.os-editorial .runway-hero {
   position:relative;
   isolation:isolate;
   min-height:clamp(570px,51vw,760px);
-  background-color:#101410;
+  background:linear-gradient(90deg,#080908 0%,#080908d9 21%,#08090854 58%,#08090820 100%),
+             url("fallback.webp") 60% center/cover #101410;
   overflow:hidden;
 }
 .runway-stage,.runway-shade {position:absolute;inset:0}

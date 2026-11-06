@@ -14,7 +14,7 @@ export const looks = [
      fabric:'#252525', photo:'#222221', trousers:'#51514a'},
 ];
 export const assets = {
-    model:'./models/runway-human.glb?v=2',
+    model:'./models/runway-human.glb?v=3',
     shirtMesh:'Cloth_tshirt',
     idleClip:null,
 };
@@ -80,7 +80,7 @@ export async function createCast() {
             let shirt, trousers;
             gltf.scene.traverse(part=>{
                 if(!part.isMesh) return;
-                part.castShadow=true;
+                part.castShadow=!/^(Eyes|Eyelashes|Eyebrows)/.test(part.name);
                 part.receiveShadow=true;
                 if(part.name === (look.shirtMesh || assets.shirtMesh)) shirt=part.material;
                 if(part.name === 'Cloth_jeans') trousers=part.material;

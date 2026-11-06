@@ -3,12 +3,15 @@
 Usage: python tools/build_runway_actor.py <directory containing the source GLBs>
 See static/runway/models/SOURCES.md for the pinned source and licence.
 """
+import io
 import json
 import math
 import struct
 import sys
 from copy import deepcopy
 from pathlib import Path
+
+from PIL import Image
 
 FORMATS = {5121: 'B', 5123: 'H', 5125: 'I', 5126: 'f'}
 WIDTH = {'SCALAR': 1, 'VEC2': 2, 'VEC3': 3, 'VEC4': 4, 'MAT4': 16}
@@ -91,6 +94,27 @@ def blend(point, ids, weights, joints, w):
     return result
 
 
+TEXTURE_LIMITS = {'skin_albedo': 1536, 'skin_normal': 768, 'eye': 384, 'eyebrow': 256,
+                  'eyelash': 256, 'hair_short04': 512, 'cloth_shoes_albedo': 640}
+
+
+def texture_bytes(image, data):
+    limit = TEXTURE_LIMITS.get(image.get('name'))
+    if not limit:
+        return data
+    with Image.open(io.BytesIO(data)) as photo:
+        if max(photo.size) <= limit:
+            return data
+        photo.thumbnail((limit,limit),Image.Resampling.LANCZOS)
+        result = io.BytesIO()
+        if image['mimeType'] == 'image/png':
+            photo.save(result,format='PNG',optimize=True)
+        else:
+            # Keep chroma detail on normals and the face.
+            photo.save(result,format='JPEG',quality=87,optimize=True,subsampling=0)
+        return result.getvalue()
+
+
 def build(directory, output):
     binary = bytearray()
     doc = {'asset':{'version':'2.0','generator':'Our Souls runway actor'},
@@ -130,7 +154,7 @@ def build(directory, output):
                     image = deepcopy(source['images'][image_index])
                     view = source['bufferViews'][image['bufferView']]
                     start = view.get('byteOffset',0)
-                    image['bufferView'] = append_view(data[start:start+view['byteLength']])
+                    image['bufferView'] = append_view(texture_bytes(image,data[start:start+view['byteLength']]))
                     images[image_index] = len(doc['images'])
                     doc['images'].append(image)
                 texture['source'] = images[image_index]

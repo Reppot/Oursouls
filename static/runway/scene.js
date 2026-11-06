@@ -1,5 +1,5 @@
 import * as T from '../studio/three/three.module.min.js';
-import {createCast, looks} from './cast.js?v=4';
+import {createCast, looks} from './cast.js?v=5';
 
 const v = (x,y,z) => new T.Vector3(x,y,z);
 const mix = (a,b,t) => a + (b-a)*t;
@@ -154,7 +154,7 @@ export async function createRunway(host,{mobile,low,reduced,manual,onError}) {
     const aim=v(0,1,-1), from=v(0,0,0), fromAim=v(0,0,0);
     let cast,playing=!reduced.matches && !manual,visible=true,disposed=false;
     let phase=0,transition=1,frame=0,last=0,drag=null,w=1,h=1;
-    let activeIndex=0;
+    let activeIndex=0, quality=1, slowFrames=0;
     const listenersForMode=new Set();
     const status=()=>listenersForMode.forEach(fn=>fn(playing));
     const render=()=>renderer.render(scene,camera);
@@ -168,9 +168,10 @@ export async function createRunway(host,{mobile,low,reduced,manual,onError}) {
         if(mobile.matches) camera.clearViewOffset();
         else camera.setViewOffset(w,h,-w*.225,0,w,h);
     };
-    function resize() {
+    function resize(draw=true) {
         w=Math.max(1,host.clientWidth); h=Math.max(1,host.clientHeight);
-        const dpr=Math.min(devicePixelRatio||1,low?1:mobile.matches?1.28:1.5,Math.sqrt(1_600_000/(w*h)));
+        const maxPixels=mobile.matches?480_000:1_200_000;
+        const dpr=Math.min(devicePixelRatio||1,low?1:mobile.matches?1.2:1.4,Math.sqrt(maxPixels/(w*h)))*quality;
         renderer.setPixelRatio(dpr);
         renderer.setSize(w,h,false);
         camera.aspect=w/h;
@@ -178,7 +179,7 @@ export async function createRunway(host,{mobile,low,reduced,manual,onError}) {
         camera.clearViewOffset();
         camera.updateProjectionMatrix();
         position();
-        if(cast) render();
+        if(cast && draw) render();
     }
     function schedule() {
         if(!frame && !disposed && visible && !document.hidden && playing) frame=requestAnimationFrame(update);
@@ -186,8 +187,22 @@ export async function createRunway(host,{mobile,low,reduced,manual,onError}) {
     function update(now) {
         frame=0;
         if(disposed || !visible || document.hidden || !playing) return;
-        const dt=last?Math.min(.1,(now-last)/1000):0;
-        if(last && now-last < (low?45:30)) { schedule(); return; }
+        const elapsed=last ? now-last : 0;
+        const interval=low ? 61 : mobile.matches ? 40 : 31;
+        if(last && elapsed < interval) { schedule(); return; }
+        const dt=Math.min(.1,elapsed/1000);
+        if(last && elapsed > interval+24) slowFrames++;
+        else slowFrames=Math.max(0,slowFrames-1);
+        if(slowFrames>=16) {
+            slowFrames=0;
+            if(quality>.73) {
+                quality=Math.max(.72,quality*.83);
+                resize(false);
+            } else {
+                setPlaying(false);
+                return;
+            }
+        }
         last=now;
         phase=(phase+dt/24)%1;
         transition=Math.min(1,transition+dt/1.2);
@@ -202,6 +217,7 @@ export async function createRunway(host,{mobile,low,reduced,manual,onError}) {
         if(playing===value) return;
         playing=value;
         if(playing) {
+            slowFrames=0;
             from.copy(camera.position); fromAim.copy(aim);
             transition=0; schedule();
         } else pauseFrames();
@@ -221,7 +237,7 @@ export async function createRunway(host,{mobile,low,reduced,manual,onError}) {
         camera.position.copy(tour.getPointAt(0)); aim.copy(targetTrack.getPointAt(0));
         position(); render();
     }
-    const observer=new ResizeObserver(resize);
+    const observer=new ResizeObserver(()=>resize());
     function destroy() {
         if(disposed) return;
         disposed=true; pauseFrames(); observer.disconnect(); listeners.abort();

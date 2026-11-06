@@ -12,7 +12,10 @@ if(hero) {
     const mobile=matchMedia('(max-width: 720px)');
     const reduced=matchMedia('(prefers-reduced-motion: reduce)');
     const query=new URLSearchParams(location.search).get('runway');
-    const low=Boolean(navigator.connection?.saveData || (navigator.deviceMemory && navigator.deviceMemory<=2));
+    const constrained=()=>Boolean(navigator.connection?.saveData
+        || ['slow-2g','2g','3g'].includes(navigator.connection?.effectiveType)
+        || (navigator.deviceMemory && navigator.deviceMemory<=2)
+        || (mobile.matches && navigator.hardwareConcurrency && navigator.hardwareConcurrency<=4));
     let runway=null,loading=false,visible=false;
 
     function fallback() {
@@ -29,8 +32,9 @@ if(hero) {
         start.textContent='Загрузка 3D…';
         message.textContent='';
         try {
-            const {createRunway}=await import('./scene.js?v=4');
-            runway=await createRunway(host,{mobile,low,reduced,manual:query==='manual',onError:fallback});
+            const {createRunway}=await import('./scene.js?v=5');
+            const low=constrained();
+            runway=await createRunway(host,{mobile,low,reduced,manual:low || query==='manual',onError:fallback});
             runway.setVisible(visible);
             runway.onMode(playing=>{
                 play.setAttribute('aria-pressed',String(playing));
@@ -74,7 +78,7 @@ if(hero) {
         const observer=new IntersectionObserver(([entry])=>{
             visible=entry.isIntersecting;
             runway?.setVisible(visible);
-            if(visible && !low && query!=='off' && !runway && !loading) queue();
+            if(visible && !constrained() && query!=='off' && !runway && !loading) queue();
         },{threshold:.05});
         observer.observe(hero);
     };
