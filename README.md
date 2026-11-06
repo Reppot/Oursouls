@@ -24,3 +24,10 @@
 Товары взяты из публичного WooCommerce API. Для закрытых карточек понадобится отдельный экспорт из админки. Корзина привязана к адресу сайта, для новой админки создаётся отдельный вход. Цены оставлены пустыми у товаров, для которых WooCommerce не отдаёт опубликованную цену.
 
 Render Free может запускаться около минуты после простоя. Supabase Free при низкой активности может поставить проект на паузу. [Render Free](https://render.com/docs/free) · [Пауза Supabase Free](https://supabase.com/docs/guides/platform/free-project-pausing)
+
+## Иллюстрации для баннеров
+
+Две иллюстрации созданы встроенным imagegen по композиции экранов Figma.
+
+- static/theme/services-open-book.png: Use case ads-marketing. Landscape web banner for a gothic print shop, wide crop 3:1 centered. Top-down antique open sketchbook with rough cream vellum, large botanical pressed burgundy roses with dark green stems on both pages, on black walnut table, an antique small candlestick at far right. Low-key brown-black cinematic lighting, earthy colors, centered open book across the horizontal canvas, quiet lower contrast middle for cream web heading to be overlaid. Photorealistic still life. Image only, absolutely no letters, words, watermark, logos, text, borders or UI.
+- static/theme/home-print-engraving.png: Use case illustration-story. Landscape banner 3:1 for dark streetwear. One giant finely detailed engraved human skull in the right half, diagonal composition, charcoal etched bone on black, dark thorn tendrils and faint graphite rose engraving. Keep far left nearly black and make right half etched mid-dark gray, quiet middle for overlay. Vintage woodcut with dense shading; no bright whites or gore. Image only, no lettering, logo, border, text or UI.

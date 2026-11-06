@@ -1,7 +1,58 @@
 {% extends 'base.html' %}
-{% block content %}<main class="section" id="main"><div class="wrap"><header class="section-heading"><div class="eyebrow">OUR SOULS / ГОТОВЫЕ ПРИНТЫ</div><h1>Каталог</h1></header>
-<div class="osp-catalog"><aside><h2>Категории</h2><a href="/catalog/" class="{{ 'is-active' if not category }}">Все принты</a>
-{% for name in categories %}<a href="{{ url_for('catalog',category=name) }}" class="{{ 'is-active' if category == name }}">{{ name }}</a>{% endfor %}</aside>
-<div><p class="osp-muted">Товаров: {{ count }}</p>{% include 'cards.html' %}
-{% if pages > 1 %}<nav class="osp-pagination" aria-label="Страницы каталога">{% for n in range(1,pages+1) %}<a class="{{ 'current' if n == page }}" href="{{ url_for('catalog',category=category,catalog_page=n) }}">{{ n }}</a>{% endfor %}</nav>{% endif %}</div>
-</div></div></main>{% endblock %}
+{% block content %}
+<main class="section" id="main">
+  <div class="wrap">
+    <header class="shop-page-heading"><p class="breadcrumbs"><a href="/">Главная</a> / Каталог</p><p class="eyebrow">Все принты</p><h1>Каталог</h1></header>
+    <div class="osp-catalog">
+      <aside class="catalog-filters">
+        <form id="catalog-search" action="/catalog/" method="get">
+          <h2>Фильтры</h2>
+          <input type="hidden" name="sort" value="{{ sort }}">
+          <label>Поиск<input type="search" name="q" placeholder="Название или артикул" value="{{ search }}" maxlength="100"></label>
+          <fieldset>
+            <legend>Категории</legend>
+            <label><input type="radio" name="category" value="" {{ 'checked' if not category }}>Все принты</label>
+            {% for name in categories %}
+            <label><input type="radio" name="category" value="{{ name }}" {{ 'checked' if category == name }}>{{ name }}</label>
+            {% endfor %}
+          </fieldset>
+          <fieldset>
+            <legend>Цвет основы</legend>
+            <div class="filter-colors">
+              {% for name, color in palette.items() %}
+              <label style="--swatch:{{ color }}" title="{{ name }}"><input type="checkbox" name="color" value="{{ name }}" aria-label="{{ name }}" {{ 'checked' if name in selected_colors }}><span></span></label>
+              {% endfor %}
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>Цена, ₽</legend>
+            <div class="filter-prices"><input type="number" name="min" aria-label="Цена от" placeholder="От" min="0" value="{{ minimum if minimum is not none else '' }}"><input type="number" name="max" aria-label="Цена до" placeholder="До" min="0" value="{{ maximum if maximum is not none else '' }}"></div>
+          </fieldset>
+          <button class="button" type="submit">Применить фильтры</button>
+          <a class="clear-filters" href="/catalog/">Сбросить</a>
+        </form>
+      </aside>
+      <div>
+        <form method="get" class="catalog-toolbar" action="/catalog/">
+          <input type="hidden" name="q" value="{{ search }}">
+          <input type="hidden" name="category" value="{{ category }}">
+          {% for color in selected_colors %}<input type="hidden" name="color" value="{{ color }}">{% endfor %}
+          {% if minimum is not none %}<input type="hidden" name="min" value="{{ minimum }}">{% endif %}
+          {% if maximum is not none %}<input type="hidden" name="max" value="{{ maximum }}">{% endif %}
+          <div>
+            <select name="sort" aria-label="Сортировка">
+              {% for key, label in [('', 'По умолчанию'), ('new', 'Сначала новые'), ('price-up', 'По возрастанию цены'), ('price-down', 'По убыванию цены')] %}
+              <option value="{{ key }}" {{ 'selected' if key == sort }}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            <button type="submit" aria-label="Применить сортировку">→</button>
+          </div>
+          <p class="osp-muted">Товаров: {{ count }}</p>
+        </form>
+        {% include 'cards.html' %}
+        {% if pages > 1 %}<nav class="osp-pagination" aria-label="Страницы каталога">{% for n in range(1,pages+1) %}<a class="page-numbers {{ 'current' if n == page }}" {% if n == page %}aria-current="page"{% endif %} href="{{ pagination[n] }}">{{ n }}</a>{% endfor %}</nav>{% endif %}
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}

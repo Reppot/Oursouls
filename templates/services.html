@@ -1,6 +1,41 @@
 {% extends 'base.html' %}
 {% block content %}
-
-<main id="main"><section id="services" class="section print-banner os-services-intro"><div class="wrap"><div class="eyebrow" style="color:#b9c8ad">УСЛУГИ ПЕЧАТИ</div><h1>Печать на твоей одежде</h1><p>Печатаем на футболках, худи и лонгсливах. Можно выбрать нашу основу или принести свою вещь. Макет и стоимость согласуем до начала работы.</p><div class="facts"><span>ОТ 1 ШТУКИ</span><span>ДО 7 ДНЕЙ</span><span>МАКЕТ ДО ПЕЧАТИ</span></div><a class="button" href="{{ telegram }}" target="_blank" rel="noopener">Обсудить печать ↗</a></div></section>
-<section class="section"><div class="wrap"><header class="section-heading"><div class="eyebrow">ОТ ОДНОЙ ВЕЩИ</div><h2>Что печатаем</h2></header><div class="values"><div><h3>Футболки</h3><p>Готовые принты и ваша картинка на нашей или вашей основе.</p></div><div><h3>Худи и лонгсливы</h3><p>Принты спереди, сзади и на рукавах — расположение согласуем до печати.</p></div><div><h3>Индивидуальный заказ</h3><p>Обсудим изображение, тираж и стоимость. Изготовление до 7 дней в зависимости от заказа.</p></div></div><div class="actions"><a class="button" href="/constructor/">Создать макет</a><a class="button" href="{{ telegram }}" target="_blank" rel="noopener">Уточнить стоимость ↗</a></div></div></section></main>
+<main id="main">
+  <section class="brand-banner services-banner">
+    <div class="wrap">
+      <header class="center-title"><p class="eyebrow">Услуги печати</p><h1>Печать на твоей одежде</h1><p>От одной вещи. Макет и стоимость согласуем до печати.</p></header>
+      <a class="button" href="#print-request">Оставить заявку</a>
+    </div>
+  </section>
+  <section class="section">
+    <div class="wrap">
+      <header class="center-title"><h2>Что печатаем</h2></header>
+      <div class="service-types">
+        {% for name, description, icon in [
+          ('Футболки','На нашей основе или на твоей вещи','M8 4 3 7l2 5 3-1v9h8v-9l3 1 2-5-5-3a4 4 0 0 1-8 0Z'),
+          ('Худи','Печать на груди, спине и рукавах','M8 7V5a4 4 0 0 1 8 0v2m-8 0 4 4 4-4 4 2 2 10-4 1-2-7v8H8v-8l-2 7-4-1L4 9Zm3 4v3m2-3v3'),
+          ('Лонгсливы','Свой принт на одежде с длинным рукавом','M8 5 4 7 2 19l4 1 2-8v8h8v-8l2 8 4-1-2-12-4-2a4 4 0 0 1-8 0Z'),
+          ('Шопперы','Наличие основы уточним при заказе','M4 8h16l1 13H3Zm4 2V6a4 4 0 1 1 8 0v4')
+        ] %}
+        <article><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="{{ icon }}"/></svg><h3>{{ name }}</h3><p>{{ description }}</p></article>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  <section class="section print-request" id="print-request">
+    <div class="wrap">
+      <header class="center-title"><p class="eyebrow">Оставить заявку</p><h2>Готовы обсудить ваш проект</h2><p>Заполни форму. Откроется Telegram с текстом заявки.</p></header>
+      {% if error %}<p class="shop-error" role="alert">{{ error }}</p>{% endif %}
+      <form method="post" action="/services/#print-request" class="request-grid">
+        <input type="hidden" name="csrf" value="{{ csrf() }}">
+        <label>Имя <input name="name" value="{{ form.name|default('') }}" maxlength="80" autocomplete="name" required></label>
+        <label>Telegram или телефон <input name="contact" value="{{ form.contact|default('') }}" maxlength="100" required></label>
+        <label>Тип одежды <select name="garment" required><option value="">Выбери основу</option>{% for kind in kinds %}<option {{ 'selected' if form.garment == kind }}>{{ kind }}</option>{% endfor %}</select></label>
+        <label>Тираж <input type="number" name="quantity" min="1" max="9999" required value="{{ form.quantity|default('1') }}"></label>
+        <label class="full">Описание заказа <textarea name="details" rows="4" maxlength="600" placeholder="Например, принт на спине и свой лонгслив">{{ form.details|default('') }}</textarea></label>
+        <button class="button full">Продолжить в Telegram ↗</button>
+      </form>
+    </div>
+  </section>
+</main>
 {% endblock %}

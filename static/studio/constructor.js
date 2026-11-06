@@ -213,13 +213,23 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
         if (viewer) { if (orient) viewer.showSide(next); else viewer.syncSide(next); }
         setMode(mode); status(''); draw();
     }
+    const narrowStudio = matchMedia('(max-width: 850px)');
+    function syncPanels() {
+        q('panel-garment').hidden = narrowStudio.matches && tab !== 'garment';
+        q('panel-print').hidden = tab === 'order' || (narrowStudio.matches && tab !== 'print');
+        q('panel-order').hidden = tab !== 'order';
+        q('panel-print').closest('.os-studio-settings').hidden = narrowStudio.matches && tab === 'garment';
+    }
+    narrowStudio.addEventListener('change', syncPanels);
+    syncPanels();
     function openTab(next, focus = false) {
         tab = next;
         for (const key of tabs) {
             const selected = key === next, button = q('tab-'+key);
             button.setAttribute('aria-selected', String(selected)); button.tabIndex = selected ? 0 : -1;
-            q('panel-'+key).hidden = !selected;
+
         }
+        syncPanels();
         if (next !== 'print') setMode('orbit');
         if (focus) q('tab-'+next).focus({preventScroll:true});
         status(''); draw();
@@ -250,7 +260,7 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
                 layer.y = key === 'front' ? 280 : 326; layer.scale = key === 'front' ? 92 : 140;
             }
             layers[key].push(layer); selected[key] = layer.id;
-            if (side === key && tab === 'print') setMode('print');
+            if (side === key && tab !== 'order') { if (tab !== 'print') openTab('print'); setMode('print'); }
             status(`${sideName(key)}: изображение добавлено.`); draw();
         } catch (error) { status('Не удалось открыть изображение. Выбери JPEG или PNG до 40 мегапикселей.', true); }
         finally { if (url) URL.revokeObjectURL(url); pending--; q('file').value = ''; draw(); }

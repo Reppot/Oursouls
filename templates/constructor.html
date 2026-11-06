@@ -1,42 +1,23 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<section id="our-print" class="os-print-studio"
+<main id="main"><section id="our-print" class="os-print-studio"
     data-atlas="/static/studio/garments-studio-v1.png"
     data-viewer="/static/studio/garment-viewer.js"
     data-archive="/static/studio/order-archive.js"
     data-sample="/static/studio/example-print.png">
 <div class="os-studio-wrap">
     <header class="os-studio-intro">
-        <div><p class="os-studio-kicker">OUR SOULS / ПЕЧАТЬ НА ЗАКАЗ</p><h1>Конструктор одежды</h1>
+        <div><p class="os-studio-kicker">OUR SOULS / ПЕЧАТЬ НА ЗАКАЗ</p><h1>Конструктор</h1>
         <p>Выбери одежду и примерь свой принт. Перед и спину можно оформить отдельно.</p></div>
-        <span class="os-studio-tag">От одной вещи</span>
-    </header>
-    <div class="os-studio-grid">
-        <section class="os-studio-stage" aria-label="Предпросмотр одежды">
-            <div class="os-stage-top"><span id="op-stage-model">Футболка</span><span id="op-render-mode" class="os-stage-badge">Загрузка…</span></div>
-            <div class="os-stage-viewport" id="op-viewport" aria-busy="true">
-                <canvas id="op-canvas" width="600" height="700" tabindex="0" aria-label="Студийный макет одежды"></canvas>
-                <div id="op-webgl" class="os-webgl" hidden></div>
-                <div class="os-stage-loading" id="op-loading"><span></span>Подготавливаем модель</div>
-            </div>
-            <div class="os-stage-toolbar">
-                <div class="os-segment" role="group" aria-label="Ракурс"><button type="button" data-side="front" aria-pressed="true">Перед</button><button type="button" data-side="back" aria-pressed="false">Спина</button></div>
-                <div class="os-stage-zoom" id="op-zoom-tools" hidden>
-                    <button type="button" id="op-zoom-out" aria-label="Отдалить" title="Отдалить">−</button>
-                    <button type="button" id="op-reset-view" aria-label="Сбросить ракурс и масштаб" title="Сбросить вид">↺</button>
-                    <button type="button" id="op-zoom-in" aria-label="Приблизить" title="Приблизить">+</button>
-                </div>
-            </div>
-            <div class="os-stage-foot"><p id="op-gesture">Поверни модель мышью или пальцем.</p><p id="op-position" aria-live="off"></p></div>
-        </section>
-        <section class="os-studio-settings" aria-label="Настройки конструктора">
             <div class="os-tabs" role="tablist" aria-label="Этапы настройки">
                 <button type="button" id="op-tab-garment" role="tab" data-tab="garment" aria-controls="op-panel-garment" aria-selected="true"><span>01</span>Одежда</button>
                 <button type="button" id="op-tab-print" role="tab" data-tab="print" aria-controls="op-panel-print" aria-selected="false" tabindex="-1"><span>02</span>Принт</button>
                 <button type="button" id="op-tab-order" role="tab" data-tab="order" aria-controls="op-panel-order" aria-selected="false" tabindex="-1"><span>03</span>Заказ</button>
             </div>
-            <div id="op-panel-garment" class="os-panel" role="tabpanel" aria-labelledby="op-tab-garment">
+    </header>
+    <div class="os-studio-grid">
+            <div id="op-panel-garment" class="os-panel os-garment-rail" aria-label="Выбор одежды">
                 <div class="os-panel-title"><h2>Выбери основу</h2><p>Форма, ткань и цвет будущей вещи.</p></div>
                 <div class="os-model-options" role="group" aria-label="Модель одежды">
                     <button type="button" data-garment="tee" aria-pressed="true"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M14 9l-6 2-5 8 7 4 3-4v13h14V19l3 4 7-4-5-8-6-2c-2 6-10 6-12 0z"/></svg><span>Футболка</span></button>
@@ -57,7 +38,26 @@
                 </details>
                 <button type="button" class="os-primary os-next" data-next="print">Добавить принт <span aria-hidden="true">→</span></button>
             </div>
-            <div id="op-panel-print" class="os-panel" role="tabpanel" aria-labelledby="op-tab-print" hidden>
+
+        <section class="os-studio-stage" aria-label="Предпросмотр одежды">
+            <div class="os-stage-top"><span id="op-stage-model">Футболка</span><span id="op-render-mode" class="os-stage-badge">Загрузка…</span></div>
+            <div class="os-stage-viewport" id="op-viewport" aria-busy="true">
+                <canvas id="op-canvas" width="600" height="700" tabindex="0" aria-label="Студийный макет одежды"></canvas>
+                <div id="op-webgl" class="os-webgl" hidden></div>
+                <div class="os-stage-loading" id="op-loading"><span></span>Подготавливаем модель</div>
+            </div>
+            <div class="os-stage-toolbar">
+                <div class="os-segment" role="group" aria-label="Ракурс"><button type="button" data-side="front" aria-pressed="true">Перед</button><button type="button" data-side="back" aria-pressed="false">Спина</button></div>
+                <div class="os-stage-zoom" id="op-zoom-tools" hidden>
+                    <button type="button" id="op-zoom-out" aria-label="Отдалить" title="Отдалить">−</button>
+                    <button type="button" id="op-reset-view" aria-label="Сбросить ракурс и масштаб" title="Сбросить вид">↺</button>
+                    <button type="button" id="op-zoom-in" aria-label="Приблизить" title="Приблизить">+</button>
+                </div>
+            </div>
+            <div class="os-stage-foot"><p id="op-gesture">Поверни модель мышью или пальцем.</p><p id="op-position" aria-live="off"></p></div>
+        </section>
+        <section class="os-studio-settings" aria-label="Настройки конструктора">
+            <div id="op-panel-print" class="os-panel" role="tabpanel" aria-labelledby="op-tab-print">
                 <div class="os-panel-title"><h2>Примерь принт</h2><p>До 10 изображений на весь макет. Выбери сторону, затем добавь принты.</p></div>
                 <div class="os-segment os-side-selector" role="group" aria-label="Сторона для печати"><button type="button" data-side="front" aria-pressed="true">Перед <span data-file-dot="front" hidden></span></button><button type="button" data-side="back" aria-pressed="false">Спина <span data-file-dot="back" hidden></span></button></div>
                 <p class="os-layer-count">Принты на макете <strong id="op-layer-count">0 / 10</strong></p>
@@ -125,7 +125,7 @@
         </section>
     </div>
 </div>
-</section>
+</section></main>
 
-<script defer src='/static/studio/constructor.js'></script>
+<script defer src='/static/studio/constructor.js?v=2.2.0'></script>
 {% endblock %}

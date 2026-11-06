@@ -1,5 +1,22 @@
 {% extends 'base.html' %}
 {% block content %}
-
-<main id="main"><section id="about" class="section"><div class="wrap"><div class="story"><img src="/static/theme/hero.png" alt="Розы и терновые ветви Our Souls" loading="lazy"><div><div class="eyebrow">О БРЕНДЕ</div><h1>Our Souls.<br>Принты и печать.</h1><p>Мемы, чёрный юмор и хоррор — темы наших принтов. Выбирай готовую футболку в каталоге или присылай своё изображение для печати. Работаем с заказами от одной вещи.</p></div></div><div class="values"><div><h3>Готовые принты</h3><p>В каталоге — футболки с мемами, хоррор-иллюстрациями и другими принтами. Размер, цвет и наличие уточним перед заказом.</p></div><div><h3>Своя картинка</h3><p>Загрузи PNG или JPEG в конструктор и покажи, как разместить принт. Можно использовать нашу основу или принести свою одежду.</p></div><div><h3>Перед печатью</h3><p>Согласуем макет, стоимость и срок в Telegram. Изготовление занимает от 3 до 7 дней в зависимости от заказа.</p></div></div></div></section></main>
+<main id="main">
+  <section class="brand-banner about-banner">
+    <div class="wrap"><header class="center-title"><h1>О бренде</h1><p>Мемы, хоррор и вещи со своим характером</p></header></div>
+  </section>
+  <section class="section">
+    <article class="wrap manifesto">
+      <h2>Наш манифест</h2>
+      <p>Our Souls — одежда для тех, кому близка тёмная эстетика и кто умеет над ней посмеяться.</p>
+      <p>Мы собираем в принтах то, что нам нравится: сцены из хорроров, странные иллюстрации, мемы и чёрный юмор. Из этого складывается каталог, в котором можно найти футболку под своё настроение.</p>
+      <p>Если нужного дизайна ещё нет, сделай его сам. Выбери основу, добавь изображение и покажи нам макет. Согласуем ткань, цвет и расположение перед печатью.</p>
+    </article>
+  </section>
+  <section class="about-facts" aria-label="Об Our Souls">
+    <div class="wrap"><div><strong>1</strong><span>вещь в минимальном заказе</span></div><div><strong>3</strong><span>модели в конструкторе</span></div><div><strong>10</strong><span>принтов на одном макете</span></div><div><strong>до 7</strong><span>дней на изготовление</span></div></div>
+  </section>
+  <section class="section about-cta">
+    <div class="wrap"><h2>Готов к своей тёмной стороне?</h2><div class="actions"><a class="button" href="/catalog/">Смотреть каталог</a><a class="button outline" href="/constructor/">Создать свой принт</a></div></div>
+  </section>
+</main>
 {% endblock %}

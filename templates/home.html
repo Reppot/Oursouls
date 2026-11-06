@@ -1,11 +1,48 @@
 {% extends 'base.html' %}
 {% block content %}
-
-<main id="main"><section class="hero"><div class="wrap"><div class="hero-copy"><div class="eyebrow">OUR SOULS / ОДЕЖДА И ПЕЧАТЬ</div><h1>Носи свою<br>тёмную сторону</h1><p>Футболки с мемами и хоррор-принтами.<br>Печать по твоему макету — от одной вещи.</p><div class="actions"><a class="button" href="/catalog/">Смотреть каталог</a><a class="button outline" href="/constructor/">Создать свой принт</a></div></div></div></section>
-<section id="catalog" class="section"><div class="wrap"><header class="section-heading"><div class="eyebrow">КАТАЛОГ / ГОТОВЫЕ ПРИНТЫ</div><h2>Выбери свой принт</h2><p>Футболки, которые уже есть в каталоге.</p></header>
-{% include 'cards.html' %}
-<div class="actions"><a class="button" href="/catalog/">Весь каталог →</a></div></div></section>
-<section class="section os-custom-print"><div class="wrap os-custom-grid"><div><div class="eyebrow">ПЕЧАТЬ НА ЗАКАЗ</div><h2>Твой макет.<br>Наша печать.</h2><p>Загрузи изображение, выбери одежду и размести принт спереди или сзади. Макет, основу и стоимость согласуем до печати.</p><a class="button" href="/constructor/">Собрать макет ↗</a><div class="os-print-spec"><span>От 1 вещи</span><span>Перед и спина</span><span>До 7 дней</span></div></div><a class="os-preview-link" href="/constructor/"><img src="/static/theme/constructor-preview-v2.png" alt="Футболка с мотыльком и розами: принт спереди и сзади" loading="lazy"><span>Конструктор принта ↗</span></a></div></section>
-<section class="os-service-strip"><div class="wrap"><p>Есть своя вещь для печати?</p><a href="/services/">Условия печати ↗</a></div></section></main>
-
+<main id="main">
+  <section class="hero">
+    <div class="wrap"><div class="hero-copy">
+      <p class="eyebrow">OUR SOULS / ОДЕЖДА И ПЕЧАТЬ</p>
+      <h1>Носи свою<br>тёмную сторону</h1>
+      <p>Футболки с мемами и хоррор-принтами.<br>Печать по твоему макету от одной вещи.</p>
+      <div class="actions"><a class="button" href="/catalog/">Смотреть каталог</a><a class="button outline" href="/constructor/">Создать свой принт</a></div>
+    </div></div>
+  </section>
+  <section id="catalog" class="section">
+    <div class="wrap">
+      <header class="center-title"><p class="eyebrow">Коллекция</p><h2>Лучшие принты</h2><p>Готовые дизайны Our Souls.</p></header>
+      {% include 'cards.html' %}
+      <p class="home-more"><a href="/catalog/">Смотреть все принты →</a></p>
+    </div>
+  </section>
+  <section class="section os-custom-print">
+    <div class="wrap os-custom-grid">
+      <div><p class="eyebrow">Конструктор</p><h2>Свой принт за 5 минут</h2><p>Выбери одежду, загрузи изображение и размести его на 3D-модели. Сохрани макет и отправь нам в Telegram.</p>
+        <ul class="feature-list"><li>Футболки, лонгсливы и худи</li><li>До 10 принтов на переде и спине</li><li>Свой цвет ткани и настройки изображения</li></ul>
+        <a class="button" href="/constructor/">Открыть конструктор</a>
+      </div>
+      <a class="os-preview-link" href="/constructor/"><img src="/static/theme/constructor-preview-v2.png" alt="Футболка с принтом спереди и сзади" loading="lazy"></a>
+    </div>
+  </section>
+  <section class="brand-banner home-print-banner">
+    <div class="wrap">
+      <header class="center-title"><p class="eyebrow">Услуги печати</p><h2>Печать на твоей одежде</h2><p>Можно принести свою вещь или выбрать нашу основу.</p></header>
+      <div class="print-promises"><div><strong>От 1 штуки</strong><span>Для себя и небольших тиражей</span></div><div><strong>Макет до печати</strong><span>Согласуем размещение и размер</span></div><div><strong>До 7 дней</strong><span>Срок зависит от тиража</span></div></div>
+      <a class="button" href="/services/#print-request">Обсудить заказ</a>
+    </div>
+  </section>
+  <section class="section">
+    <div class="wrap home-story">
+      <img src="/static/theme/hero.png" alt="Розы и терновые ветви Our Souls" loading="lazy">
+      <div><p class="eyebrow">О нас</p><h2>Эстетика, которую можно носить</h2><p>Мемы, чёрный юмор и хоррор встречаются на одежде Our Souls. Выбери готовый дизайн или придумай принт, который хочется носить самому.</p><a href="/about/">Узнать о бренде →</a></div>
+    </div>
+  </section>
+  <section class="section home-faq">
+    <div class="wrap">
+      <header class="center-title"><h2>Перед заказом</h2></header>
+      <div class="print-promises"><div><strong>Можно заказать одну вещь?</strong><span>Да, печатаем от одной штуки.</span></div><div><strong>Как узнать цену?</strong><span>Отправь макет или ссылку на товар в Telegram.</span></div><div><strong>Можно принести свою одежду?</strong><span>Да, обсудим ткань и место печати перед заказом.</span></div></div>
+    </div>
+  </section>
+</main>
 {% endblock %}

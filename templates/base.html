@@ -1,16 +1,39 @@
 <!doctype html>
-<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{{ title }} — Our Souls</title>
-{% for css in ['style','mobile-header','editorial','store','migration'] %}<link rel="stylesheet" href="{{ url_for('static',filename='theme/'+css+'.css') }}">{% endfor %}
-{% if request.endpoint == 'constructor' %}<link rel="stylesheet" href="/static/studio/constructor.css">{% endif %}</head>
-<body class="os-editorial"><a class="skip-link" href="#main">Перейти к содержимому</a>
-<header class="site-header"><div class="wrap header-inner"><a class="wordmark" href="/">OUR SOULS</a>
-<nav class="site-nav" aria-label="Основное меню">
-{% for endpoint, label in [('catalog','Каталог'),('constructor','Конструктор'),('services','Печать'),('about','О бренде')] %}
-<a href="{{ url_for(endpoint) }}" {% if request.endpoint == endpoint %}aria-current="page"{% endif %}>{{ label }}</a>
-{% endfor %}
-<a class="cart-link" href="{{ url_for('cart') }}">Корзина <span class="cart-count">{{ cart_count }}</span></a>
-</nav></div></header>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{ title }} — Our Souls</title>
+  {% for css in ['style','mobile-header','editorial','store','migration'] %}
+  <link rel="stylesheet" href="{{ url_for('static',filename='theme/'+css+'.css') }}">
+  {% endfor %}
+  {% if request.endpoint == 'constructor' %}<link rel="stylesheet" href="/static/studio/constructor.css">{% endif %}
+  <link rel="stylesheet" href="/static/theme/figma.css?v=1">
+</head>
+<body class="os-editorial page-{{ request.endpoint }}">
+<a class="skip-link" href="#main">Перейти к содержимому</a>
+<header class="site-header">
+  <div class="wrap header-row">
+    <a class="wordmark" href="/">OUR SOULS</a>
+    <nav class="site-nav" aria-label="Основное меню">
+      {% for endpoint, label in [('catalog','Каталог'),('constructor','Конструктор'),('services','Услуги печати'),('about','О бренде')] %}
+      <a href="{{ url_for(endpoint) }}" {% if request.endpoint == endpoint %}aria-current="page"{% endif %}>{{ label }}</a>
+      {% endfor %}
+      <a href="#contacts">Контакты</a>
+    </nav>
+    <div class="header-actions">
+      <a href="/cart/" class="header-cart" aria-label="Корзина, товаров {{ cart_count }}" {% if request.endpoint == 'cart' %}aria-current="page"{% endif %}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 4h3l2.5 11h11l2-8H6"/><circle cx="9" cy="19" r="1"/><circle cx="18" cy="19" r="1"/></svg>
+        {% if cart_count %}<span>{{ cart_count }}</span>{% endif %}
+      </a>
+      <a href="/catalog/#catalog-search" aria-label="Поиск по каталогу">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 5 5"/></svg>
+      </a>
+    </div>
+  </div>
+</header>
 {% for message in get_flashed_messages() %}<p class="wrap shop-notice" role="status">{{ message }}</p>{% endfor %}
 {% block content %}{% endblock %}
 {% include 'footer.html' %}
-</body></html>
+</body>
+</html>

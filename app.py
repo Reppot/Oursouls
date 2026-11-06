@@ -87,9 +87,26 @@ def health():
 def home():
     return render_template('home.html', title='Одежда и печать', products=public_products()[:4])
 
-@app.get('/services/')
+@app.route('/services/', methods=['GET', 'POST'])
 def services():
-    return render_template('services.html', title='Печать')
+    kinds = ('Футболка', 'Худи', 'Лонгслив', 'Шоппер', 'Своя вещь', 'Другое')
+    form = {}
+    error = None
+    if request.method == 'POST':
+        for key, length in (('name', 80), ('contact', 100), ('garment', 30), ('quantity', 5), ('details', 600)):
+            form[key] = request.form.get(key, '').strip()[:length]
+        qty = request.form.get('quantity', type=int)
+        if not form['name'] or not form['contact'] or form['garment'] not in kinds or not qty or not 1 <= qty <= 9999:
+            error = 'Проверь имя, контакт, тип одежды и количество.'
+        else:
+            message = (
+                f"Здравствуйте! Хочу заказать печать.\nИмя: {form['name']}\n"
+                f"Контакт: {form['contact']}\nОдежда: {form['garment']}\nТираж: {qty} шт."
+            )
+            if form['details']:
+                message += '\nОписание: ' + form['details']
+            return redirect(TELEGRAM + '?' + urlencode({'text': message}), code=303)
+    return render_template('services.html', title='Печать', kinds=kinds, form=form, error=error), 400 if error else 200
 
 @app.get('/about/')
 def about():
@@ -103,12 +120,51 @@ def constructor():
 def catalog():
     items = public_products()
     categories = sorted({p['category'] for p in items})
+    palette = {name: value for value, name in SWATCHES.items()}
+    palette['Хаки'] = '#686744'
     category = request.args.get('category', '')
-    filtered = [p for p in items if not category or p['category'] == category]
-    pages = max(1, (len(filtered) + 11)//12)
+    colors = [name for name in request.args.getlist('color') if name in palette]
+    search = request.args.get('q', '').strip()[:100]
+    sort = request.args.get('sort', '')
+    if sort not in ('new', 'price-up', 'price-down'):
+        sort = ''
+    minimum = request.args.get('min', type=int)
+    maximum = request.args.get('max', type=int)
+    if minimum is not None and minimum < 0:
+        minimum = None
+    if maximum is not None and maximum < 0:
+        maximum = None
+    if minimum is not None and maximum is not None and minimum > maximum:
+        minimum, maximum = maximum, minimum
+
+    def current_price(item):
+        return item['sale_price'] if item['sale_price'] is not None else item['price']
+
+    filtered = [p for p in items if
+                (not category or p['category'] == category)
+                and (not colors or p['color'] in colors)
+                and (not search or search.casefold() in f"{p['name']} {p['category']} {p['sku']}".casefold())]
+    if minimum is not None:
+        filtered = [p for p in filtered if current_price(p) is not None and current_price(p) >= minimum * 100]
+    if maximum is not None:
+        filtered = [p for p in filtered if current_price(p) is not None and current_price(p) <= maximum * 100]
+    if sort == 'new':
+        filtered.reverse()
+    if sort in ('price-up', 'price-down'):
+        factor = 1 if sort == 'price-up' else -1
+        filtered.sort(key=lambda p: (current_price(p) is None, factor * (current_price(p) or 0)))
+
+    per_page = 9
+    pages = max(1, (len(filtered) + per_page - 1) // per_page)
     page = min(pages, max(1, request.args.get('catalog_page', 1, type=int)))
-    return render_template('catalog.html', title='Каталог', products=filtered[(page-1)*12:page*12],
-                           count=len(filtered), categories=categories, category=category, page=page, pages=pages)
+    params = [(key, value) for key, value in (
+        ('category', category), ('q', search), ('sort', sort), ('min', minimum), ('max', maximum)
+    ) if value not in (None, '')] + [('color', color) for color in colors]
+    return render_template('catalog.html', title='Каталог', products=filtered[(page-1)*per_page:page*per_page],
+                           count=len(filtered), categories=categories, category=category, palette=palette,
+                           selected_colors=colors, search=search, sort=sort, minimum=minimum, maximum=maximum,
+                           pagination={n: '?' + urlencode(params + [('catalog_page', n)]) for n in range(1,pages+1)},
+                           page=page, pages=pages)
 
 @app.get('/product/<slug>/')
 def product(slug):
@@ -146,14 +202,17 @@ def cart():
     text = 'Здравствуйте! Хочу оформить заказ Our Souls:\n' + '\n'.join(
         f"• {items[i['id']]['name']} — {i['size']}, {i['color']}, {i['qty']} шт." for i in basket)
     total = 0
+    lines = []
     for i in basket:
         p = items[i['id']]
         price = p['sale_price'] if p['sale_price'] is not None else p['price']
-        if price is None:
+        subtotal = price * i['qty'] if price is not None else None
+        lines.append((i, p, subtotal))
+        if subtotal is None:
             total = None
-            break
-        total += price*i['qty']
-    return render_template('cart.html', title='Корзина', lines=[(i,items[i['id']]) for i in basket],
+        elif total is not None:
+            total += subtotal
+    return render_template('cart.html', title='Корзина', lines=lines,
                            order_text=text, total=total, checkout=TELEGRAM + '?' + urlencode({'text':text}))
 
 @app.route('/admin/login/', methods=['GET','POST'])
