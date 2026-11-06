@@ -69,7 +69,7 @@ def posed_joints(doc, binary):
         if node.get('name') in ('upperarm_l','upperarm_r'):
             x,y,z = transform(out,(0,0,0),1)
             sign = 1 if x > 0 else -1
-            angle = -sign * math.radians(20)
+            angle = -sign * math.radians(32 if sign > 0 else 36)
             turn = matrix((0,0,math.sin(angle/2),math.cos(angle/2)),(0,0,0))
             moved = multiply(turn,out)
             out = tuple({3:x,7:y,11:z}.get(i,n) for i,n in enumerate(moved))

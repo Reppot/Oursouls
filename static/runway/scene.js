@@ -1,5 +1,5 @@
 import * as T from '../studio/three/three.module.min.js';
-import {createCast, looks} from './cast.js?v=3';
+import {createCast, looks} from './cast.js?v=4';
 
 const v = (x,y,z) => new T.Vector3(x,y,z);
 const mix = (a,b,t) => a + (b-a)*t;

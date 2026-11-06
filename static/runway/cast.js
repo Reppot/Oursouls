@@ -14,7 +14,7 @@ export const looks = [
      fabric:'#252525', photo:'#222221', trousers:'#51514a'},
 ];
 export const assets = {
-    model:'./models/runway-human.glb',
+    model:'./models/runway-human.glb?v=2',
     shirtMesh:'Cloth_tshirt',
     idleClip:null,
 };
