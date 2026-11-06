@@ -1,239 +1,134 @@
 import * as T from '../studio/three/three.module.min.js';
-import { createGarment } from '../studio/garment-geometry.js';
 
-// The built-in mannequin and externally fitted garments share this catalogue.
+// Photo rectangles are normalized against the actual storefront photos.
+// The base tone is sampled from the fabric next to each print.
 export const looks = [
-    { name: 'Футболка · Мотылёк', kind: 'tee', color: '#242823', art: './moth.webp', trousers: '#2f3331' },
-    { name: 'Лонгслив · Пепел', kind: 'long', color: '#a59f96', art: './moth.webp', trousers: '#282a27' },
-    { name: 'Худи · Хвоя', kind: 'hoodie', color: '#283d31', trousers: '#2d312d' },
+    {name:'Красная тьма', url:'/product/красная-тьма/', art:'../catalog/12.webp',
+     rect:[290/864, 1-775/1184, 290/864, 450/1184], fit:[.239,.371,1.285],
+     fabric:'#202523', photo:'#151c1b', trousers:'#474944'},
+    {name:'Лучшие друзья', url:'/product/лучшие-друзья/', art:'../catalog/14.webp',
+     rect:[299/896, 1-652/1200, 296/896, 308/1200], fit:[.231,.240,1.328],
+     fabric:'#6764a7', photo:'#5d5996', trousers:'#3e4142'},
+    {name:'Terrifying', url:'/product/terrifying/', art:'../catalog/16.webp',
+     rect:[283/896, 1-709/1200, 331/896, 365/1200], fit:[.263,.290,1.303],
+     fabric:'#252525', photo:'#222221', trousers:'#51514a'},
 ];
 export const assets = {
-    // A self-contained model in metres, facing +Z, with feet on Y=0.
-    model: null,
-    idleClip: null,
+    model:'./models/runway-human.glb',
+    shirtMesh:'Cloth_tshirt',
+    idleClip:null,
 };
 
-const matte = (color, roughness = .8) => new T.MeshStandardMaterial({ color, roughness });
-const tau = Math.PI * 2;
-
-// Sculpted cross-sections. Each row gives Y, centre X/Z, and ellipse radii.
-// The spline keeps ankles, elbows, hands and the face continuous.
-function loft(rows, material, { segments = 28, samples = 44, detail = () => 0 } = {}) {
-    const centres = new T.CatmullRomCurve3(rows.map(([y,x,z]) => new T.Vector3(x,y,z)), false, 'centripetal');
-    const profiles = new T.CatmullRomCurve3(rows.map(([y,,,x,z]) => new T.Vector3(x,z,y)), false, 'centripetal');
-    const points = [], indices = [];
-    for (let j = 0; j <= samples; j++) {
-        const t = j / samples, c = centres.getPoint(t), r = profiles.getPoint(t);
-        for (let i = 0; i < segments; i++) {
-            const angle = i / segments * tau, fold = detail(t, angle);
-            points.push(c.x + Math.sin(angle) * Math.max(.001,r.x + fold),
-                c.y, c.z + Math.cos(angle) * Math.max(.001,r.y + fold));
-            if (j < samples) {
-                const a = j * segments + i, b = j * segments + (i + 1) % segments;
-                indices.push(a,b,b+segments,a,b+segments,a+segments);
-            }
-        }
-    }
-    const bottom = points.length / 3;
-    const [y,x,z] = rows[0], [topY,topX,topZ] = rows.at(-1);
-    points.push(x,y,z,topX,topY,topZ);
-    for (let i = 0; i < segments; i++) {
-        const next = (i + 1) % segments, end = samples * segments;
-        indices.push(bottom,next,i,bottom+1,end+i,end+next);
-    }
-    const geo = new T.BufferGeometry();
-    geo.setAttribute('position', new T.Float32BufferAttribute(points,3));
-    geo.setIndex(indices);
-    geo.computeVertexNormals();
-    return new T.Mesh(geo,material);
-}
-
-function face() {
-    const skin = new T.MeshStandardMaterial({ color:'#4a4842', roughness:.39, metalness:.23 });
-    return loft([
-        [1.421,0,-.004,.071,.062], [1.52,0,-.004,.059,.062],
-        [1.57,0,.018,.064,.072], [1.62,0,.012,.084,.088],
-        [1.69,0,.004,.093,.094], [1.76,0,-.005,.094,.099],
-        [1.817,0,-.012,.074,.082], [1.852,0,-.014,.040,.051], [1.864,0,-.017,.001,.001]
-    ],skin,{segments:40,detail:(t,a)=>.012*Math.exp(-((t-.55)**2)/.013)*Math.exp(-(Math.atan2(Math.sin(a),Math.cos(a))**2)/.18)});
-}
-
-function arms(kind, material) {
-    return [-1,1].map(sign => {
-        const front = sign * .013;
-        const outer = kind === 'tee' ? .397 : .405;
-        return loft([
-            [.750,sign*(outer-.028),front+.036,.009,.012],
-            [.777,sign*(outer-.014),front+.028,.023,.017],
-            [.819,sign*outer,front+.014,.033,.021],
-            [.866,sign*(outer+.006),front+.007,.026,.024],
-            [.921,sign*.387,front,.030,.029],
-            [1.041,sign*.354,front-.004,.042,.039],
-            [1.14,sign*.315,front-.011,.047,.043],
-            [1.255,sign*.284,front-.014,.055,.055],
-            [1.393,sign*.232,front-.020,.061,.058],
-        ],material);
-    });
-}
-
-function bottoms(color) {
-    const cloth = matte(color, .9), sole = matte('#1e201e', .85), leather = matte('#232725', .46);
-    const result = [loft([
-        [.826,0,-.013,.146,.092],[.887,0,0,.172,.103],[.981,0,0,.185,.113],[1.053,0,-.007,.171,.104]
-    ],cloth)];
-    for (const sign of [-1,1]) {
-        const x = sign*.131, stride = sign*.059;
-        result.push(loft([
-            [.087,x,stride,.064,.057],[.146,x,stride,.065,.066],
-            [.305,sign*.12,stride*.83,.065,.069],[.47,sign*.108,stride*.61,.071,.075],
-            [.635,sign*.101,stride*.29,.080,.083],[.819,sign*.091,0,.093,.10],[.945,sign*.085,0,.091,.10]
-        ],cloth,{detail:(t,a)=>.003*Math.sin(a*4+t*9)+.005*Math.exp(-((t-.11+.045*Math.sin(a))**2)/.003)*Math.cos(a)}));
-        const shoe = (rows, material) => {
-            const mesh=loft(rows.map(([y,z,rx,rz])=>[y,0,z,rx,rz]),material,{segments:32,samples:16});
-            mesh.position.set(x,0,stride); mesh.rotation.y=sign*.095;
-            return mesh;
-        };
-        result.push(shoe([[0,.039,.067,.145],[.018,.04,.070,.149],[.031,.04,.067,.147]],sole));
-        result.push(shoe([[.022,.04,.066,.143],[.049,.043,.062,.139],[.071,.027,.059,.114],[.103,-.026,.055,.071],[.129,-.036,.047,.055]],leather));
-    }
-    return result;
-}
-
-function fabric(color, ink) {
-    const base = matte(color,.92);
-    base.side = T.DoubleSide;
-    if (!ink) return base;
-    base.onBeforeCompile = shader => {
-        shader.uniforms.runwayInk = {value:ink};
-        shader.vertexShader = shader.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 clothPoint;')
-            .replace('#include <begin_vertex>','#include <begin_vertex>\nclothPoint = position;');
-        shader.fragmentShader = shader.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 clothPoint; uniform sampler2D runwayInk;')
-            .replace('#include <color_fragment>', `#include <color_fragment>
-                vec2 artUV = vec2(clothPoint.x / 1.01 + .5, (clothPoint.y + .46) / .85);
-                if (gl_FrontFacing && clothPoint.z > .035 && all(greaterThan(artUV,vec2(0))) && all(lessThan(artUV,vec2(1)))) {
-                    vec4 artwork = texture2D(runwayInk,artUV);
-                    diffuseColor.rgb = mix(diffuseColor.rgb, artwork.rgb, artwork.a * .93);
-                }`);
+function makeShirt(material) {
+    const ink = {
+        runwayPhoto:{value:null}, runwayPhotoTone:{value:new T.Color()}, runwayPhotoRect:{value:new T.Vector4()},
+        runwayPrintFit:{value:new T.Vector3()}, runwayHasPrint:{value:false}
     };
-    return base;
+    material.onBeforeCompile = shader => {
+        Object.assign(shader.uniforms,ink);
+        shader.vertexShader = shader.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 runwayCloth;')
+            .replace('#include <begin_vertex>','#include <begin_vertex>\nrunwayCloth = position;');
+        shader.fragmentShader = shader.fragmentShader.replace('#include <common>', `#include <common>
+            varying vec3 runwayCloth;
+            uniform sampler2D runwayPhoto;
+            uniform vec3 runwayPhotoTone;
+            uniform vec4 runwayPhotoRect;
+            uniform vec3 runwayPrintFit;
+            uniform bool runwayHasPrint;`).replace('#include <color_fragment>', `#include <color_fragment>
+            vec2 uvInk = vec2(runwayCloth.x,(runwayCloth.y - runwayPrintFit.z)) / runwayPrintFit.xy + .5;
+            if (runwayHasPrint && gl_FrontFacing && runwayCloth.z > .035
+                    && all(greaterThan(uvInk,vec2(0))) && all(lessThan(uvInk,vec2(1)))) {
+                vec3 photo = texture2D(runwayPhoto, runwayPhotoRect.xy + uvInk * runwayPhotoRect.zw).rgb;
+                vec2 rim = min(uvInk, 1. - uvInk);
+                float fade = smoothstep(.012,.079,min(rim.x,rim.y));
+                vec3 delta = photo - runwayPhotoTone;
+                float inkCoverage = smoothstep(.018,.095,length(delta));
+                diffuseColor.rgb = mix(diffuseColor.rgb, clamp(diffuseColor.rgb + delta,0.,1.), fade * inkCoverage);
+            }`);
+    };
+    return ink;
 }
 
-function mannequin(look, artwork) {
-    const actor = new T.Group();
-    const head = face();
-    actor.add(head, ...arms(look.kind, head.material), ...bottoms(look.trousers));
-    const cloth = fabric(look.color,artwork);
-    const sameCloth = (factor) => {
-        const m = matte(look.color,.93);
-        m.color.multiplyScalar(factor); m.side=T.DoubleSide;
-        return m;
-    };
-    const {group} = createGarment(look.kind,{
-        fabric:cloth,rib:sameCloth(.75),hood:sameCloth(.84),pocket:sameCloth(.97),
-        stitch:sameCloth(.62),cord:sameCloth(.7),hardware:matte('#4d504b',.43)
-    });
-    // Fit the constructor's floating garment to a dressed pose.
-    for (const part of group.children) {
-        const position = part.geometry.attributes.position;
-        for (let i=0;i<position.count;i++) {
-            const x=position.getX(i), y=position.getY(i), z=position.getZ(i);
-            const sleeve = T.MathUtils.smoothstep(Math.abs(x),.49,.92);
-            const hem = T.MathUtils.smoothstep(-y,.40,1);
-            if (look.kind === 'tee') position.setXYZ(i,x,y-.23*sleeve-.16*hem,z*(1-.28*sleeve));
-            else {
-                const hood = look.kind === 'hoodie' ? T.MathUtils.smoothstep(y,.73,1.53) : 0;
-                const cuff = T.MathUtils.smoothstep(-y,.38,1.21)*sleeve;
-                position.setXYZ(i,x*(1+.07*hood),y+.59*hood-.18*cuff-.12*hem*(1-sleeve),z);
-            }
+function disposeActor(actor) {
+    const resources = new Set();
+    actor.traverse(part=>{
+        if(part.geometry) resources.add(part.geometry);
+        if(part.skeleton) resources.add(part.skeleton);
+        for(const mat of [].concat(part.material||[])) {
+            resources.add(mat);
+            for(const value of Object.values(mat)) if(value?.isTexture) resources.add(value);
         }
-        position.needsUpdate=true;
-        part.geometry.computeVertexNormals();
-        part.geometry.computeBoundingSphere();
-    }
-    group.scale.set(.39,.316,.43);
-    group.position.set(0,1.262,0);
-    actor.add(group);
-    return actor;
+    });
+    resources.forEach(resource=>resource.dispose());
 }
 
 export async function createCast() {
+    const {GLTFLoader} = await import('./vendor/GLTFLoader.js');
     const root = new T.Group();
-    const cache = new Map();
-    const textures = new Map();
-    let disposed = false;
-    let mixer, request = 0;
+    const loader = new GLTFLoader(), photoLoader = new T.TextureLoader();
+    const actors = new Map(), photos = new Map();
+    let mixer = null, disposed = false;
     async function use(index) {
-        if (disposed) return false;
-        const ticket = ++request;
         const look = looks[index];
-        if (!look) throw new Error('Unknown outfit');
-        let asset = cache.get(index);
-        if (!asset) {
-            const url = look.model || assets.model;
-            if (url) {
-                const {GLTFLoader} = await import('./vendor/GLTFLoader.js');
-                const gltf = await new GLTFLoader().loadAsync(new URL(url, import.meta.url).href);
-                asset = {actor:gltf.scene, clips:gltf.animations};
-            } else {
-                let artwork = null;
-                if (look.art) {
-                    artwork = textures.get(look.art);
-                    if (!artwork) {
-                        artwork = await new T.TextureLoader().loadAsync(new URL(look.art,import.meta.url).href).catch(()=>null);
-                        if (artwork) {
-                            artwork.colorSpace = T.SRGBColorSpace;
-                            artwork.anisotropy = 4;
-                            textures.set(look.art,artwork);
-                        }
-                    }
-                }
-                asset = {actor:mannequin(look,artwork),clips:[]};
-            }
-            asset.actor.traverse(part => {
-                if (part.isMesh) { part.castShadow = true; part.receiveShadow = true; }
+        if(!look) throw new Error('Unknown outfit');
+        const model = look.model || assets.model;
+        let asset = actors.get(model);
+        let photo = photos.get(look.art);
+        if(!asset) {
+            const gltf = await loader.loadAsync(new URL(model, import.meta.url).href);
+            if(disposed) {disposeActor(gltf.scene); return false;}
+            let shirt, trousers;
+            gltf.scene.traverse(part=>{
+                if(!part.isMesh) return;
+                part.castShadow=true;
+                part.receiveShadow=true;
+                if(part.name === (look.shirtMesh || assets.shirtMesh)) shirt=part.material;
+                if(part.name === 'Cloth_jeans') trousers=part.material;
             });
-            if (disposed) {
-                disposeActors([asset]);
-                textures.forEach(texture=>texture.dispose());
-                textures.clear();
-                return false;
-            }
-            cache.set(index,asset);
+            asset={actor:gltf.scene,clips:gltf.animations,shirt,trousers,ink:shirt && makeShirt(shirt)};
+            actors.set(model,asset);
         }
-        if (ticket !== request) return false;
-        mixer?.stopAllAction();
-        mixer = null;
-        root.clear();
-        root.add(asset.actor);
-        const clipName = look.idleClip || assets.idleClip;
-        const clip = clipName && T.AnimationClip.findByName(asset.clips,clipName);
-        if (clip) {
-            mixer = new T.AnimationMixer(asset.actor);
-            mixer.clipAction(clip).play();
+        if(look.art && asset.ink && !photo) {
+            photo=await photoLoader.loadAsync(new URL(look.art,import.meta.url).href).catch(()=>null);
+            if(disposed) {photo?.dispose(); return false;}
+            if(photo) {
+                photo.colorSpace=T.SRGBColorSpace;
+                photo.anisotropy=4;
+                photos.set(look.art,photo);
+            }
+        }
+        if(asset.ink) {
+            const {ink,shirt,trousers}=asset;
+            shirt.color.set(look.fabric).multiplyScalar(1.45);
+            ink.runwayHasPrint.value=Boolean(photo);
+            ink.runwayPhoto.value=photo||null;
+            ink.runwayPhotoTone.value.set(look.photo);
+            ink.runwayPhotoRect.value.fromArray(look.rect);
+            ink.runwayPrintFit.value.fromArray(look.fit);
+            if(trousers) trousers.color.set(look.trousers).multiplyScalar(1.45);
+        }
+        if(root.children[0] !== asset.actor) {
+            mixer?.stopAllAction();
+            mixer=null;
+            root.clear(); root.add(asset.actor);
+            const clipName=look.idleClip || assets.idleClip;
+            const clip=clipName && T.AnimationClip.findByName(asset.clips,clipName);
+            if(clip) {
+                mixer=new T.AnimationMixer(asset.actor);
+                mixer.clipAction(clip).play();
+            }
         }
         return true;
     }
-    function disposeActors(actors) {
-        const resources = new Set();
-        for (const {actor} of actors) actor.traverse(part => {
-            if (part.geometry) resources.add(part.geometry);
-            if (part.skeleton) resources.add(part.skeleton);
-            for (const mat of [].concat(part.material || [])) {
-                resources.add(mat);
-                for (const value of Object.values(mat)) if (value?.isTexture) resources.add(value);
-            }
-        });
-        resources.forEach(resource=>resource.dispose());
-    }
-    await use(0);
-    return {root,use, animate(dt) { mixer?.update(dt); }, get animated() { return Boolean(mixer); },
+    try { await use(0); }
+    catch(error) { actors.forEach(asset=>disposeActor(asset.actor)); throw error; }
+    return {
+        root,use,animate(dt) {mixer?.update(dt);},get animated() {return Boolean(mixer);},
         dispose() {
-            disposed=true; request++;
-            mixer?.stopAllAction();
-            root.clear();
-            disposeActors(cache.values());
-            textures.forEach(texture=>texture.dispose());
-            cache.clear(); textures.clear();
-        }
+            disposed=true; mixer?.stopAllAction(); root.clear();
+            actors.forEach(asset=>disposeActor(asset.actor));
+            photos.forEach(texture=>texture.dispose());
+            actors.clear(); photos.clear();
+        },
     };
 }

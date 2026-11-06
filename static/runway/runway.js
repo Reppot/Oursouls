@@ -29,7 +29,7 @@ if(hero) {
         start.textContent='Загрузка 3D…';
         message.textContent='';
         try {
-            const {createRunway}=await import('./scene.js?v=2');
+            const {createRunway}=await import('./scene.js?v=3');
             runway=await createRunway(host,{mobile,low,reduced,manual:query==='manual',onError:fallback});
             runway.setVisible(visible);
             runway.onMode(playing=>{
@@ -55,6 +55,7 @@ if(hero) {
         try {
             const next=await runway.changeLook(runway.index+1);
             label.textContent=next.name;
+            label.href=next.url;
             outfit.textContent='Образ '+(next.index+1)+' / '+next.total+' →';
             message.textContent='';
         } catch {

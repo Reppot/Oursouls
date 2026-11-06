@@ -1,5 +1,5 @@
 import * as T from '../studio/three/three.module.min.js';
-import {createCast, looks} from './cast.js?v=2';
+import {createCast, looks} from './cast.js?v=3';
 
 const v = (x,y,z) => new T.Vector3(x,y,z);
 const mix = (a,b,t) => a + (b-a)*t;
@@ -124,11 +124,11 @@ function lighting(scene,shadowSize) {
 
 // The closed spline gives the return shot the same velocity as the opening shot.
 const tour=new T.CatmullRomCurve3([
-    v(-.73,1.51,4.32),v(-.37,1.38,3.36),v(.47,1.26,2.51),
+    v(-.73,1.51,4.32),v(-.37,1.38,3.36),v(.47,1.41,1.82),
     v(1.40,1.36,2.87),v(1.13,1.58,4.29),v(.08,1.59,4.77),
 ],true,'centripetal');
 const targetTrack=new T.CatmullRomCurve3([
-    v(0,1.00,-1),v(0,1.02,-1),v(0,1.18,-1),
+    v(0,1.00,-1),v(0,1.02,-1),v(0,1.29,-1),
     v(0,1.14,-1),v(0,1.02,-1),v(0,1.00,-1),
 ],true,'centripetal');
 
@@ -174,7 +174,7 @@ export async function createRunway(host,{mobile,low,reduced,manual,onError}) {
         renderer.setPixelRatio(dpr);
         renderer.setSize(w,h,false);
         camera.aspect=w/h;
-        camera.fov=mobile.matches?46:39;
+        camera.fov=mobile.matches?44:39;
         camera.clearViewOffset();
         camera.updateProjectionMatrix();
         position();
@@ -292,7 +292,7 @@ export async function createRunway(host,{mobile,low,reduced,manual,onError}) {
                 renderer.shadowMap.needsUpdate=true;
                 render();
             }
-            return {index:activeIndex,name:looks[activeIndex].name,total:looks.length};
+            return {index:activeIndex,name:looks[activeIndex].name,url:looks[activeIndex].url,total:looks.length};
         },
     };
 }

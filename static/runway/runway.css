@@ -65,7 +65,7 @@ body.os-editorial .runway-hero .hero-copy h1 {font-size:clamp(45px,5.15vw,76px)}
 .runway-controls button:is(:hover,:focus-visible) {background:#344135;border-color:#c4caad}
 .runway-controls button:disabled {cursor:wait;opacity:.7}
 .runway-controls [data-runway-live] {display:flex;gap:6px;align-items:center}
-.runway-name {padding-right:7px;color:#dbd7ca}
+.runway-name {padding-right:7px;color:#dbd7ca;text-decoration:underline;text-underline-offset:3px}
 .runway-controls [data-runway-message]:empty {display:none}
 .runway-controls [data-runway-message] {margin:0;color:#eeeade}
 @media(max-width:720px) {
@@ -75,14 +75,15 @@ body.os-editorial .runway-hero .hero-copy h1 {font-size:clamp(45px,5.15vw,76px)}
     background-position:56% 20%;
   }
   .runway-stage,.runway-shade {height:57%;bottom:auto}
-  .runway-hero[data-runway-ready] {background:#101410}
+  body.os-editorial .runway-hero[data-runway-ready] {background:#101410}
   .runway-shade {background:linear-gradient(0deg,#101410 0%,#10141020 24%,transparent 55%)}
   body.os-editorial .runway-hero .hero-copy {padding:28px 0 32px}
   body.os-editorial .runway-hero .hero-copy h1 {font-size:clamp(37px,9.6vw,60px);margin:13px 0 16px}
   body.os-editorial .runway-hero .hero-copy .actions {flex-direction:row;flex-wrap:wrap;margin-top:18px;gap:8px}
   body.os-editorial .runway-hero .hero-copy .button {min-width:0}
   .runway-controls {right:18px;bottom:auto;top:12px}
-  .runway-name {display:none}
+  .runway-controls [data-runway-live] {flex-wrap:wrap;justify-content:flex-end}
+  .runway-name {flex-basis:100%;text-align:right;padding-right:0}
 }
 @media(prefers-reduced-motion:reduce) {
   .runway-stage,.runway-shade {transition:none}
