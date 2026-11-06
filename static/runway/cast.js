@@ -79,7 +79,7 @@ function arms(kind, material) {
 function bottoms(color) {
     const cloth = matte(color, .9), sole = matte('#1e201e', .85), leather = matte('#232725', .46);
     const result = [loft([
-        [.754,0,0,.129,.083],[.829,0,0,.179,.104],[.981,0,0,.186,.113],[1.053,0,-.007,.171,.104]
+        [.826,0,-.013,.146,.092],[.887,0,0,.172,.103],[.981,0,0,.185,.113],[1.053,0,-.007,.171,.104]
     ],cloth)];
     for (const sign of [-1,1]) {
         const x = sign*.131, stride = sign*.059;
@@ -132,6 +132,24 @@ function mannequin(look, artwork) {
         fabric:cloth,rib:sameCloth(.75),hood:sameCloth(.84),pocket:sameCloth(.97),
         stitch:sameCloth(.62),cord:sameCloth(.7),hardware:matte('#4d504b',.43)
     });
+    // Fit the constructor's floating garment to a dressed pose.
+    for (const part of group.children) {
+        const position = part.geometry.attributes.position;
+        for (let i=0;i<position.count;i++) {
+            const x=position.getX(i), y=position.getY(i), z=position.getZ(i);
+            const sleeve = T.MathUtils.smoothstep(Math.abs(x),.49,.92);
+            const hem = T.MathUtils.smoothstep(-y,.40,1);
+            if (look.kind === 'tee') position.setXYZ(i,x,y-.23*sleeve-.16*hem,z*(1-.28*sleeve));
+            else {
+                const hood = look.kind === 'hoodie' ? T.MathUtils.smoothstep(y,.73,1.53) : 0;
+                const cuff = T.MathUtils.smoothstep(-y,.38,1.21)*sleeve;
+                position.setXYZ(i,x*(1+.07*hood),y+.59*hood-.18*cuff-.12*hem*(1-sleeve),z);
+            }
+        }
+        position.needsUpdate=true;
+        part.geometry.computeVertexNormals();
+        part.geometry.computeBoundingSphere();
+    }
     group.scale.set(.39,.316,.43);
     group.position.set(0,1.262,0);
     actor.add(group);

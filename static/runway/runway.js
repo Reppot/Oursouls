@@ -29,7 +29,7 @@ if(hero) {
         start.textContent='Загрузка 3D…';
         message.textContent='';
         try {
-            const {createRunway}=await import('./scene.js');
+            const {createRunway}=await import('./scene.js?v=2');
             runway=await createRunway(host,{mobile,low,reduced,manual:query==='manual',onError:fallback});
             runway.setVisible(visible);
             runway.onMode(playing=>{

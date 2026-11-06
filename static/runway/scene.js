@@ -1,5 +1,5 @@
 import * as T from '../studio/three/three.module.min.js';
-import {createCast, looks} from './cast.js';
+import {createCast, looks} from './cast.js?v=2';
 
 const v = (x,y,z) => new T.Vector3(x,y,z);
 const mix = (a,b,t) => a + (b-a)*t;
@@ -107,7 +107,7 @@ function lighting(scene,shadowSize) {
     key.castShadow=true;
     key.shadow.mapSize.set(shadowSize,shadowSize);
     Object.assign(key.shadow.camera,{left:-2.7,right:2.7,top:2.5,bottom:-2.7,near:.1,far:13});
-    key.shadow.normalBias=.021; key.shadow.bias=-.00019;
+    key.shadow.normalBias=.021; key.shadow.bias=-.00019; key.shadow.radius=3.2;
     scene.add(key,key.target);
     const bounce=new T.DirectionalLight('#d2e3de',.88);
     bounce.position.set(3.9,2.65,3.15);
@@ -124,8 +124,8 @@ function lighting(scene,shadowSize) {
 
 // The closed spline gives the return shot the same velocity as the opening shot.
 const tour=new T.CatmullRomCurve3([
-    v(-.73,1.58,4.95),v(-.37,1.38,3.55),v(.47,1.26,2.51),
-    v(1.40,1.36,2.87),v(1.13,1.58,4.29),v(.08,1.67,5.32),
+    v(-.73,1.51,4.32),v(-.37,1.38,3.36),v(.47,1.26,2.51),
+    v(1.40,1.36,2.87),v(1.13,1.58,4.29),v(.08,1.59,4.77),
 ],true,'centripetal');
 const targetTrack=new T.CatmullRomCurve3([
     v(0,1.00,-1),v(0,1.02,-1),v(0,1.18,-1),
@@ -160,7 +160,7 @@ export async function createRunway(host,{mobile,low,reduced,manual,onError}) {
     const render=()=>renderer.render(scene,camera);
     const position=()=>{
         if(playing) {
-            const t=ease(Math.min(1,transition));
+            const t=ease(transition);
             camera.position.copy(from).lerp(tour.getPointAt(phase),t);
             aim.copy(fromAim).lerp(targetTrack.getPointAt(phase),t);
         }
