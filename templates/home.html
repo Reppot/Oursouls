@@ -1,13 +1,25 @@
 {% extends 'base.html' %}
 {% block content %}
 <main id="main">
-  <section class="hero">
+  <section class="hero runway-hero" data-runway aria-label="Our Souls — подиум">
+    <div class="runway-stage"></div>
+    <div class="runway-shade" aria-hidden="true"></div>
     <div class="wrap"><div class="hero-copy">
       <p class="eyebrow">OUR SOULS / ОДЕЖДА И ПЕЧАТЬ</p>
       <h1>Носи свою<br>тёмную сторону</h1>
       <p>Футболки с мемами и хоррор-принтами.<br>Печать по твоему макету от одной вещи.</p>
       <div class="actions"><a class="button" href="/catalog/">Смотреть каталог</a><a class="button outline" href="/constructor/">Создать свой принт</a></div>
     </div></div>
+    <div class="runway-controls" aria-label="Управление подиумом" hidden>
+      <button type="button" data-runway-start hidden>Включить 3D</button>
+      <div data-runway-live hidden>
+        <span class="runway-name" data-runway-name aria-live="polite">Футболка · Мотылёк</span>
+        <button type="button" data-runway-look aria-label="Следующий образ">Образ 1 / 3 →</button>
+        <button type="button" data-runway-play aria-pressed="false">Автокамера</button>
+        <button type="button" data-runway-reset aria-label="Сбросить ракурс" title="Сбросить ракурс">↺</button>
+      </div>
+      <span data-runway-message role="status"></span>
+    </div>
   </section>
   <section id="catalog" class="section">
     <div class="wrap">
@@ -45,4 +57,5 @@
     </div>
   </section>
 </main>
+<script type="module" src="/static/runway/runway.js?v=1"></script>
 {% endblock %}
