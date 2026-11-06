@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}<main class="section" id="main"><div class="wrap"><h1>Корзина</h1>
+{% if lines %}<div class="osp-cart-layout"><div class="osp-cart-items">
+{% for i, p in lines %}<article class="osp-cart-item">
+<a href="{{ url_for('product',slug=p.slug) }}"><img src="{{ p.images[0] }}" alt="{{ p.name }}"></a>
+<div><h2><a href="{{ url_for('product',slug=p.slug) }}">{{ p.name }}</a></h2><p>{{ i.size }} / {{ i.color }}</p>
+<form class="osp-quantity" method="post"><input type="hidden" name="csrf" value="{{ csrf() }}"><input type="hidden" name="index" value="{{ loop.index0 }}">
+<label>Количество<input name="qty" type="number" min="1" max="9999" value="{{ i.qty }}" required></label>
+<button class="button" name="action" value="update">Обновить</button><button class="osp-remove" name="action" value="remove">Удалить ×</button></form></div>
+</article>{% endfor %}<a href="/catalog/">← Продолжить покупки</a></div>
+<aside class="osp-order-summary"><h2>Ваш заказ</h2><p>Стоимость: <strong>{{ 'после согласования' if total is none else total|rub }}</strong></p>
+<label for="order-text">Состав заказа</label><textarea id="order-text" rows="9" readonly>{{ order_text }}</textarea>
+<button type="button" class="button" onclick="navigator.clipboard.writeText(document.getElementById('order-text').value).then(()=>this.textContent='Заказ скопирован')">Скопировать заказ</button>
+<a class="button" href="{{ checkout }}" target="_blank" rel="noopener">Оформить через Telegram ↗</a></aside></div>
+{% else %}<div class="osp-empty-cart"><h2>В корзине пока пусто</h2><p>Выбери футболку, цвет и размер.</p><a class="button" href="/catalog/">Перейти в каталог</a></div>{% endif %}
+</div></main>{% endblock %}

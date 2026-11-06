@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+{% block content %}<main id="main" class="section"><div class="wrap"><div class="shop-admin shop-login"><p class="eyebrow">OUR SOULS / УПРАВЛЕНИЕ</p><h1>Вход в каталог</h1>
+{% if error %}<p role="alert" class="shop-error">{{ error }}</p>{% endif %}
+<form method="post"><input type="hidden" name="csrf" value="{{ csrf() }}"><label>Логин<input name="user" autocomplete="username" required></label>
+<label>Пароль<input type="password" name="password" autocomplete="current-password" required></label><button class="button">Войти</button></form>
+</div></div></main>{% endblock %}

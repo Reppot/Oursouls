@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}<main id="main" class="section"><div class="wrap shop-admin"><p class="eyebrow">OUR SOULS / УПРАВЛЕНИЕ</p><h1>Товары</h1>
+<div class="shop-admin-bar"><a class="button" href="{{ url_for('admin_product',key='new') }}">+ Добавить товар</a>
+<form method="get" class="shop-inline"><input name="q" aria-label="Поиск товаров" placeholder="Название, артикул или категория" value="{{ request.args.get('q','') }}"><button class="button">Найти</button></form>
+<form method="post" action="{{ url_for('logout') }}"><input type="hidden" name="csrf" value="{{ csrf() }}"><button class="button">Выйти</button></form></div>
+<p>Найдено товаров: {{ products|length }}</p>
+<div class="shop-table-scroll"><table><thead><tr><th>Товар</th><th>Категория</th><th>Цена</th><th>В витрине</th><th></th></tr></thead><tbody>
+{% for p in products %}<tr><td><div class="shop-row-title"><img src="{{ p.images[0] }}" alt="" loading="lazy"><div><a href="{{ url_for('admin_product',key=p.id) }}">{{ p.name }}</a><small>{{ p.sku }}</small></div></div></td>
+<td>{{ p.category }}</td><td>{% if p.sale_price is not none %}<del>{{ p.price|rub }}</del> {{ p.sale_price|rub }}{% elif p.price is not none %}{{ p.price|rub }}{% else %}—{% endif %}</td>
+<td>{{ 'Опубликован' if p.published else 'Скрыт' }}</td><td><a href="{{ url_for('admin_product',key=p.id) }}">Изменить</a></td></tr>{% endfor %}
+</tbody></table></div></div></main>{% endblock %}

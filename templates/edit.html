@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}<main id="main" class="section"><div class="wrap"><div class="shop-admin shop-edit">
+<a href="{{ url_for('admin_catalog') }}">← Все товары</a><h1>{{ 'Добавить товар' if key == 'new' else 'Редактировать товар' }}</h1>
+{% if error %}<p role="alert" class="shop-error">{{ error }}</p>{% endif %}
+<form method="post" enctype="multipart/form-data"><input type="hidden" name="csrf" value="{{ csrf() }}">
+<label>Название<input name="name" maxlength="150" value="{{ p.name }}" required></label>
+<div class="shop-pair"><label>Артикул<input name="sku" maxlength="80" value="{{ p.sku }}"></label>
+<label>Категория<input name="category" list="category-options" maxlength="80" value="{{ p.category }}" required><datalist id="category-options">{% for name in categories %}<option value="{{ name }}">{% endfor %}</datalist></label></div>
+<label>Описание<textarea name="description" rows="5" maxlength="6000">{{ p.description }}</textarea></label>
+<div class="shop-pair"><label>Обычная цена, ₽<input name="price" inputmode="decimal" value="{{ p.price/100 if p.price is not none else '' }}" placeholder="По запросу"></label>
+<label>Цена со скидкой, ₽<input name="sale_price" inputmode="decimal" value="{{ p.sale_price/100 if p.sale_price is not none else '' }}" placeholder="Без скидки"></label></div>
+<label>Цвет на фото<select name="color">{% for color in colors %}<option {% if color==p.color %}selected{% endif %}>{{ color }}</option>{% endfor %}</select></label>
+<div class="shop-photo-list">{% for image in p.images %}<label><img src="{{ image }}" alt="Фото {{ loop.index }}"><span><input type="checkbox" name="remove" value="{{ loop.index0 }}"> Убрать фото</span></label>{% endfor %}</div>
+<label>Добавить фото<input type="file" name="photos" accept="image/jpeg,image/png,image/webp" multiple><small>До 8 фото на карточку. Первое фото показывается в каталоге.</small></label>
+<label class="shop-check"><input type="checkbox" name="published" {% if p.published %}checked{% endif %}> Показывать в каталоге</label>
+<label class="shop-check"><input type="checkbox" name="available" {% if p.available %}checked{% endif %}> В наличии</label>
+<button class="button">Сохранить карточку</button></form></div></div></main>{% endblock %}

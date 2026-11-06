@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: our-souls-shop
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 4 app:app
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.11
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: ADMIN_PASSWORD_HASH
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SECRET_KEY
+        sync: false

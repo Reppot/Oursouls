@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<main id="main"><section class="hero"><div class="wrap"><div class="hero-copy"><div class="eyebrow">OUR SOULS / ОДЕЖДА И ПЕЧАТЬ</div><h1>Носи свою<br>тёмную сторону</h1><p>Футболки с мемами и хоррор-принтами.<br>Печать по твоему макету — от одной вещи.</p><div class="actions"><a class="button" href="/catalog/">Смотреть каталог</a><a class="button outline" href="/constructor/">Создать свой принт</a></div></div></div></section>
+<section id="catalog" class="section"><div class="wrap"><header class="section-heading"><div class="eyebrow">КАТАЛОГ / ГОТОВЫЕ ПРИНТЫ</div><h2>Выбери свой принт</h2><p>Футболки, которые уже есть в каталоге.</p></header>
+{% include 'cards.html' %}
+<div class="actions"><a class="button" href="/catalog/">Весь каталог →</a></div></div></section>
+<section class="section os-custom-print"><div class="wrap os-custom-grid"><div><div class="eyebrow">ПЕЧАТЬ НА ЗАКАЗ</div><h2>Твой макет.<br>Наша печать.</h2><p>Загрузи изображение, выбери одежду и размести принт спереди или сзади. Макет, основу и стоимость согласуем до печати.</p><a class="button" href="/constructor/">Собрать макет ↗</a><div class="os-print-spec"><span>От 1 вещи</span><span>Перед и спина</span><span>До 7 дней</span></div></div><a class="os-preview-link" href="/constructor/"><img src="/static/theme/constructor-preview-v2.png" alt="Футболка с мотыльком и розами: принт спереди и сзади" loading="lazy"><span>Конструктор принта ↗</span></a></div></section>
+<section class="os-service-strip"><div class="wrap"><p>Есть своя вещь для печати?</p><a href="/services/">Условия печати ↗</a></div></section></main>
+
+{% endblock %}

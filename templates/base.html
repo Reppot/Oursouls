@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{{ title }} — Our Souls</title>
+{% for css in ['style','mobile-header','editorial','store','migration'] %}<link rel="stylesheet" href="{{ url_for('static',filename='theme/'+css+'.css') }}">{% endfor %}
+{% if request.endpoint == 'constructor' %}<link rel="stylesheet" href="/static/studio/constructor.css">{% endif %}</head>
+<body class="os-editorial"><a class="skip-link" href="#main">Перейти к содержимому</a>
+<header class="site-header"><div class="wrap header-inner"><a class="wordmark" href="/">OUR SOULS</a>
+<nav class="site-nav" aria-label="Основное меню">
+{% for endpoint, label in [('catalog','Каталог'),('constructor','Конструктор'),('services','Печать'),('about','О бренде')] %}
+<a href="{{ url_for(endpoint) }}" {% if request.endpoint == endpoint %}aria-current="page"{% endif %}>{{ label }}</a>
+{% endfor %}
+<a class="cart-link" href="{{ url_for('cart') }}">Корзина <span class="cart-count">{{ cart_count }}</span></a>
+</nav></div></header>
+{% for message in get_flashed_messages() %}<p class="wrap shop-notice" role="status">{{ message }}</p>{% endfor %}
+{% block content %}{% endblock %}
+{% include 'footer.html' %}
+</body></html>

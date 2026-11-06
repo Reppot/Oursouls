@@ -1,0 +1,10 @@
+{% macro price(p) -%}
+{% if p.sale_price is not none %}<del>{{ p.price|rub }}</del> <strong>{{ p.sale_price|rub }}</strong>{% elif p.price is not none %}{{ p.price|rub }}{% endif %}
+{%- endmacro %}
+{% if products %}<div class="products-grid">
+{% for p in products %}
+<article class="product-card"><a href="{{ url_for('product',slug=p.slug) }}"><img class="product-image" loading="lazy" src="{{ p.images[0] }}" alt="{{ p.name }}"></a>
+<div class="product-info"><div class="tag">{{ p.category }}</div><h3><a href="{{ url_for('product',slug=p.slug) }}">{{ p.name }}</a></h3>
+{% if p.price is not none %}<div class="price">{{ price(p) }}</div>{% endif %}
+<a class="button" href="{{ url_for('product',slug=p.slug) }}">Подробнее ↗</a></div></article>
+{% endfor %}</div>{% else %}<p>В этой категории пока нет товаров.</p>{% endif %}

@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}<main id="main" class="section"><div class="wrap"><a href="/catalog/">← Каталог</a>
+<div class="shop-product">
+<div class="shop-gallery">{% for photo in p.images %}<img src="{{ photo }}" alt="{{ p.name }}{% if not loop.first %}, фото {{ loop.index }}{% endif %}" loading="{{ 'eager' if loop.first else 'lazy' }}">{% endfor %}</div>
+<section><p class="eyebrow">{{ p.category }}</p><h1>{{ p.name }}</h1><p class="shop-description">{{ p.description }}</p>
+<p class="price">{% if p.sale_price is not none %}<del>{{ p.price|rub }}</del> <strong>{{ p.sale_price|rub }}</strong>{% elif p.price is not none %}{{ p.price|rub }}{% else %}Цена уточняется{% endif %}</p>
+{% if p.available %}<form class="osp-add-form" method="post" action="/cart/"><input type="hidden" name="csrf" value="{{ csrf() }}"><input type="hidden" name="action" value="add"><input type="hidden" name="id" value="{{ p.id }}">
+<div class="osp-options"><label>Размер<select name="size">{% for size in sizes %}<option>{{ size }}</option>{% endfor %}</select></label>
+<label>Цвет<select name="color">{% for color in colors %}<option {% if color==p.color %}selected{% endif %}>{{ color }}</option>{% endfor %}</select></label>
+<label>Количество<input name="qty" type="number" min="1" max="9999" value="1" required></label></div>
+<button class="button">В корзину</button><p class="osp-muted">Наличие основы и сроки уточним в Telegram.</p></form>{% else %}<p>Сейчас нет в наличии.</p>{% endif %}</section></div></div></main>{% endblock %}

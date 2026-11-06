@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<section id="our-print" class="os-print-studio"
+    data-atlas="/static/studio/garments-studio-v1.png"
+    data-viewer="/static/studio/garment-viewer.js"
+    data-archive="/static/studio/order-archive.js"
+    data-sample="/static/studio/example-print.png">
+<div class="os-studio-wrap">
+    <header class="os-studio-intro">
+        <div><p class="os-studio-kicker">OUR SOULS / ПЕЧАТЬ НА ЗАКАЗ</p><h1>Конструктор одежды</h1>
+        <p>Выбери одежду и примерь свой принт. Перед и спину можно оформить отдельно.</p></div>
+        <span class="os-studio-tag">От одной вещи</span>
+    </header>
+    <div class="os-studio-grid">
+        <section class="os-studio-stage" aria-label="Предпросмотр одежды">
+            <div class="os-stage-top"><span id="op-stage-model">Футболка</span><span id="op-render-mode" class="os-stage-badge">Загрузка…</span></div>
+            <div class="os-stage-viewport" id="op-viewport" aria-busy="true">
+                <canvas id="op-canvas" width="600" height="700" tabindex="0" aria-label="Студийный макет одежды"></canvas>
+                <div id="op-webgl" class="os-webgl" hidden></div>
+                <div class="os-stage-loading" id="op-loading"><span></span>Подготавливаем модель</div>
+            </div>
+            <div class="os-stage-toolbar">
+                <div class="os-segment" role="group" aria-label="Ракурс"><button type="button" data-side="front" aria-pressed="true">Перед</button><button type="button" data-side="back" aria-pressed="false">Спина</button></div>
+                <div class="os-stage-zoom" id="op-zoom-tools" hidden>
+                    <button type="button" id="op-zoom-out" aria-label="Отдалить" title="Отдалить">−</button>
+                    <button type="button" id="op-reset-view" aria-label="Сбросить ракурс и масштаб" title="Сбросить вид">↺</button>
+                    <button type="button" id="op-zoom-in" aria-label="Приблизить" title="Приблизить">+</button>
+                </div>
+            </div>
+            <div class="os-stage-foot"><p id="op-gesture">Поверни модель мышью или пальцем.</p><p id="op-position" aria-live="off"></p></div>
+        </section>
+        <section class="os-studio-settings" aria-label="Настройки конструктора">
+            <div class="os-tabs" role="tablist" aria-label="Этапы настройки">
+                <button type="button" id="op-tab-garment" role="tab" data-tab="garment" aria-controls="op-panel-garment" aria-selected="true"><span>01</span>Одежда</button>
+                <button type="button" id="op-tab-print" role="tab" data-tab="print" aria-controls="op-panel-print" aria-selected="false" tabindex="-1"><span>02</span>Принт</button>
+                <button type="button" id="op-tab-order" role="tab" data-tab="order" aria-controls="op-panel-order" aria-selected="false" tabindex="-1"><span>03</span>Заказ</button>
+            </div>
+            <div id="op-panel-garment" class="os-panel" role="tabpanel" aria-labelledby="op-tab-garment">
+                <div class="os-panel-title"><h2>Выбери основу</h2><p>Форма, ткань и цвет будущей вещи.</p></div>
+                <div class="os-model-options" role="group" aria-label="Модель одежды">
+                    <button type="button" data-garment="tee" aria-pressed="true"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M14 9l-6 2-5 8 7 4 3-4v13h14V19l3 4 7-4-5-8-6-2c-2 6-10 6-12 0z"/></svg><span>Футболка</span></button>
+                    <button type="button" data-garment="long" aria-pressed="false"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M14 8l-7 3-4 20 6 2 4-14v14h14V19l4 14 6-2-4-20-7-3c-2 6-10 6-12 0z"/></svg><span>Лонгслив</span></button>
+                    <button type="button" data-garment="hoodie" aria-pressed="false"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M14 12V8c0-4 12-4 12 0v4l7 3 4 16-6 2-4-11v12H13V22L9 33l-6-2 4-16zm0 0 6 5 6-5m-8 4v6m4-6v5m-6 8 2-4h4l2 4z"/></svg><span>Худи</span></button>
+                </div>
+                <select id="op-garment" hidden aria-label="Модель одежды"><option value="tee">Футболка</option><option value="long">Лонгслив</option><option value="hoodie">Худи</option></select>
+                <div class="os-field-heading"><h3>Цвет ткани</h3><span id="op-color-name">Чёрный</span></div>
+                
+                <select id="op-color" hidden aria-label="Цвет ткани">{% for hex, name in swatches.items() %}<option value="{{ hex }}">{{ name }}</option>{% endfor %}<option value="custom">Свой цвет</option></select>
+                <div class="os-swatches" role="group" aria-label="Готовые цвета">
+                    {% for hex, name in swatches.items() %}<button type="button" data-color="{{ hex }}" style="--swatch:{{ hex }}" aria-label="{{ name }}" title="{{ name }}"><span aria-hidden="true">✓</span></button>{% endfor %}
+                </div>
+                <details class="os-disclosure os-custom-color"><summary>Указать свой цвет <span id="op-hex-preview">#202321</span></summary>
+                    <div class="os-color-line"><label>Палитра<input id="op-fabric-picker" type="color" value="#202321"></label><label>HEX<input id="op-fabric-hex" value="#202321" maxlength="7" spellcheck="false" placeholder="#F08080"></label></div>
+                    <div class="os-rgb"><label>R<input id="op-fabric-r" type="number" min="0" max="255" value="32"></label><label>G<input id="op-fabric-g" type="number" min="0" max="255" value="35"></label><label>B<input id="op-fabric-b" type="number" min="0" max="255" value="33"></label></div>
+                    <p id="op-color-error" class="os-error" role="status"></p><p class="os-small">Наличие нужного оттенка уточним при заказе.</p>
+                </details>
+                <button type="button" class="os-primary os-next" data-next="print">Добавить принт <span aria-hidden="true">→</span></button>
+            </div>
+            <div id="op-panel-print" class="os-panel" role="tabpanel" aria-labelledby="op-tab-print" hidden>
+                <div class="os-panel-title"><h2>Примерь принт</h2><p>До 10 изображений на весь макет. Выбери сторону, затем добавь принты.</p></div>
+                <div class="os-segment os-side-selector" role="group" aria-label="Сторона для печати"><button type="button" data-side="front" aria-pressed="true">Перед <span data-file-dot="front" hidden></span></button><button type="button" data-side="back" aria-pressed="false">Спина <span data-file-dot="back" hidden></span></button></div>
+                <p class="os-layer-count">Принты на макете <strong id="op-layer-count">0 / 10</strong></p>
+                <label class="os-upload" id="op-drop">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3m-5 5 5-5 5 5M4 14v6h16v-6"/></svg>
+                    <span><strong id="op-upload-title">Выбрать файл</strong><small>PNG или JPEG до 20 МБ каждый</small></span>
+                    <input id="op-file" type="file" multiple accept="image/png,image/jpeg" aria-label="Загрузить принт для выбранной стороны">
+                </label>
+                <div class="os-layer-picker" id="op-file-info" hidden>
+                    <label>Редактируемый принт<select id="op-layers" aria-describedby="op-file-name"></select></label>
+                    <span id="op-file-name" hidden></span>
+                    <div class="os-inline">
+                        <button type="button" id="op-layer-up" class="os-text-button">Выше ↑</button>
+                        <button type="button" id="op-layer-down" class="os-text-button">Ниже ↓</button>
+                        <button type="button" id="op-remove" class="os-text-button">Удалить</button>
+                    </div>
+                </div>
+                <button type="button" id="op-example" class="os-text-button os-example">Попробовать с примером ↗</button>
+                <fieldset id="op-transform-fields" class="os-transform" hidden>
+                    <legend>Положение и размер</legend>
+                    <div class="os-placement-row"><button type="button" id="op-move-mode" class="os-secondary" aria-pressed="false">Двигать принт</button><button type="button" id="op-reset" class="os-text-button">По центру</button></div>
+                    <label class="os-range">Размер <output id="op-scale-value">65%</output><input id="op-scale" type="range" min="15" max="160" value="65"></label>
+                    <label class="os-range">Поворот <output id="op-degrees">0°</output><input id="op-angle" type="range" min="-180" max="180" value="0"></label>
+                    <div class="os-nudge" role="group" aria-label="Точное перемещение"><span>Сдвинуть</span><button type="button" data-nudge="left" aria-label="Сдвинуть влево">←</button><button type="button" data-nudge="up" aria-label="Сдвинуть вверх">↑</button><button type="button" data-nudge="down" aria-label="Сдвинуть вниз">↓</button><button type="button" data-nudge="right" aria-label="Сдвинуть вправо">→</button></div>
+                </fieldset>
+                <details class="os-disclosure" id="op-effects-panel" hidden><summary>Обработка изображения</summary>
+                    <fieldset id="op-effect-fields" disabled>
+                        <label>Цвет принта<select id="op-effect-mode"><option value="original">Исходные цвета</option><option value="solid">Один цвет</option><option value="gradient">Градиент</option></select></label>
+                        <div id="op-solid-options" hidden><label>Цвет перекраски<input type="color" id="op-effect-tint" value="#e85a65"></label></div>
+                        <div id="op-gradient-options" hidden>
+                            <div class="os-two"><label>Первый цвет<input type="color" id="op-effect-from" value="#355d31"></label><label>Второй цвет<input type="color" id="op-effect-to" value="#9b2f45"></label></div>
+                            <label>Тип градиента<select id="op-effect-gradientType"><option value="linear">Линейный</option><option value="radial">Радиальный</option></select></label>
+                            <label class="os-range" id="op-gradient-direction">Направление <output id="op-value-gradientAngle">90°</output><input type="range" id="op-effect-gradientAngle" min="0" max="360" value="90"></label>
+                        </div>
+                        <div id="op-amount-options" hidden><label class="os-range">Интенсивность <output id="op-value-amount">100%</output><input type="range" id="op-effect-amount" min="0" max="100" value="100"></label></div>
+                        <label class="os-range">Яркость <output id="op-value-brightness">100%</output><input type="range" id="op-effect-brightness" min="0" max="200" value="100"></label>
+                        <label class="os-range">Контраст <output id="op-value-contrast">100%</output><input type="range" id="op-effect-contrast" min="0" max="200" value="100"></label>
+                        <label class="os-range">Насыщенность <output id="op-value-saturation">100%</output><input type="range" id="op-effect-saturation" min="0" max="200" value="100"></label>
+                        <label class="os-range">Непрозрачность <output id="op-value-opacity">100%</output><input type="range" id="op-effect-opacity" min="0" max="100" value="100"></label>
+                        <div class="os-inline"><button type="button" id="op-flipX" class="os-secondary" aria-pressed="false">Отразить ↔</button><button type="button" id="op-flipY" class="os-secondary" aria-pressed="false">Отразить ↕</button></div>
+                        <div class="os-inline"><button type="button" id="op-reset-effects" class="os-text-button">Сбросить эффекты</button><button type="button" id="op-print-png" class="os-text-button">Скачать принт PNG</button></div>
+                    </fieldset>
+                </details>
+                <button type="button" class="os-primary os-next" data-next="order">К заказу <span aria-hidden="true">→</span></button>
+            </div>
+            <div id="op-panel-order" class="os-panel" role="tabpanel" aria-labelledby="op-tab-order" hidden>
+                <div class="os-panel-title"><h2>Детали заказа</h2><p>Сохрани макет и пришли его в Telegram.</p></div>
+                <div id="op-order-summary" class="os-order-summary"></div>
+                <div class="os-field-heading"><h3>Размер</h3></div>
+                <div class="os-sizes" role="group" aria-label="Размер одежды">{% for size in sizes %}<button type="button" data-size="{{ size }}" aria-pressed="{{ 'true' if size == 'M' else 'false' }}">{{ size }}</button>{% endfor %}</div>
+                <select id="op-size" hidden aria-label="Размер одежды"><option>S</option><option selected>M</option><option>L</option><option>XL</option><option>2XL</option><option>3XL</option></select>
+                <label>Количество<input id="op-qty" type="number" min="1" max="9999" step="1" value="1"></label>
+                <label>Пожелания к заказу<textarea id="op-comment" rows="3" placeholder="Например, хочу печать на своей футболке"></textarea></label>
+                <button type="button" id="op-download-order" class="os-primary os-next">Скачать заказ <span aria-hidden="true">↓</span></button>
+                <p class="os-small">В ZIP будут макет, детали заказа и файлы принтов. Стоимость и наличие согласуем в Telegram.</p>
+                <dialog id="op-send-dialog" aria-labelledby="op-send-title">
+                    <form method="dialog"><button type="submit" class="os-secondary os-dialog-close" aria-label="Закрыть">×</button></form>
+                    <p class="os-studio-kicker">OUR SOULS / ПЕЧАТЬ НА ЗАКАЗ</p>
+                    <h2 id="op-send-title">Отправь архив в Telegram</h2>
+                    <p>Прикрепи скачанный <strong>our-souls-order.zip</strong> в чат с @oursouls33. В архиве уже есть макет и все параметры заказа.</p>
+                    <a class="os-primary" href="{{ telegram }}" target="_blank" rel="noopener">Открыть Telegram ↗</a>
+                </dialog>
+            </div>
+            <p id="op-status" class="os-studio-status" role="status" aria-live="polite"></p>
+        </section>
+    </div>
+</div>
+</section>
+
+<script defer src='/static/studio/constructor.js'></script>
+{% endblock %}

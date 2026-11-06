@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block content %}<main class="section" id="main"><div class="wrap"><header class="section-heading"><div class="eyebrow">OUR SOULS / ГОТОВЫЕ ПРИНТЫ</div><h1>Каталог</h1></header>
+<div class="osp-catalog"><aside><h2>Категории</h2><a href="/catalog/" class="{{ 'is-active' if not category }}">Все принты</a>
+{% for name in categories %}<a href="{{ url_for('catalog',category=name) }}" class="{{ 'is-active' if category == name }}">{{ name }}</a>{% endfor %}</aside>
+<div><p class="osp-muted">Товаров: {{ count }}</p>{% include 'cards.html' %}
+{% if pages > 1 %}<nav class="osp-pagination" aria-label="Страницы каталога">{% for n in range(1,pages+1) %}<a class="{{ 'current' if n == page }}" href="{{ url_for('catalog',category=category,catalog_page=n) }}">{{ n }}</a>{% endfor %}</nav>{% endif %}</div>
+</div></div></main>{% endblock %}
