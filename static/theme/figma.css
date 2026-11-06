@@ -16,7 +16,11 @@ body.os-editorial {
   color:var(--ink);
 }
 body.os-editorial :is(h1,h2,h3) {font-family:var(--display)}
-body.os-editorial .wrap {max-width:1304px}
+body.os-editorial .wrap {
+  max-width:1440px;
+  padding-inline:clamp(18px,5.4vw,78px);
+}
+body.os-editorial .hero>.wrap {padding-inline:clamp(18px,13.3vw,192px)}
 body.os-editorial .site-header {background:var(--black);border-bottom:1px solid #ffffff13}
 body.os-editorial .header-row {
   display:grid;
@@ -133,7 +137,6 @@ body.os-editorial .about-cta .button.outline {color:var(--wine);border-color:var
   margin:3px 0 0;
 }
 .shop-page-heading .eyebrow {margin:0}
-body.os-editorial .page-catalog,.page-catalog {scroll-padding-top:92px}
 body.os-editorial .osp-catalog {grid-template-columns:minmax(212px,1fr) minmax(0,4fr);gap:26px}
 body.os-editorial .osp-catalog aside.catalog-filters {
   display:block;
@@ -193,8 +196,8 @@ body.os-editorial .osp-order-summary h2 {font-size:25px;text-transform:uppercase
 .osp-order-summary summary {cursor:pointer}
 .osp-order-summary textarea {margin:8px 0}
 
-body.page-constructor #main #our-print.os-print-studio {background:var(--paper);padding-top:27px}
-body.page-constructor #our-print h1 {font:400 clamp(38px,4.6vw,64px)/1.04 var(--display);text-transform:uppercase;letter-spacing:-.02em}
+body.page-constructor #main #our-print.os-print-studio {background:var(--paper);padding-top:22px}
+body.page-constructor #our-print h1 {font:400 clamp(36px,4.15vw,58px)/1.04 var(--display);text-transform:uppercase;letter-spacing:-.02em}
 body.page-constructor #our-print .os-studio-intro {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;gap:16px;margin-bottom:24px}
 body.page-constructor #our-print .os-tabs {
   border:0;border-radius:0;background:none;padding:0;gap:6px;
@@ -260,6 +263,7 @@ body.page-constructor #our-print #op-send-dialog .os-secondary {background:#f7f8
 }
 @media(max-width:800px) {
   body.os-editorial .header-row {grid-template-columns:1fr auto;min-height:unset;gap:7px}
+  body.os-editorial :is(.wrap,.hero>.wrap) {padding-inline:18px}
   body.os-editorial .site-header nav {grid-column:1/-1;grid-row:2;gap:8px 17px;justify-content:flex-start}
   body.os-editorial .header-actions {grid-column:2;grid-row:1}
   body.os-editorial .site-footer .footer-row {grid-template-columns:1fr 1fr}
