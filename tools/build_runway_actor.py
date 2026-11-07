@@ -13,7 +13,7 @@ from pathlib import Path
 
 from PIL import Image
 
-FORMATS = {5121: 'B', 5123: 'H', 5125: 'I', 5126: 'f'}
+FORMATS = {5120: 'b', 5121: 'B', 5122: 'h', 5123: 'H', 5125: 'I', 5126: 'f'}
 WIDTH = {'SCALAR': 1, 'VEC2': 2, 'VEC3': 3, 'VEC4': 4, 'MAT4': 16}
 PARTS = ('base_body', 'clothing_tshirt', 'clothing_jeans', 'clothing_shoes', 'hair_short04')
 HEIGHT_SCALE = 1.105
@@ -52,11 +52,26 @@ def read_glb(path):
 
 def read_accessor(doc, binary, index):
     a = doc['accessors'][index]
-    view = doc['bufferViews'][a['bufferView']]
     fmt = struct.Struct('<'+FORMATS[a['componentType']]*WIDTH[a['type']])
-    offset = view.get('byteOffset',0)+a.get('byteOffset',0)
-    stride = view.get('byteStride',fmt.size)
-    return [fmt.unpack_from(binary,offset+i*stride) for i in range(a['count'])]
+    rows = [(0,)*WIDTH[a['type']]]*a['count']
+    if 'bufferView' in a:
+        view = doc['bufferViews'][a['bufferView']]
+        offset = view.get('byteOffset',0)+a.get('byteOffset',0)
+        stride = view.get('byteStride',fmt.size)
+        rows = [fmt.unpack_from(binary,offset+i*stride) for i in range(a['count'])]
+    if 'sparse' in a:
+        sparse=a['sparse']; indices=sparse['indices']; values=sparse['values']
+        iv=doc['bufferViews'][indices['bufferView']]; vv=doc['bufferViews'][values['bufferView']]
+        index_format=struct.Struct('<'+FORMATS[indices['componentType']])
+        start_i=iv.get('byteOffset',0)+indices.get('byteOffset',0)
+        start_v=vv.get('byteOffset',0)+values.get('byteOffset',0)
+        for i in range(sparse['count']):
+            at=index_format.unpack_from(binary,start_i+i*index_format.size)[0]
+            rows[at]=fmt.unpack_from(binary,start_v+i*fmt.size)
+    if a.get('normalized') and a['componentType']!=5126:
+        maximum={5120:127,5121:255,5122:32767,5123:65535,5125:4294967295}[a['componentType']]
+        rows=[tuple(max(-1,value/maximum) for value in row) for row in rows]
+    return rows
 
 
 def posed_joints(doc, binary):
@@ -115,7 +130,7 @@ def texture_bytes(image, data):
         return result.getvalue()
 
 
-def build(directory, output, parts=PARTS):
+def build(directory, output, parts=PARTS, morph_weights=None):
     binary = bytearray()
     doc = {'asset':{'version':'2.0','generator':'Our Souls runway actor'},
            'scene':0,'scenes':[{'nodes':[]}],'nodes':[],'meshes':[],
@@ -194,6 +209,17 @@ def build(directory, output, parts=PARTS):
                 attrs=old['attributes']
                 positions=read_accessor(source,data,attrs['POSITION'])
                 normals=read_accessor(source,data,attrs['NORMAL'])
+                names=mesh.get('extras',{}).get('targetNames',[])
+                if morph_weights:
+                    positions=[list(point) for point in positions]
+                    for target_name,weight in morph_weights.items():
+                        if target_name not in names:
+                            continue
+                        target=old.get('targets',[])[names.index(target_name)]
+                        if 'POSITION' not in target:
+                            continue
+                        for point,delta in zip(positions,read_accessor(source,data,target['POSITION'])):
+                            for axis in range(3):point[axis]+=weight*delta[axis]
                 texcoords=read_accessor(source,data,attrs['TEXCOORD_0'])
                 joints=read_accessor(source,data,attrs['JOINTS_0'])
                 weights=read_accessor(source,data,attrs['WEIGHTS_0'])

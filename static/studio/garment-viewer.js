@@ -188,7 +188,7 @@ export function createViewer(host, callbacks) {
     // Replace the editor's fallback geometry with the same fitted, textured
     // garments used by the person. Canonical coordinates keep print positions
     // and order exports consistent with existing saved designs.
-    import('../fitting/outfits.js?v=4').then(async module=>({asset:await module.loadOutfits(),cords:module.createDrawstrings})).then(({asset,cords})=>{
+    import('../fitting/outfits.js?v=5').then(async module=>({asset:await module.loadOutfits(),cords:module.createDrawstrings})).then(({asset,cords})=>{
         if (disposed) return;
         const names={Cloth_tshirt:'tee',Cloth_longsleeve:'long',Cloth_hoodie:'hoodie'};
         const transform=new T.Matrix4().makeScale(1/.405,1/.325,1/.54);
@@ -208,7 +208,7 @@ export function createViewer(host, callbacks) {
             detailedMaterials.push(material);
             const fabric=new T.Mesh(geometry,material);fabric.castShadow=true;fabric.receiveShadow=true;
             const group=new T.Group();group.name=kind;group.add(fabric);
-            if(kind==='hoodie') {const strings=cords();strings.applyMatrix4(transform);group.add(strings);}
+            if(kind==='hoodie') {const strings=cords(part);strings.applyMatrix4(transform);group.add(strings);}
             const box=geometry.boundingBox;
             const fitted={group,fabric,center:(box.min.y+box.max.y)/2,span:Math.max(2.25,(box.max.y-box.min.y)*1.13)};
             models.set(kind,fitted);
@@ -334,7 +334,7 @@ export function createViewer(host, callbacks) {
     }
 
     async function fittingSnapshot(profile) {
-        if (!presentationPromise) presentationPromise=import('../fitting/avatar.js?v=4').then(module=>module.createPresentation(print))
+        if (!presentationPromise) presentationPromise=import('../fitting/avatar.js?v=5').then(module=>module.createPresentation(print,renderer))
             .catch(error=>{presentationPromise=null;throw error;});
         const presentation = await presentationPromise;
         if (!garment || disposed) throw new Error('Preview unavailable');

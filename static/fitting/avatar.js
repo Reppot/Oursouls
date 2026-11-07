@@ -1,6 +1,7 @@
 import * as T from '../studio/three/three.module.min.js';
 import {GLTFLoader} from '../runway/vendor/GLTFLoader.js';
-import {loadOutfits,createDrawstrings} from './outfits.js?v=4';
+import {loadOutfits,createDrawstrings} from './outfits.js?v=5';
+import {detailMaterials,studioEnvironment} from './person-materials.js';
 
 function printable(material, prints) {
     material = material.clone();
@@ -31,14 +32,16 @@ function printable(material, prints) {
     return material;
 }
 
-export async function createPresentation(prints) {
+export async function createPresentation(prints,renderer) {
     const loader = new GLTFLoader();
     const [person, garments] = await Promise.all([
-        loader.loadAsync('/static/runway/models/runway-human.glb?v=3'),
+        loader.loadAsync(new URL('./person-detail.glb?v=1',import.meta.url).href),
         loadOutfits(),
     ]);
     const scene = new T.Scene();
     scene.background = new T.Color('#ecebe4');
+    scene.environment=studioEnvironment(renderer);
+    scene.environmentIntensity=.22;
     const camera = new T.PerspectiveCamera(29,1,.1,20);
     const body = new T.Group();
     person.scene.traverse(part => {
@@ -46,11 +49,8 @@ export async function createPresentation(prints) {
         if (part.name==='Cloth_tshirt') {part.visible=false;return;}
         part.castShadow = !/^(Eyes|Eyelashes|Eyebrows)/.test(part.name);
         part.receiveShadow=true;
-        if (part.name==='base') {
-            part.material=part.material.clone();part.material.roughness=.82;
-            part.material.normalScale.setScalar(.55);
-        }
     });
+    detailMaterials(person.scene);
     body.add(person.scene);
     const outfits = new Map();
     garments.scene.clone(true).traverse(part => {
@@ -62,7 +62,7 @@ export async function createPresentation(prints) {
     });
     if (outfits.size!==3) throw new Error('Fitted garments unavailable');
     for (const mesh of outfits.values()) body.add(mesh);
-    const cords=createDrawstrings();body.add(cords);scene.add(body);
+    const cords=createDrawstrings(outfits.get('Cloth_hoodie'));body.add(cords);scene.add(body);
     const key=new T.DirectionalLight('#fff9ef',2.1);
     key.position.set(-3.4,4.4,4.1);key.castShadow=true;
     key.shadow.mapSize.set(1024,1024);key.shadow.bias=-.00018;key.shadow.normalBias=.007;
@@ -84,10 +84,10 @@ export async function createPresentation(prints) {
             }
             cords.visible=kind==='hoodie';
             camera.aspect=aspect;camera.updateProjectionMatrix();
-            const close=profile.framing===1;
-            const angle=profile.angle*Math.PI/180, distance=(close?2.35:4.3)*height;
-            const aim=(close?1.34:.94)*height;
-            camera.position.set(Math.sin(angle)*distance,aim+.13*height,Math.cos(angle)*distance);
+            const frame=profile.framing||0;
+            const angle=profile.angle*Math.PI/180, distance=(frame===2?1.12:frame===1?2.35:4.3)*height;
+            const aim=(frame===2?1.65:frame===1?1.34:.94)*height;
+            camera.position.set(Math.sin(angle)*distance,aim+(frame===2?.06:.13)*height,Math.cos(angle)*distance);
             camera.lookAt(0,aim,0);camera.updateMatrixWorld();
         },
     };
