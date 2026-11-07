@@ -97,6 +97,7 @@ export function createFittingRoom(dialog, studio) {
     const isBack=()=>select('side').value==='back';
     let photo, garment, productArt, worker, pendingPose, photoSequence=0, renderSequence=0, mode='photo';
     let pointer=null;
+    let pageOverflow='';
 
     function setSliders(values) {
         Object.assign(adjustments,values);
@@ -239,6 +240,7 @@ export function createFittingRoom(dialog, studio) {
     function switchMode(next) {
         mode=next;
         renderSequence++;
+        if (next==='avatar' && isProduct()) select('source').value='design';
         for (const node of dialog.querySelectorAll('[data-fit-mode]')) node.setAttribute('aria-pressed',String(node.dataset.fitMode===next));
         for (const node of dialog.querySelectorAll('[data-fit-panel]')) node.hidden=node.dataset.fitPanel!==next;
         status('');
@@ -256,7 +258,11 @@ export function createFittingRoom(dialog, studio) {
         loadPhoto(event.target.files[0]); event.target.value='';
     };
     select('side').onchange=refreshPhoto;
-    if (select('source')) select('source').onchange=()=>mode==='photo'?refreshPhoto():renderAvatar();
+    if (select('source')) select('source').onchange=()=>{
+        if (isProduct() && mode==='avatar') switchMode('photo');
+        else if (mode==='photo') refreshPhoto();
+        else renderAvatar();
+    };
     select('auto').onclick=locatePose;
     select('measures').onsubmit=renderAvatar;
     for (const key of Object.keys(adjustments)) slider(key).oninput=event=>{
@@ -297,6 +303,7 @@ export function createFittingRoom(dialog, studio) {
             : 'Среди измеренных размеров нет варианта с запасом от 6 см по груди.';
     };
     dialog.addEventListener('close',()=>{
+        document.documentElement.style.overflow=pageOverflow;
         photoSequence++; renderSequence++; endPose();
         photo=null; garment=null; pointer=null;
         canvasOut.width=1; canvasOut.height=1;
@@ -304,7 +311,11 @@ export function createFittingRoom(dialog, studio) {
         switchMode('photo');
     });
     return {open() {
-        if (!dialog.open) dialog.showModal();
+        if (!dialog.open) {
+            pageOverflow=document.documentElement.style.overflow;
+            dialog.showModal();
+            document.documentElement.style.overflow='hidden';
+        }
         select('side').value=isProduct()?'front':studio.side();
         if (mode==='photo') refreshPhoto();
     }};

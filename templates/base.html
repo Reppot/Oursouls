@@ -7,7 +7,7 @@
   {% for css in ['style','mobile-header','editorial','store','migration'] %}
   <link rel="stylesheet" href="{{ url_for('static',filename='theme/'+css+'.css') }}">
   {% endfor %}
-  {% if request.endpoint == 'constructor' %}<link rel="stylesheet" href="/static/studio/constructor.css"><link rel="stylesheet" href="/static/fitting/fitting.css?v=2">{% endif %}
+  {% if request.endpoint == 'constructor' %}<link rel="stylesheet" href="/static/studio/constructor.css"><link rel="stylesheet" href="/static/fitting/fitting.css?v=3">{% endif %}
   <link rel="stylesheet" href="/static/theme/figma.css?v=2">
   {% if request.endpoint == "home" %}<link rel="stylesheet" href="/static/runway/runway.css?v=5">{% endif %}
 </head>
