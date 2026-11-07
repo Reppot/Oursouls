@@ -424,7 +424,7 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
         openFitting.disabled = true;
         try {
             if (!fittingRoom) {
-                const {createFittingRoom} = await import('../fitting/fitting.js?v=2');
+                const {createFittingRoom} = await import('../fitting/fitting.js?v=3.0.0');
                 fittingRoom = createFittingRoom(q('fitting'), {
                     side: () => side,
                     kind: () => q('garment').value,

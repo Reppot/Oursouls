@@ -115,7 +115,7 @@ def texture_bytes(image, data):
         return result.getvalue()
 
 
-def build(directory, output):
+def build(directory, output, parts=PARTS):
     binary = bytearray()
     doc = {'asset':{'version':'2.0','generator':'Our Souls runway actor'},
            'scene':0,'scenes':[{'nodes':[]}],'nodes':[],'meshes':[],
@@ -142,7 +142,7 @@ def build(directory, output):
         doc['accessors'].append(record)
         return len(doc['accessors'])-1
 
-    for part in PARTS:
+    for part in parts:
         source, data = read_glb(directory/(part+'.glb'))
         skin_matrices = posed_joints(source,data)
         materials,textures,images,samplers = {},{},{},{}

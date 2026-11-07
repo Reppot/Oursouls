@@ -108,9 +108,10 @@ export function createViewer(host, callbacks) {
     host.appendChild(el);
 
     const scene = new T.Scene(), camera = new T.OrthographicCamera(-1, 1, 1, -1, .1, 30);
-    const print = layers(), materials = createMaterials(print), models = new Map(), fittingModels = new Map();
+    const print = layers(), materials = createMaterials(print), models = new Map();
     const contactShadow = addStudio(scene);
-    let actorPromise;
+    let presentationPromise;
+    const detailedMaterials=[];
     let garment = null, yaw = .28, pitch = .115, zoom = 1, orient = null;
     let raf = 0, disposed = false, mode = 'orbit', side = 'front', pointers = new Map(), gesture = null;
     let viewport = { width: 1, height: 1, ratio: 1 };
@@ -180,8 +181,40 @@ export function createViewer(host, callbacks) {
         materials.rib.color.copy(base).multiplyScalar(.82);
         materials.stitch.color.copy(base).multiplyScalar(.67);
         materials.cord.color.copy(base).lerp(white, .055);
+        for (const material of detailedMaterials) material.color.copy(base).multiplyScalar(1.65);
         schedule();
     }
+
+    // Replace the editor's fallback geometry with the same fitted, textured
+    // garments used by the person. Canonical coordinates keep print positions
+    // and order exports consistent with existing saved designs.
+    import('../fitting/outfits.js').then(async module=>({asset:await module.loadOutfits(),cords:module.createDrawstrings})).then(({asset,cords})=>{
+        if (disposed) return;
+        const names={Cloth_tshirt:'tee',Cloth_longsleeve:'long',Cloth_hoodie:'hoodie'};
+        const transform=new T.Matrix4().makeScale(1/.405,1/.325,1/.54);
+        transform.setPosition(0,-1.29/.325,0);
+        const activeKind=garment?.group.name;
+        asset.scene.traverse(part=>{
+            const kind=names[part.name];
+            if (!part.isMesh || !kind) return;
+            const geometry=part.geometry.clone().applyMatrix4(transform);
+            geometry.computeBoundingBox();
+            const material=materials.fabric.clone();
+            material.onBeforeCompile=materials.fabric.onBeforeCompile;
+            material.customProgramCacheKey=materials.fabric.customProgramCacheKey;
+            material.map=part.material.map;material.normalMap=part.material.normalMap;
+            material.normalScale.setScalar(.45);material.bumpMap=null;
+            material.color.set(lastColor||'#202321').multiplyScalar(1.65);
+            detailedMaterials.push(material);
+            const fabric=new T.Mesh(geometry,material);fabric.castShadow=true;fabric.receiveShadow=true;
+            const group=new T.Group();group.name=kind;group.add(fabric);
+            if(kind==='hoodie') {const strings=cords();strings.applyMatrix4(transform);group.add(strings);}
+            const box=geometry.boundingBox;
+            const fitted={group,fabric,center:(box.min.y+box.max.y)/2,span:Math.max(2.25,(box.max.y-box.min.y)*1.13)};
+            models.set(kind,fitted);
+        });
+        if (activeKind) setGarment(activeKind);
+    }).catch(()=>{/* The existing geometry keeps the editor usable if an asset fails. */});
 
     function setPrint(key, paint, stamp) {
         const item = print[key];
@@ -300,41 +333,25 @@ export function createViewer(host, callbacks) {
         finally { contactShadow.visible = true; resize(); }
     }
 
-    function loadActor() {
-        if (!actorPromise) actorPromise = import('../runway/vendor/GLTFLoader.js').then(async ({GLTFLoader}) => {
-            const gltf = await new GLTFLoader().loadAsync('/static/runway/models/runway-human.glb?v=3');
-            gltf.scene.traverse(part => {
-                if (part.name === 'Cloth_tshirt') part.visible = false;
-            });
-            return gltf.scene;
-        }).catch(error => { actorPromise = null; throw error; });
-        return actorPromise;
-    }
-
     async function fittingSnapshot(profile) {
-        const actor = await loadActor();
+        if (!presentationPromise) presentationPromise=import('../fitting/avatar.js?v=3').then(module=>module.createPresentation(print))
+            .catch(error=>{presentationPromise=null;throw error;});
+        const presentation = await presentationPromise;
         if (!garment || disposed) throw new Error('Preview unavailable');
-        const height = profile.height / 184;
-        const chest = Math.sqrt(profile.chest / 96);
-        const waist = Math.sqrt(profile.waist / 82);
-        const width = chest * .72 + waist * .28;
-        const original = garment.group;
-        if (!fittingModels.has(original.name)) fittingModels.set(original.name, createGarment(original.name, materials, true));
-        const active = fittingModels.get(original.name).group;
-        actor.scale.set(width,height,chest);
-        // Sleeves follow the display model's relaxed arms. The editor's
-        // suspended garment keeps its original, wider presentation pose.
-        active.scale.set(.405*width,.325*height,.54*chest);
-        active.position.set(0,1.29*height,.025);
-        original.visible = false;
-        contactShadow.visible = false;
-        scene.add(actor,active);
-        renderer.shadowMap.needsUpdate = true;
-        try { return capture(620,780,.94*height,profile.angle*Math.PI/180,2.10*height); }
+        const out=canvas(900,1120);
+        paintPrints();
+        presentation.prepare(profile,garment.group.name,lastColor||'#202321',out.width/out.height);
+        const exposure=renderer.toneMappingExposure;
+        renderer.setPixelRatio(1);renderer.setSize(out.width,out.height,false);
+        renderer.toneMappingExposure=1.04;
+        renderer.shadowMap.needsUpdate=true;
+        try {
+            renderer.render(presentation.scene,presentation.camera);
+            out.getContext('2d').drawImage(el,0,0);
+            return out;
+        }
         finally {
-            scene.remove(actor,active);
-            original.visible = true;
-            contactShadow.visible = true;
+            renderer.toneMappingExposure=exposure;
             renderer.shadowMap.needsUpdate = true;
             resize();
         }

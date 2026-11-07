@@ -87,236 +87,189 @@ function poseFrom(points, width, height) {
 
 export function createFittingRoom(dialog, studio) {
     const select = name => dialog.querySelector('[data-fit-'+name+']');
-    const canvasOut=select('canvas'), context=canvasOut.getContext('2d');
-    const status=message=>{select('status').textContent=message;};
     const productScript=dialog.querySelector('#fitting-product');
     const product=productScript ? JSON.parse(productScript.textContent) : null;
+    const views={photo:select('photo-canvas'),avatar:select('avatar-canvas')};
+    const contexts={photo:views.photo.getContext('2d'),avatar:views.avatar.getContext('2d')};
     const slider=key=>dialog.querySelector('[data-fit-adjust="'+key+'"]');
     const adjustments={x:50,y:39,scale:53,angle:0};
     const isProduct=()=>select('source')?.value==='product';
-    const isBack=()=>select('side').value==='back';
-    let photo, garment, productArt, worker, pendingPose, photoSequence=0, renderSequence=0, mode='photo';
-    let pointer=null;
-    let pageOverflow='';
-
+    let mode=product?'photo':'avatar';
+    let photo=null,garment=null,productArt=null,worker=null,pendingPose=null;
+    let photoSequence=0,renderSequence=0,poseSequence=0,pointer=null,pageOverflow='',updateTimer;
+    const status=message=>{select('status').textContent=message;};
+    const current=ticket=>ticket===renderSequence && dialog.open;
     function setSliders(values) {
         Object.assign(adjustments,values);
-        for (const key of Object.keys(adjustments)) slider(key).value=adjustments[key];
+        for (const key of Object.keys(adjustments)) {
+            slider(key).value=adjustments[key];
+            dialog.querySelector('[data-fit-value="'+key+'"]').textContent=Math.round(adjustments[key])+(key==='angle'?'°':'%');
+        }
     }
-    function present(image) {
-        canvasOut.width=image.width;
-        canvasOut.height=image.height;
-        context.drawImage(image,0,0);
-        canvasOut.hidden=false;
-        select('empty').hidden=true;
-        select('save').disabled=false;
+    function blank(which,message) {
+        views[which].hidden=true;
+        select(which+'-empty').hidden=false;
+        select(which+'-empty').textContent=message;
+        if(mode===which) select('save').disabled=true;
     }
-    function blank(message) {
-        canvasOut.hidden=true;
-        select('empty').hidden=false;
-        select('empty').textContent=message;
-        select('save').disabled=true;
+    function present(which,image) {
+        const target=views[which];
+        target.width=image.width;target.height=image.height;
+        contexts[which].setTransform(1,0,0,1,0,0);
+        contexts[which].clearRect(0,0,target.width,target.height);
+        contexts[which].drawImage(image,0,0);
+        target.hidden=false;select(which+'-empty').hidden=true;
+        if(mode===which) select('save').disabled=false;
     }
     function drawPhoto() {
-        if (!photo || mode!=='photo') return;
-        present(photo);
+        if(!photo || mode!=='photo' || !dialog.open) return;
+        present('photo',photo);
         select('save').disabled=!garment;
-        if (!garment) return;
-        const w=photo.width*adjustments.scale/100, h=w*garment.height/garment.width;
-        const shoulder=isProduct() ? 0.14 : studio.kind()==='hoodie' ? 0.28 : 0.14;
-        context.save();
-        context.translate(photo.width*adjustments.x/100,photo.height*adjustments.y/100);
+        if(!garment) return;
+        const w=photo.width*adjustments.scale/100,h=w*garment.height/garment.width;
+        const shoulder=isProduct() ? .14 : studio.kind()==='hoodie' ? .22 : .14;
+        const context=contexts.photo;
+        context.save();context.translate(photo.width*adjustments.x/100,photo.height*adjustments.y/100);
         context.rotate(adjustments.angle*Math.PI/180);
-        context.drawImage(garment,-w/2,-h*shoulder,w,h);
-        context.restore();
+        context.drawImage(garment,-w/2,-h*shoulder,w,h);context.restore();
     }
     async function refreshPhoto() {
-        if (!photo || mode!=='photo') return;
-        const request=++renderSequence;
-        garment=null;
-        drawPhoto();
+        if(!photo || mode!=='photo' || !dialog.open) return;
+        const ticket=++renderSequence;garment=null;drawPhoto();
         try {
-            if (isProduct() && isBack()) {
-                status('В карточке используется передний ракурс. Для спины выбери макет конструктора.');
-                return;
+            if(isProduct() && select('side').value==='back') {
+                status('У товара есть фото только спереди. Для спины выбери свой макет.');return;
             }
-            const image=isProduct()
-                ? (productArt || (productArt=await catalogueCutout(product.image)))
+            const image=isProduct() ? (productArt || (productArt=await catalogueCutout(product.image)))
                 : crop(studio.garment(select('side').value));
-            if (request!==renderSequence) return;
-            garment=image;
-            drawPhoto();
-            status('Передвинь одежду на снимке или уточни положение ползунками.');
-        } catch(error) {
-            if (request===renderSequence) status(error.message || 'Не удалось подготовить одежду.');
-        }
+            if(!current(ticket) || mode!=='photo') return;
+            garment=image;drawPhoto();
+            status('Подгони одежду по фигуре кнопкой ниже или перетащи её вручную.');
+        } catch(error) {if(current(ticket) && mode==='photo') status(error.message || 'Не удалось подготовить одежду.');}
     }
     function endPose() {
-        worker?.terminate();
-        worker=null;
-        pendingPose?.reject(new Error('Cancelled'));
-        pendingPose=null;
+        poseSequence++;worker?.terminate();worker=null;
+        pendingPose?.reject(new Error('Cancelled'));pendingPose=null;
+    }
+    function clearPhoto() {
+        photoSequence++;renderSequence++;endPose();photo=null;garment=null;pointer=null;
+        views.photo.width=1;views.photo.height=1;
+        select('sliders').hidden=true;select('photo-actions').hidden=true;
+        select('auto').disabled=true;select('file-name').textContent='JPG, PNG или WebP · до 16 МБ';
+        blank('photo','Добавь своё фото. Лучше встать прямо и оставить плечи и бёдра в кадре.');
+        if(mode==='photo') status('');
     }
     async function loadPhoto(file) {
-        if (!file) return;
-        const ticket=++photoSequence;
-        endPose();
-        select('auto').disabled=true;
-        status('Открываем снимок…');
+        if(!file) return;
+        const ticket=++photoSequence;endPose();select('auto').disabled=true;
+        status('Открываем фото…');
         try {
-            if (file.size>16*1024*1024) throw new Error('Выбери снимок размером до 16 МБ.');
+            if(file.size>16*1024*1024) throw new Error('Выбери фото размером до 16 МБ.');
             const image=await decode(file);
-            if (ticket!==photoSequence) return;
-            photo=image;
+            if(ticket!==photoSequence || !dialog.open) return;
+            photo=image;select('file-name').textContent=file.name;
             setSliders({x:50,y:39,scale:53,angle:0});
-            select('sliders').hidden=false;
-            await refreshPhoto();
-        } catch(error) {
-            if (ticket===photoSequence) status(error.message || 'Не удалось открыть снимок.');
-        } finally {
-            if (ticket===photoSequence) select('auto').disabled=!photo;
-        }
+            select('sliders').hidden=false;select('photo-actions').hidden=false;
+            if(mode==='photo') await refreshPhoto();
+        } catch(error) {if(ticket===photoSequence && mode==='photo') status(error.message || 'Не удалось открыть фото.');}
+        finally {if(ticket===photoSequence) select('auto').disabled=!photo;}
     }
     async function locatePose() {
-        if (!photo) return;
-        const ticket=photoSequence;
-        select('auto').disabled=true;
-        status('Определяем положение плеч на этом устройстве…');
+        if(!photo || mode!=='photo') return;
+        const ticket=photoSequence,poseTicket=++poseSequence;
+        const valid=()=>ticket===photoSequence && poseTicket===poseSequence && mode==='photo' && dialog.open;
+        select('auto').disabled=true;status('Подгоняем одежду по плечам. Фото остаётся на устройстве…');
         try {
             worker ||= new Worker(new URL('./pose/worker.js',import.meta.url));
             const bitmap=await createImageBitmap(photo);
-            if (ticket!==photoSequence) { bitmap.close(); return; }
+            if(!valid()) {bitmap.close();return;}
             const points=await new Promise((resolve,reject)=>{
-                const timeout=setTimeout(()=>{
-                    worker?.terminate(); worker=null;
-                    finish(new Error('Pose timeout'));
-                },45000);
-                function finish(error,points) {
-                    clearTimeout(timeout);
-                    if (error) reject(error); else resolve(points);
-                }
+                const timeout=setTimeout(()=>{worker?.terminate();worker=null;finish(new Error('Timeout'));},45000);
+                function finish(error,points) {clearTimeout(timeout);error?reject(error):resolve(points);}
                 pendingPose={reject:error=>finish(error)};
                 worker.onmessage=({data})=>finish(data.error?new Error('Pose unavailable'):null,data.points);
-                worker.onerror=error=>{worker?.terminate(); worker=null; finish(error);};
-                try {worker.postMessage(bitmap,[bitmap]);}
-                catch(error) {bitmap.close(); finish(error);}
+                worker.onerror=error=>{worker?.terminate();worker=null;finish(error);};
+                try {worker.postMessage(bitmap,[bitmap]);} catch(error) {bitmap.close();finish(error);}
             });
-            if (ticket!==photoSequence) return;
+            if(!valid()) return;
             const placement=poseFrom(points,photo.width,photo.height);
-            if (!placement) {
-                status('Плечи на снимке не распознаны. Поставь одежду вручную.');
-                return;
-            }
-            setSliders(placement);
-            drawPhoto();
-            status('Положение обновлено. Поправь его ползунками, если нужно.');
-        } catch {
-            if (ticket===photoSequence) status('Автоподгонка недоступна. Можно настроить положение вручную.');
-        } finally {
-            if (ticket===photoSequence) {
-                pendingPose=null;
-                select('auto').disabled=false;
-            }
-        }
+            if(!placement) {status('Плечи не распознаны. Попробуй снимок анфас или настрой положение вручную.');return;}
+            setSliders(placement);drawPhoto();status('Готово. При необходимости уточни размер и положение одежды.');
+        } catch {if(valid()) status('Автоподгонка недоступна. Одежду можно переместить вручную.');}
+        finally {if(valid()) {pendingPose=null;select('auto').disabled=false;}}
     }
     async function renderAvatar(event) {
-        event?.preventDefault();
+        event?.preventDefault();clearTimeout(updateTimer);
+        if(mode!=='avatar' || !dialog.open) return;
         const form=select('measures');
-        if (!form.reportValidity()) return;
-        const ticket=++renderSequence;
-        const button=form.querySelector('button');
-        button.disabled=true;
-        status('Готовим 3D-ракурс…');
+        if(!form.checkValidity()) {if(event) form.reportValidity();return;}
+        const ticket=++renderSequence,button=form.querySelector('button');
+        button.disabled=true;blank('avatar','Готовим модель…');status('');
         try {
             const profile=Object.fromEntries([...new FormData(form)].map(([key,value])=>[key,Number(value)]));
             const image=await studio.avatar(profile);
-            if (ticket!==renderSequence || !dialog.open) return;
-            present(image);
-            status(isProduct()?'На 3D-модели показан макет конструктора. Товар из каталога можно примерить на фото.':'Показан макет конструктора с выбранными пропорциями.');
-        } catch(error) {
-            if (ticket===renderSequence) status(error.message || 'Не удалось подготовить 3D-ракурс.');
-        } finally { button.disabled=false; }
+            if(!current(ticket) || mode!=='avatar') return;
+            present('avatar',image);status('Цвет и принты взяты из твоего макета.');
+        } catch(error) {if(current(ticket) && mode==='avatar') {blank('avatar','Не удалось загрузить 3D-просмотр.');status(error.message || 'Попробуй ещё раз.');}}
+        finally {if(current(ticket)) button.disabled=false;}
     }
     function switchMode(next) {
-        mode=next;
-        renderSequence++;
-        if (next==='avatar' && isProduct()) select('source').value='design';
-        for (const node of dialog.querySelectorAll('[data-fit-mode]')) node.setAttribute('aria-pressed',String(node.dataset.fitMode===next));
-        for (const node of dialog.querySelectorAll('[data-fit-panel]')) node.hidden=node.dataset.fitPanel!==next;
-        status('');
-        if (next==='photo') {
-            blank('Добавь фото, чтобы примерить одежду.');
-            if (photo) refreshPhoto();
-        } else {
-            blank('Укажи мерки и выбери ракурс.');
-            renderAvatar();
-        }
+        mode=next;renderSequence++;clearTimeout(updateTimer);pointer=null;endPose();
+        if(next==='avatar' && isProduct()) select('source').value='design';
+        for(const node of dialog.querySelectorAll('[data-fit-mode]')) node.setAttribute('aria-pressed',String(node.dataset.fitMode===next));
+        for(const node of dialog.querySelectorAll('[data-fit-panel],[data-fit-view]')) node.hidden=(node.dataset.fitPanel||node.dataset.fitView)!==next;
+        status('');select('save').disabled=true;select('auto').disabled=!photo;
+        select('measures').querySelector('button').disabled=false;
+        if(next==='avatar') renderAvatar();
+        else if(photo) refreshPhoto();
+        else blank('photo','Добавь своё фото. Лучше встать прямо и оставить плечи и бёдра в кадре.');
     }
-
-    for (const button of dialog.querySelectorAll('[data-fit-mode]')) button.onclick=()=>switchMode(button.dataset.fitMode);
-    for (const key of ['file','camera']) select(key).onchange=event=>{
-        loadPhoto(event.target.files[0]); event.target.value='';
-    };
+    for(const button of dialog.querySelectorAll('[data-fit-mode]')) button.onclick=()=>switchMode(button.dataset.fitMode);
+    for(const name of ['file','camera']) select(name).onchange=event=>{loadPhoto(event.target.files[0]);event.target.value='';};
+    select('clear').onclick=clearPhoto;
+    select('reset').onclick=()=>{setSliders({x:50,y:39,scale:53,angle:0});drawPhoto();status('Положение сброшено.');};
     select('side').onchange=refreshPhoto;
-    if (select('source')) select('source').onchange=()=>{
-        if (isProduct() && mode==='avatar') switchMode('photo');
-        else if (mode==='photo') refreshPhoto();
-        else renderAvatar();
+    if(select('source')) select('source').onchange=()=>{
+        if(isProduct() && mode==='avatar') switchMode('photo');
+        else if(mode==='photo') refreshPhoto();else renderAvatar();
     };
-    select('auto').onclick=locatePose;
-    select('measures').onsubmit=renderAvatar;
-    for (const key of Object.keys(adjustments)) slider(key).oninput=event=>{
-        adjustments[key]=Number(event.target.value);
-        drawPhoto();
+    select('auto').onclick=locatePose;select('measures').onsubmit=renderAvatar;
+    select('measures').onchange=()=>{clearTimeout(updateTimer);updateTimer=setTimeout(renderAvatar,120);};
+    for(const key of Object.keys(adjustments)) slider(key).oninput=event=>{setSliders({[key]:Number(event.target.value)});drawPhoto();};
+    views.photo.onpointerdown=event=>{
+        if(mode!=='photo' || !garment || event.button!==0) return;
+        pointer={x:event.clientX,y:event.clientY};views.photo.setPointerCapture(event.pointerId);
     };
-    canvasOut.onpointerdown=event=>{
-        if (mode!=='photo' || !garment || event.button!==0) return;
-        pointer={x:event.clientX,y:event.clientY};
-        canvasOut.setPointerCapture(event.pointerId);
+    views.photo.onpointermove=event=>{
+        if(!pointer || mode!=='photo') return;
+        const box=views.photo.getBoundingClientRect();
+        setSliders({x:between(adjustments.x+(event.clientX-pointer.x)/box.width*100,0,100),y:between(adjustments.y+(event.clientY-pointer.y)/box.height*100,0,100)});
+        pointer={x:event.clientX,y:event.clientY};drawPhoto();
     };
-    canvasOut.onpointermove=event=>{
-        if (!pointer) return;
-        const box=canvasOut.getBoundingClientRect();
-        setSliders({x:between(adjustments.x+(event.clientX-pointer.x)/box.width*100,0,100),
-                    y:between(adjustments.y+(event.clientY-pointer.y)/box.height*100,0,100)});
-        pointer={x:event.clientX,y:event.clientY};
-        drawPhoto();
+    views.photo.onpointerup=views.photo.onpointercancel=views.photo.onlostpointercapture=()=>{pointer=null;};
+    select('save').onclick=()=>{
+        if(select('save').disabled) return;
+        const target=views[mode];
+        target.toBlob(blob=>{
+            if(!blob) return;
+            const link=document.createElement('a'),url=URL.createObjectURL(blob);
+            link.href=url;link.download='our-souls-fitting-'+mode+'.png';link.click();setTimeout(()=>URL.revokeObjectURL(url),3000);
+        },'image/png');
     };
-    canvasOut.onpointerup=canvasOut.onpointercancel=canvasOut.onlostpointercapture=()=>{pointer=null;};
-    select('save').onclick=()=>canvasOut.toBlob(blob=>{
-        if (!blob) return;
-        const link=document.createElement('a'), url=URL.createObjectURL(blob);
-        link.href=url; link.download='our-souls-fitting.png'; link.click();
-        setTimeout(()=>URL.revokeObjectURL(url),3000);
-    },'image/png');
-    if (select('size')) select('size').onclick=()=>{
+    if(select('size')) select('size').onclick=()=>{
         const field=select('chest');
-        if (!field.value || !field.checkValidity()) {
-            select('size-result').textContent='Укажи обхват груди от 60 до 160 см.';
-            return;
-        }
+        if(!field.value || !field.checkValidity()) {select('size-result').textContent='Укажи обхват груди от 60 до 160 см.';return;}
         const chest=Number(field.value);
-        const candidates=Object.entries(product.measurements).map(([name,width])=>({name,ease:width*2-chest}))
-            .filter(size=>size.ease>=6).sort((a,b)=>a.ease-b.ease);
-        select('size-result').textContent=candidates.length
-            ? 'Для свободного облегания ориентир — '+candidates[0].name+' (запас '+Math.round(candidates[0].ease)+' см по груди).'
-            : 'Среди измеренных размеров нет варианта с запасом от 6 см по груди.';
+        const candidates=Object.entries(product.measurements).map(([name,width])=>({name,ease:width*2-chest})).filter(size=>size.ease>=6).sort((a,b)=>a.ease-b.ease);
+        select('size-result').textContent=candidates.length?'Ориентир — '+candidates[0].name+' (запас '+Math.round(candidates[0].ease)+' см по груди).':'Нет измеренного размера с запасом от 6 см по груди.';
     };
     dialog.addEventListener('close',()=>{
-        document.documentElement.style.overflow=pageOverflow;
-        photoSequence++; renderSequence++; endPose();
-        photo=null; garment=null; pointer=null;
-        canvasOut.width=1; canvasOut.height=1;
-        select('auto').disabled=true; select('sliders').hidden=true;
-        switchMode('photo');
+        document.documentElement.style.overflow=pageOverflow;clearTimeout(updateTimer);clearPhoto();
+        views.avatar.width=1;views.avatar.height=1;select('save').disabled=true;
     });
+    setSliders(adjustments);
     return {open() {
-        if (!dialog.open) {
-            pageOverflow=document.documentElement.style.overflow;
-            dialog.showModal();
-            document.documentElement.style.overflow='hidden';
-        }
-        select('side').value=isProduct()?'front':studio.side();
-        if (mode==='photo') refreshPhoto();
+        if(!dialog.open) {pageOverflow=document.documentElement.style.overflow;dialog.showModal();document.documentElement.style.overflow='hidden';}
+        select('side').value=isProduct()?'front':studio.side();switchMode(mode);
     }};
 }
