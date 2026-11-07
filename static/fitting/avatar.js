@@ -1,6 +1,6 @@
 import * as T from '../studio/three/three.module.min.js';
 import {GLTFLoader} from '../runway/vendor/GLTFLoader.js';
-import {loadOutfits,createDrawstrings} from './outfits.js';
+import {loadOutfits,createDrawstrings} from './outfits.js?v=4';
 
 function printable(material, prints) {
     material = material.clone();
@@ -70,7 +70,7 @@ export async function createPresentation(prints) {
     const fill=new T.DirectionalLight('#e8edff',.75);fill.position.set(3,2.4,2);
     const rim=new T.DirectionalLight('#fff4df',1.15);rim.position.set(1.2,3.1,-3.4);
     scene.add(key,fill,rim,new T.HemisphereLight('#fff9f1','#8d9389',1.25));
-    const floor=new T.Mesh(new T.PlaneGeometry(200,200),new T.MeshStandardMaterial({color:'#e4e3da',roughness:1}));
+    const floor=new T.Mesh(new T.PlaneGeometry(200,200),new T.ShadowMaterial({color:'#394334',opacity:.12}));
     floor.rotation.x=-Math.PI/2;floor.position.y=-.006;floor.receiveShadow=true;scene.add(floor);
     const names={tee:'Cloth_tshirt',long:'Cloth_longsleeve',hoodie:'Cloth_hoodie'};
     return {

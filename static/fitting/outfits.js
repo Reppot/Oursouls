@@ -3,7 +3,7 @@ import {GLTFLoader} from '../runway/vendor/GLTFLoader.js';
 
 let promise;
 export function loadOutfits() {
-    if (!promise) promise=new GLTFLoader().loadAsync(new URL('./outfits.glb?v=3',import.meta.url).href)
+    if (!promise) promise=new GLTFLoader().loadAsync(new URL('./outfits.glb?v=4',import.meta.url).href)
         .catch(error=>{promise=null;throw error;});
     return promise;
 }
@@ -14,8 +14,8 @@ export function createDrawstrings() {
     const metal = new T.MeshStandardMaterial({color:'#59584f',roughness:.55,metalness:.35});
     for (const sign of [-1,1]) {
         const y = sign === 1 ? 1.29 : 1.315;
-        const points = [new T.Vector3(sign*.042,1.49,.101),new T.Vector3(sign*.045,1.43,.117),
-            new T.Vector3(sign*.052,1.36,.124),new T.Vector3(sign*.047,y,.123)];
+        const points = [new T.Vector3(sign*.042,1.49,.146),new T.Vector3(sign*.045,1.43,.162),
+            new T.Vector3(sign*.052,1.36,.169),new T.Vector3(sign*.047,y,.168)];
         const path = new T.CatmullRomCurve3(points);
         const cord = new T.Mesh(new T.TubeGeometry(path,22,.0026,6,false),cotton);
         cord.castShadow = true;group.add(cord);

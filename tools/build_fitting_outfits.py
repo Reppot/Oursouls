@@ -7,10 +7,12 @@ without its separately generated, disconnected hood.
 from collections import defaultdict
 from copy import deepcopy
 import json
+import io
 import math
 from pathlib import Path
 import struct
 import sys
+from PIL import Image, ImageChops, ImageFilter
 
 from build_runway_actor import build, read_glb, read_accessor
 
@@ -86,6 +88,21 @@ def main(source, output):
     build(source,output,parts=('clothing_tshirt','clothing_hoodie'))
     doc, data = read_glb(output)
     binary=bytearray(data)
+    # The source tee includes a thin decorative circle. Remove that stock
+    # graphic while retaining the broad cloth shading and the UV layout.
+    for image in doc['images']:
+        if image.get('name')!='cloth_tshirt_albedo':
+            continue
+        view=doc['bufferViews'][image['bufferView']]; start=view.get('byteOffset',0)
+        photo=Image.open(io.BytesIO(data[start:start+view['byteLength']])).convert('RGB')
+        median=photo.filter(ImageFilter.MedianFilter(15))
+        mask=ImageChops.subtract(photo.convert('L'),median.convert('L')).point(lambda x:255 if x>9 else 0).filter(ImageFilter.MaxFilter(5))
+        neutral=Image.composite(median,photo,mask)
+        encoded=io.BytesIO();neutral.save(encoded,'JPEG',quality=94,subsampling=0)
+        binary.extend(b'\0'*(-len(binary)%4))
+        image['bufferView']=len(doc['bufferViews']);image['mimeType']='image/jpeg'
+        doc['bufferViews'].append({'buffer':0,'byteOffset':len(binary),'byteLength':len(encoded.getvalue())})
+        binary.extend(encoded.getvalue())
     def accessor(rows, typ, component, bounds=False):
         binary.extend(b'\0'*(-len(binary)%4))
         code = 'f' if component==5126 else 'H'
