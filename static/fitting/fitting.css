@@ -10,42 +10,42 @@
   background:#f6f5ee;
   color:#20271f;
 }
-.fit-dialog::backdrop {background:#141a16bc}
-.fit-dialog [hidden] {display:none!important}
-.fit-header,.fit-modes {display:flex;justify-content:space-between;align-items:center;gap:12px}
-.fit-header h2 {font:400 clamp(26px,4vw,42px)/1.12 var(--display,Georgia);margin:0 0 12px}
-.fit-grid {display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:20px}
-.fit-preview {
+#our-print .fit-dialog::backdrop {background:#141a16bc}
+#our-print .fit-dialog [hidden] {display:none!important}
+#our-print .fit-header,#our-print .fit-modes {display:flex;justify-content:space-between;align-items:center;gap:12px}
+#our-print .fit-header h2 {font:400 clamp(26px,4vw,42px)/1.12 var(--display,Georgia);margin:0 0 12px}
+#our-print .fit-grid {display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:20px}
+#our-print .fit-preview {
   display:grid;place-items:center;
   min-height:340px;background:#e9e8df;
   text-align:center;
 }
-.fit-preview p {max-width:29ch;padding:20px;color:#4e594c}
-.fit-preview canvas {display:block;width:auto;height:auto;max-width:100%;max-height:68vh;touch-action:pan-y}
-.fit-modes {justify-content:flex-start;margin:8px 0 15px}
-.fit-controls label {display:grid;gap:3px;margin-bottom:8px;font-size:13px}
-.fit-controls select,.fit-controls input:not([type=range]):not([type=file]) {
+#our-print .fit-preview p {max-width:29ch;padding:20px;color:#4e594c}
+#our-print .fit-preview canvas {display:block;width:auto;height:auto;max-width:100%;max-height:68vh;touch-action:pan-y}
+#our-print .fit-modes {justify-content:flex-start;margin:8px 0 15px}
+#our-print .fit-controls label {display:grid;gap:3px;margin-bottom:8px;font-size:13px}
+#our-print .fit-controls select,#our-print .fit-controls input:not([type=range]):not([type=file]) {
   max-width:100%;min-width:0;width:100%;padding:6px 8px;background:#fffef9;border:1px solid #c8cbbc;color:#20271f
 }
-.fit-controls input[type=file] {max-width:100%;font-size:13px}
-.fit-controls input[type=range] {width:100%;margin:2px 0;accent-color:#3f6b38}
-.fit-dialog button {
+#our-print .fit-controls input[type=file] {max-width:100%;font-size:13px}
+#our-print .fit-controls input[type=range] {width:100%;margin:2px 0;accent-color:#3f6b38}
+#our-print .fit-dialog button {
   border:1px solid #afbaaa;border-radius:3px;background:#fffef9;padding:7px 11px;color:#29462a;cursor:pointer;
 }
-.fit-dialog button[aria-pressed=true],.fit-dialog .fit-primary {background:#345b30;color:#fff;border-color:#345b30}
-.fit-dialog .fit-close {font-size:22px;min-width:40px}
-.fit-dialog button:disabled {opacity:.5;cursor:wait}
-.fit-note {font-size:12px;color:#536050;margin:6px 0 10px}
-.fit-sliders,.fit-measures {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 12px;margin-top:12px}
-.fit-measures .fit-primary {grid-column:1/-1}
-.fit-size {margin-top:12px;padding:8px 0;border-top:1px solid #d1d5c8}
-.fit-size summary {cursor:pointer}
-.fit-size a {text-decoration:underline}
+#our-print .fit-dialog button[aria-pressed=true],#our-print .fit-dialog .fit-primary {background:#345b30;color:#fff;border-color:#345b30}
+#our-print .fit-dialog .fit-close {font-size:22px;min-width:40px}
+#our-print .fit-dialog button:disabled {opacity:.5;cursor:wait}
+#our-print .fit-note {font-size:12px;color:#536050;margin:6px 0 10px}
+#our-print .fit-sliders,#our-print .fit-measures {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 12px;margin-top:12px}
+#our-print .fit-measures .fit-primary {grid-column:1/-1}
+#our-print .fit-size {margin-top:12px;padding:8px 0;border-top:1px solid #d1d5c8}
+#our-print .fit-size summary {cursor:pointer}
+#our-print .fit-size a {text-decoration:underline}
 #our-print #op-open-fitting {padding:4px 10px;margin-left:auto;min-height:31px}
 @media(max-width:650px) {
-  .fit-grid {grid-template-columns:1fr;gap:12px}
-  .fit-preview {min-height:150px}
-  .fit-preview canvas {max-height:44dvh}
-  .fit-modes {gap:6px}
-  .fit-dialog button {min-height:38px}
+  #our-print .fit-grid {grid-template-columns:1fr;gap:12px}
+  #our-print .fit-preview {min-height:150px}
+  #our-print .fit-preview canvas {max-height:44dvh}
+  #our-print .fit-modes {gap:6px}
+  #our-print .fit-dialog button {min-height:38px}
 }

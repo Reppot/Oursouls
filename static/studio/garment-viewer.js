@@ -1,5 +1,5 @@
 import * as T from './three/three.module.min.js';
-import { createGarment } from './garment-geometry.js?ver=2.1.1';
+import { createGarment } from './garment-geometry.js?ver=2.3.1';
 
 const clamp = (n, low, high) => Math.min(high, Math.max(low, n));
 const printUnits = 245;
@@ -108,7 +108,7 @@ export function createViewer(host, callbacks) {
     host.appendChild(el);
 
     const scene = new T.Scene(), camera = new T.OrthographicCamera(-1, 1, 1, -1, .1, 30);
-    const print = layers(), materials = createMaterials(print), models = new Map();
+    const print = layers(), materials = createMaterials(print), models = new Map(), fittingModels = new Map();
     const contactShadow = addStudio(scene);
     let actorPromise;
     let garment = null, yaw = .28, pitch = .115, zoom = 1, orient = null;
@@ -318,19 +318,22 @@ export function createViewer(host, callbacks) {
         const chest = Math.sqrt(profile.chest / 96);
         const waist = Math.sqrt(profile.waist / 82);
         const width = chest * .72 + waist * .28;
-        const active = garment.group;
+        const original = garment.group;
+        if (!fittingModels.has(original.name)) fittingModels.set(original.name, createGarment(original.name, materials, true));
+        const active = fittingModels.get(original.name).group;
         actor.scale.set(width,height,chest);
-        // The display model's arms hang down. The studio garment is posed to
-        // leave room for them, with separate scales for width and depth.
+        // Sleeves follow the display model's relaxed arms. The editor's
+        // suspended garment keeps its original, wider presentation pose.
         active.scale.set(.405*width,.325*height,.54*chest);
         active.position.set(0,1.29*height,.025);
+        original.visible = false;
         contactShadow.visible = false;
-        scene.add(actor);
+        scene.add(actor,active);
         renderer.shadowMap.needsUpdate = true;
         try { return capture(620,780,.94*height,profile.angle*Math.PI/180,2.10*height); }
         finally {
-            scene.remove(actor);
-            active.scale.set(1,1,1); active.position.set(0,0,0);
+            scene.remove(actor,active);
+            original.visible = true;
             contactShadow.visible = true;
             renderer.shadowMap.needsUpdate = true;
             resize();

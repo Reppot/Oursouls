@@ -205,9 +205,11 @@ function pocket(group, spec, materials) {
     for (const t of [.018, .978]) group.add(seam(Array.from({ length: 18 }, (_, i) => surf(i / 17 * 1.98 - .99, t).add(V(0, 0, .003))), .0045, materials.stitch));
 }
 
-export function createGarment(kind, materials) {
-    const spec = styles[kind];
-    if (!spec) throw new Error('Unknown garment');
+export function createGarment(kind, materials, onBody = false) {
+    if (!styles[kind]) throw new Error('Unknown garment');
+    const spec = onBody
+        ? {...styles[kind], sleeveX: .12, sleeveY: kind === 'tee' ? .66 : 1.43}
+        : styles[kind];
     const group = new T.Group(); group.name = kind;
     const points = [], cloth = [], rib = [], grid = [];
     const sockets = [SLICES / 4, SLICES * 3 / 4].map(center => ({ lo: center - 12, hi: center + 12, bottom: 41, top: ROWS }));
