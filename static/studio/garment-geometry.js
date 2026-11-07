@@ -112,7 +112,7 @@ function sleeve(points, socket, spec, sign, kind, cloth, rib, group, materials) 
         const taper = t > .89 && kind !== 'tee' ? lerp(1, .9, smooth((t - .89) / .11)) : 1;
         const r = ((w * shape + folds) * taper - (inside ? .016 : 0));
         const armDepth = spec.onBody
-            ? (kind === 'tee' ? -.13 * t : -.10 * Math.sin(Math.PI*t) + .26*t*t)
+            ? (kind === 'tee' ? -.13 * t : -.10 * Math.sin(Math.PI*t) + .20*t*t)
             : .016 * Math.sin(t * 5);
         return center.clone().addScaledVector(advance, t - (inside ? .034 : 0))
             .add(V(sign * .048 * Math.sin(t * Math.PI), 0, armDepth))
@@ -211,7 +211,7 @@ function pocket(group, spec, materials) {
 export function createGarment(kind, materials, onBody = false) {
     if (!styles[kind]) throw new Error('Unknown garment');
     const spec = onBody
-        ? {...styles[kind], onBody:true, sleeveX: kind === 'tee' ? -.04 : .06, sleeveY: kind === 'tee' ? .66 : 1.43}
+        ? {...styles[kind], onBody:true, sleeveX: kind === 'tee' ? -.04 : .06, sleeveY: kind === 'tee' ? .66 : 1.10}
         : styles[kind];
     const group = new T.Group(); group.name = kind;
     const points = [], cloth = [], rib = [], grid = [];

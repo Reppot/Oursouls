@@ -1,5 +1,5 @@
 import * as T from './three/three.module.min.js';
-import { createGarment } from './garment-geometry.js?ver=2.3.2';
+import { createGarment } from './garment-geometry.js?ver=2.3.3';
 
 const clamp = (n, low, high) => Math.min(high, Math.max(low, n));
 const printUnits = 245;
