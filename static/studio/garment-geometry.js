@@ -94,7 +94,7 @@ function seam(points, radius, material, closed = false) {
 function sleeve(points, socket, spec, sign, kind, cloth, rib, group, materials) {
     const root = socket.map(i => points[i]);
     const center = root.reduce((p, v) => p.add(v), V(0, 0, 0)).multiplyScalar(1 / root.length);
-    const advance = V(sign * spec.sleeveX, -spec.sleeveY, .01);
+    const advance = V(sign * spec.sleeveX, -spec.sleeveY, spec.onBody ? 0 : .01);
     const up = V(sign * spec.sleeveY, spec.sleeveX, 0).normalize();
     const theta = root.map(p => {
         const d = p.clone().sub(center);
@@ -111,8 +111,11 @@ function sleeve(points, socket, spec, sign, kind, cloth, rib, group, materials) 
         const shape = 1 + .034 * Math.sin(a * 3 + t * 5);
         const taper = t > .89 && kind !== 'tee' ? lerp(1, .9, smooth((t - .89) / .11)) : 1;
         const r = ((w * shape + folds) * taper - (inside ? .016 : 0));
+        const armDepth = spec.onBody
+            ? (kind === 'tee' ? -.13 * t : -.10 * Math.sin(Math.PI*t) + .26*t*t)
+            : .016 * Math.sin(t * 5);
         return center.clone().addScaledVector(advance, t - (inside ? .034 : 0))
-            .add(V(sign * .048 * Math.sin(t * Math.PI), 0, .016 * Math.sin(t * 5)))
+            .add(V(sign * .048 * Math.sin(t * Math.PI), 0, armDepth))
             .addScaledVector(up, Math.cos(a) * r).add(V(0, 0, Math.sin(a) * r * .84));
     };
     let last = socket;
@@ -208,7 +211,7 @@ function pocket(group, spec, materials) {
 export function createGarment(kind, materials, onBody = false) {
     if (!styles[kind]) throw new Error('Unknown garment');
     const spec = onBody
-        ? {...styles[kind], sleeveX: .12, sleeveY: kind === 'tee' ? .66 : 1.43}
+        ? {...styles[kind], onBody:true, sleeveX: kind === 'tee' ? -.04 : .06, sleeveY: kind === 'tee' ? .66 : 1.43}
         : styles[kind];
     const group = new T.Group(); group.name = kind;
     const points = [], cloth = [], rib = [], grid = [];
