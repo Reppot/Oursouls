@@ -70,7 +70,7 @@ async function catalogueCutout(url) {
     return crop(source);
 }
 
-function poseFrom(points, width, height) {
+function poseFrom(points, width, height, shoulderShare = .52) {
     const [a,b]=[points?.[11],points?.[12]];
     if (!a || !b || Math.min(a.visibility,b.visibility)<.55) return null;
     const [left,right]=a.x<b.x?[a,b]:[b,a];
@@ -80,7 +80,7 @@ function poseFrom(points, width, height) {
     return {
         x:between((left.x+right.x)*50,0,100),
         y:between((left.y+right.y)*50,0,100),
-        scale:between(span/width*100/.52,10,155),
+        scale:between(span/width*100/shoulderShare,10,155),
         angle:between(Math.atan2(dy,dx)*180/Math.PI,-45,45),
     };
 }
@@ -127,7 +127,7 @@ export function createFittingRoom(dialog, studio) {
         select('save').disabled=!garment;
         if(!garment) return;
         const w=photo.width*adjustments.scale/100,h=w*garment.height/garment.width;
-        const shoulder=isProduct() ? .14 : studio.kind()==='hoodie' ? .22 : .14;
+        const shoulder=isProduct() ? .14 : studio.kind()==='tee' ? .14 : .17;
         const context=contexts.photo;
         context.save();context.translate(photo.width*adjustments.x/100,photo.height*adjustments.y/100);
         context.rotate(adjustments.angle*Math.PI/180);
@@ -156,7 +156,7 @@ export function createFittingRoom(dialog, studio) {
         views.photo.width=1;views.photo.height=1;
         select('sliders').hidden=true;select('photo-actions').hidden=true;
         select('auto').disabled=true;select('file-name').textContent='JPG, PNG или WebP · до 16 МБ';
-        blank('photo','Добавь своё фото. Лучше встать прямо и оставить плечи и бёдра в кадре.');
+        blank('photo','Добавь фото анфас с опущенными руками. Плечи и бёдра должны быть в кадре.');
         if(mode==='photo') status('');
     }
     async function loadPhoto(file) {
@@ -192,7 +192,8 @@ export function createFittingRoom(dialog, studio) {
                 try {worker.postMessage(bitmap,[bitmap]);} catch(error) {bitmap.close();finish(error);}
             });
             if(!valid()) return;
-            const placement=poseFrom(points,photo.width,photo.height);
+            const shoulderShare=isProduct() ? .52 : studio.kind()==='tee' ? .72 : .60;
+            const placement=poseFrom(points,photo.width,photo.height,shoulderShare);
             if(!placement) {status('Плечи не распознаны. Попробуй снимок анфас или настрой положение вручную.');return;}
             setSliders(placement);drawPhoto();status('Готово. При необходимости уточни размер и положение одежды.');
         } catch {if(valid()) status('Автоподгонка недоступна. Одежду можно переместить вручную.');}
@@ -222,7 +223,7 @@ export function createFittingRoom(dialog, studio) {
         select('measures').querySelector('button').disabled=false;
         if(next==='avatar') renderAvatar();
         else if(photo) refreshPhoto();
-        else blank('photo','Добавь своё фото. Лучше встать прямо и оставить плечи и бёдра в кадре.');
+        else blank('photo','Добавь фото анфас с опущенными руками. Плечи и бёдра должны быть в кадре.');
     }
     for(const button of dialog.querySelectorAll('[data-fit-mode]')) button.onclick=()=>switchMode(button.dataset.fitMode);
     for(const name of ['file','camera']) select(name).onchange=event=>{loadPhoto(event.target.files[0]);event.target.value='';};
