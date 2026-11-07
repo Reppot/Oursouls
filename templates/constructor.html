@@ -3,7 +3,7 @@
 
 <main id="main"><section id="our-print" class="os-print-studio"
     data-atlas="/static/studio/garments-studio-v1.png"
-    data-viewer="/static/studio/garment-viewer.js"
+    data-viewer="/static/studio/garment-viewer.js?v=2.3"
     data-archive="/static/studio/order-archive.js"
     data-sample="/static/studio/example-print.png">
 <div class="os-studio-wrap">
@@ -40,7 +40,7 @@
             </div>
 
         <section class="os-studio-stage" aria-label="Предпросмотр одежды">
-            <div class="os-stage-top"><span id="op-stage-model">Футболка</span><span id="op-render-mode" class="os-stage-badge">Загрузка…</span></div>
+            <div class="os-stage-top"><span id="op-stage-model">Футболка</span><button class="os-secondary" type="button" id="op-open-fitting">Примерить</button><span id="op-render-mode" class="os-stage-badge">Загрузка…</span></div>
             <div class="os-stage-viewport" id="op-viewport" aria-busy="true">
                 <canvas id="op-canvas" width="600" height="700" tabindex="0" aria-label="Студийный макет одежды"></canvas>
                 <div id="op-webgl" class="os-webgl" hidden></div>
@@ -125,7 +125,8 @@
         </section>
     </div>
 </div>
+{% include "fitting.html" %}
 </section></main>
 
-<script defer src='/static/studio/constructor.js?v=2.2.0'></script>
+<script defer src='/static/studio/constructor.js?v=2.3.0'></script>
 {% endblock %}

@@ -108,11 +108,11 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
         c.drawImage(renderPrint(s), -d.w / 2, -d.h / 2, d.w, d.h);
         c.restore();
     }
-    function garment(c, which, edit) {
+    function garment(c, which, edit, transparent = false) {
         c.save();
         const bg = c.createRadialGradient(300,300,20,300,350,480);
         bg.addColorStop(0,'#fafaf7'); bg.addColorStop(1,'#e5e5df');
-        c.fillStyle = bg; c.fillRect(0,0,600,700);
+        if (!transparent) { c.fillStyle = bg; c.fillRect(0,0,600,700); }
         const photo = coloredPhoto(which);
         c.textAlign = 'center'; c.fillStyle = '#52604d';
         if (!photo) {
@@ -122,7 +122,7 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
             return;
         }
         c.save();
-        c.shadowColor = 'rgba(25,29,24,.18)'; c.shadowBlur = 18; c.shadowOffsetY = 12;
+        if (!transparent) { c.shadowColor = 'rgba(25,29,24,.18)'; c.shadowBlur = 18; c.shadowOffsetY = 12; }
         c.drawImage(photo.canvas,0,0); c.restore();
         if (layers[which].length) {
             const pc = printLayer.getContext('2d'), mc = printMask.getContext('2d');
@@ -141,7 +141,7 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
             }
         }
         c.font = '16px Arial';
-        c.fillText(which === 'front' ? 'ПЕРЕД' : 'СПИНА',300,670);
+        if (!transparent) c.fillText(which === 'front' ? 'ПЕРЕД' : 'СПИНА',300,670);
         c.restore();
     }
 
@@ -418,6 +418,34 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
             const im = new Image(); im.onload=()=>{atlasImage=im;draw();}; im.onerror=()=>{photoError=true;draw();}; im.src=root.dataset.atlas;
         }
     }
+    let fittingRoom;
+    const openFitting = q('open-fitting');
+    openFitting.onclick = async () => {
+        openFitting.disabled = true;
+        try {
+            if (!fittingRoom) {
+                const {createFittingRoom} = await import('../fitting/fitting.js?v=1');
+                fittingRoom = createFittingRoom(q('fitting'), {
+                    side: () => side,
+                    kind: () => q('garment').value,
+                    garment(which) {
+                        if (viewer) return viewer.exportGarment(which);
+                        if (!atlasImage) throw new Error('Предпросмотр одежды загружается. Попробуй ещё раз.');
+                        const preview = canvasLayer();
+                        garment(preview.getContext('2d'), which, false, true);
+                        return preview;
+                    },
+                    avatar(profile) {
+                        if (!viewer) throw new Error('Для 3D-примерки нужен WebGL. Можно примерить на фото.');
+                        return viewer.fittingSnapshot(profile);
+                    },
+                });
+            }
+            await fittingRoom.open();
+        } catch { status('Примерочная пока недоступна. Попробуй ещё раз.', true); }
+        finally { openFitting.disabled = false; }
+    };
+    if (document.getElementById('fitting-product')) openFitting.click();
     setColor(fabricColor);
     if (root.dataset.viewer) {
         import(root.dataset.viewer).then(module => {

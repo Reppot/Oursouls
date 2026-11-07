@@ -91,6 +91,7 @@ function addStudio(scene) {
     const shadow = new T.Mesh(new T.PlaneGeometry(2.65, 1.75), new T.MeshBasicMaterial({ map: new T.CanvasTexture(soft), transparent: true, depthWrite: false }));
     shadow.rotation.x = -Math.PI / 2; shadow.position.y = -1.133;
     scene.add(shadow);
+    return shadow;
 }
 
 export function createViewer(host, callbacks) {
@@ -108,7 +109,8 @@ export function createViewer(host, callbacks) {
 
     const scene = new T.Scene(), camera = new T.OrthographicCamera(-1, 1, 1, -1, .1, 30);
     const print = layers(), materials = createMaterials(print), models = new Map();
-    addStudio(scene);
+    const contactShadow = addStudio(scene);
+    let actorPromise;
     let garment = null, yaw = .28, pitch = .115, zoom = 1, orient = null;
     let raf = 0, disposed = false, mode = 'orbit', side = 'front', pointers = new Map(), gesture = null;
     let viewport = { width: 1, height: 1, ratio: 1 };
@@ -132,8 +134,7 @@ export function createViewer(host, callbacks) {
             ctx.setTransform(c.width / 600, 0, 0, c.height / 700, 0, 0);
             ctx.clearRect(0, 0, 600, 700);
             if (item.paint) {
-                ctx.save(); ctx.scale(item.canvas.width / 600, item.canvas.height / 700);
-                item.paint(ctx); ctx.restore();
+                item.paint(ctx);
             }
             item.texture.needsUpdate = true; item.dirty = false;
         }
@@ -277,7 +278,66 @@ export function createViewer(host, callbacks) {
         return out;
     }
 
-    return { setGarment, setColor, setPrint, showSide, resize, zoomBy, exportPair,
+    function capture(width, height, aim, cameraYaw, viewHeight) {
+        const out = canvas(width, height);
+        paintPrints();
+        renderer.setPixelRatio(1);
+        renderer.setSize(width, height, false);
+        const half = viewHeight / 2, horizontal = half * width / height;
+        Object.assign(camera, {left:-horizontal,right:horizontal,top:half,bottom:-half});
+        camera.updateProjectionMatrix();
+        camera.position.set(Math.sin(cameraYaw)*6,aim,Math.cos(cameraYaw)*6);
+        camera.lookAt(0,aim,0);
+        renderer.render(scene,camera);
+        out.getContext('2d').drawImage(el,0,0);
+        return out;
+    }
+
+    function exportGarment(which) {
+        if (!garment || disposed) throw new Error('Preview unavailable');
+        contactShadow.visible = false;
+        try { return capture(760,860,garment.center,which==='back'?Math.PI:0,Math.max(garment.span,2.83)); }
+        finally { contactShadow.visible = true; resize(); }
+    }
+
+    function loadActor() {
+        if (!actorPromise) actorPromise = import('../runway/vendor/GLTFLoader.js').then(async ({GLTFLoader}) => {
+            const gltf = await new GLTFLoader().loadAsync('/static/runway/models/runway-human.glb?v=3');
+            gltf.scene.traverse(part => {
+                if (part.name === 'Cloth_tshirt') part.visible = false;
+            });
+            return gltf.scene;
+        }).catch(error => { actorPromise = null; throw error; });
+        return actorPromise;
+    }
+
+    async function fittingSnapshot(profile) {
+        const actor = await loadActor();
+        if (!garment || disposed) throw new Error('Preview unavailable');
+        const height = profile.height / 184;
+        const chest = Math.sqrt(profile.chest / 96);
+        const waist = Math.sqrt(profile.waist / 82);
+        const width = chest * .72 + waist * .28;
+        const active = garment.group;
+        actor.scale.set(width,height,chest);
+        // The display model's arms hang down. The studio garment is posed to
+        // leave room for them, with separate scales for width and depth.
+        active.scale.set(.405*width,.325*height,.54*chest);
+        active.position.set(0,1.29*height,.025);
+        contactShadow.visible = false;
+        scene.add(actor);
+        renderer.shadowMap.needsUpdate = true;
+        try { return capture(620,780,.94*height,profile.angle*Math.PI/180,2.10*height); }
+        finally {
+            scene.remove(actor);
+            active.scale.set(1,1,1); active.position.set(0,0,0);
+            contactShadow.visible = true;
+            renderer.shadowMap.needsUpdate = true;
+            resize();
+        }
+    }
+
+    return { setGarment, setColor, setPrint, showSide, resize, zoomBy, exportPair, exportGarment, fittingSnapshot,
         setMode(value) { mode = value; el.dataset.mode = value; },
         reset() { zoom = 1; showSide(side); },
         syncSide(value) { side = value; }

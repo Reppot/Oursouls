@@ -4,6 +4,7 @@
 <div class="shop-gallery">{% for photo in p.images %}<img src="{{ photo }}" alt="{{ p.name }}{% if not loop.first %}, фото {{ loop.index }}{% endif %}" loading="{{ 'eager' if loop.first else 'lazy' }}">{% endfor %}</div>
 <section><p class="eyebrow">{{ p.category }}</p><h1>{{ p.name }}</h1><p class="shop-description">{{ p.description }}</p>
 <p class="price">{% if p.sale_price is not none %}<del>{{ p.price|rub }}</del> <strong>{{ p.sale_price|rub }}</strong>{% elif p.price is not none %}{{ p.price|rub }}{% else %}Цена уточняется{% endif %}</p>
+<a class="button shop-try" href="{{ url_for('constructor', try=p.slug) }}">Примерить →</a>
 {% if p.available %}<form class="osp-add-form" method="post" action="/cart/"><input type="hidden" name="csrf" value="{{ csrf() }}"><input type="hidden" name="action" value="add"><input type="hidden" name="id" value="{{ p.id }}">
 <div class="osp-options"><label>Размер<select name="size">{% for size in sizes %}<option>{{ size }}</option>{% endfor %}</select></label>
 <label>Цвет<select name="color">{% for color in colors %}<option {% if color==p.color %}selected{% endif %}>{{ color }}</option>{% endfor %}</select></label>

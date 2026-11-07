@@ -14,4 +14,8 @@
 <label>Добавить фото<input type="file" name="photos" accept="image/jpeg,image/png,image/webp" multiple><small>До 8 фото на карточку. Первое фото показывается в каталоге.</small></label>
 <label class="shop-check"><input type="checkbox" name="published" {% if p.published %}checked{% endif %}> Показывать в каталоге</label>
 <label class="shop-check"><input type="checkbox" name="available" {% if p.available %}checked{% endif %}> В наличии</label>
-<button class="button">Сохранить карточку</button></form></div></div></main>{% endblock %}
+<details><summary>Замеры изделия для примерочной</summary>
+<input type="hidden" name="fit_measurements_present" value="1">
+<p>Ширина вещи в сантиметрах, от подмышки до подмышки, когда изделие лежит ровно. Заполняй только измеренные размеры.</p>
+<div class="shop-pair">{% for size in sizes %}<label>{{ size }}<input name="fit_{{ size }}" type="number" min="25" max="100" step=".1" value="{{ p.get('fit_measurements', {}).get(size, '') }}"></label>{% endfor %}</div>
+</details><button class="button">Сохранить карточку</button></form></div></div></main>{% endblock %}

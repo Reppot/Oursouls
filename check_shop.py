@@ -56,9 +56,15 @@ with TemporaryDirectory(dir=Path.cwd()) as tmp:
     png.seek(0)
     data = {'csrf':token(client.get('/admin/product/new/')),'name':'Футболка для теста','sku':'TEST-001',
             'category':'Тест','color':'Чёрный','price':'2500','sale_price':'1900',
-            'published':'on','available':'on','photos':(png,'photo.png')}
+            'published':'on','available':'on','photos':(png,'photo.png'),
+            'fit_measurements_present':'1','fit_M':'52.5','fit_L':'55'}
     assert client.post('/admin/product/new/',data=data).location == '/admin/'
     p = next(p for p in app.store.list_products() if p['sku']=='TEST-001')
+    assert p['fit_measurements'] == {'M':52.5,'L':55}
+    fitting = client.get('/constructor/?try='+p['slug'])
+    assert fitting.status_code == 200 and 'fitting-product' in fitting.get_data(as_text=True)
+    assert '"M": 52.5' in fitting.get_data(as_text=True)
+    assert client.get('/constructor/?try=missing-product').status_code == 404
     assert p['price'] == 250000 and p['sale_price'] == 190000 and p['images']
     product = client.get('/product/'+p['slug']+'/')
     assert '1 900 ₽' in product.get_data(as_text=True)
@@ -67,9 +73,20 @@ with TemporaryDirectory(dir=Path.cwd()) as tmp:
     assert '3 800 ₽' in basket.get_data(as_text=True) and 't.me/oursouls33' in basket.get_data(as_text=True)
     data.pop('photos')
     data.pop('published')
+    data.pop('fit_measurements_present')
+    data.pop('fit_M')
+    data.pop('fit_L')
     data.update(csrf=token(client.get('/admin/product/'+p['id']+'/')),name='Скрытая футболка')
     assert client.post('/admin/product/'+p['id']+'/',data=data).status_code == 302
     assert client.get('/product/'+p['slug']+'/').status_code == 404
+    assert client.get('/constructor/?try='+p['slug']).status_code == 404
+    assert next(x for x in app.store.list_products() if x['id']==p['id'])['fit_measurements'] == {'M':52.5,'L':55}
+    data.update(fit_measurements_present='1', fit_M='nan')
+    assert client.post('/admin/product/'+p['id']+'/',data=data).status_code == 400
+    assert next(x for x in app.store.list_products() if x['id']==p['id'])['fit_measurements'] == {'M':52.5,'L':55}
+    data.update(fit_M='', fit_L='57')
+    assert client.post('/admin/product/'+p['id']+'/',data=data).status_code == 302
+    assert next(x for x in app.store.list_products() if x['id']==p['id'])['fit_measurements'] == {'L':57}
     assert 'Скрытая футболка' in client.get('/admin/').get_data(as_text=True)
     assert client.post('/admin/logout/',data={'csrf':token(client.get('/admin/'))}).status_code == 302
     assert client.get('/admin/').location == '/admin/login/'

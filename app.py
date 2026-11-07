@@ -114,7 +114,16 @@ def about():
 
 @app.get('/constructor/')
 def constructor():
-    return render_template('constructor.html', title='Конструктор')
+    slug = request.args.get('try', '').strip()
+    fitting_product = None
+    if slug:
+        item = next((p for p in public_products() if p['slug'] == slug), None)
+        if item is None:
+            abort(404)
+        fitting_product = dict(name=item['name'], image=item['images'][0],
+                               url=url_for('product', slug=item['slug']),
+                               measurements=item.get('fit_measurements', {}))
+    return render_template('constructor.html', title='Конструктор', fitting_product=fitting_product)
 
 @app.get('/catalog/')
 def catalog():
@@ -296,6 +305,18 @@ def admin_product(key):
             p['price'], p['sale_price'] = price_value('price'), price_value('sale_price')
             if p['sale_price'] is not None and (p['price'] is None or p['sale_price'] >= p['price']):
                 raise ValueError('Цена со скидкой должна быть ниже обычной.')
+            measurements = dict(p.get('fit_measurements', {}))
+            if 'fit_measurements_present' in request.form:
+                measurements = {}
+                for size in SIZES:
+                    raw = request.form.get(f'fit_{size}', '').strip()
+                    if not raw:
+                        continue
+                    width = request.form.get(f'fit_{size}', type=float)
+                    if width is None or not 25 <= width <= 100:
+                        raise ValueError(f'Укажи ширину изделия от 25 до 100 см для {size}.')
+                    measurements[size] = width
+            p['fit_measurements'] = measurements
             kept = [image for index,image in enumerate(p['images']) if str(index) not in request.form.getlist('remove')]
             photos = [photo for photo in request.files.getlist('photos') if photo.filename]
             if not 1 <= len(kept)+len(photos) <= 8:
