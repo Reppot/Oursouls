@@ -4,26 +4,38 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>{{ title }} — Our Souls</title>
+  <meta name="description" content="{{ description|default('Our Souls — футболки с мемами и хоррор-принтами. Печать своего дизайна от одной вещи. Заказ и согласование в Telegram.') }}">
+  <meta property="og:title" content="{{ title }} — Our Souls">
+  <meta property="og:description" content="Футболки, лонгсливы и худи. Готовые принты и печать по твоему макету.">
+  <meta property="og:type" content="{{ 'product' if request.endpoint == 'product' else 'website' }}">
+  {% set share_image=p.images[0] if p is defined and p.images else '/static/catalog/12.webp' %}
+  <meta property="og:image" content="{{ share_image if share_image.startswith('https://') else public_base+share_image }}">
+  <meta property="og:url" content="{{ public_base }}{{ request.path }}">
+  <link rel="canonical" href="{{ public_base }}{{ request.path }}">
+  <link rel="icon" href="/static/theme/favicon.svg" type="image/svg+xml">
+  {% if product_jsonld is defined %}<script type="application/ld+json">{{ product_jsonld|tojson }}</script>{% endif %}
   {% for css in ['style','mobile-header','editorial','store','migration'] %}
   <link rel="stylesheet" href="{{ url_for('static',filename='theme/'+css+'.css') }}">
   {% endfor %}
   {% if request.endpoint == 'constructor' %}<link rel="stylesheet" href="/static/studio/constructor.css"><link rel="stylesheet" href="/static/fitting/fitting.css?v=3.0.1">{% endif %}
   <link rel="stylesheet" href="/static/theme/figma.css?v=2">
-  {% if request.endpoint == "home" %}<link rel="stylesheet" href="/static/runway/runway.css?v=5">{% endif %}
+  <link rel="stylesheet" href="/static/theme/shop-2d.css?v=1">
+  {% if request.endpoint == "home" %}<link rel="stylesheet" href="/static/rack/rack.css?v=1">{% endif %}
 </head>
 <body class="os-editorial page-{{ request.endpoint }}">
 <a class="skip-link" href="#main">Перейти к содержимому</a>
 <header class="site-header">
   <div class="wrap header-row">
     <a class="wordmark" href="/">OUR SOULS</a>
-    <nav class="site-nav" aria-label="Основное меню">
+    <button class="mobile-menu-toggle" type="button" aria-controls="main-navigation" aria-expanded="false" aria-label="Открыть меню"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+    <nav class="site-nav" id="main-navigation" aria-label="Основное меню">
       {% for endpoint, label in [('catalog','Каталог'),('constructor','Конструктор'),('services','Услуги печати'),('about','О бренде')] %}
       <a href="{{ url_for(endpoint) }}" {% if request.endpoint == endpoint %}aria-current="page"{% endif %}>{{ label }}</a>
       {% endfor %}
       <a href="#contacts">Контакты</a>
     </nav>
     <div class="header-actions">
-      <a href="/cart/" class="header-cart" aria-label="Корзина, товаров {{ cart_count }}" {% if request.endpoint == 'cart' %}aria-current="page"{% endif %}>
+      <a href="/cart/" class="header-cart" data-ready-count="{{ cart_count }}" aria-label="Корзина, товаров {{ cart_count }}" {% if request.endpoint == 'cart' %}aria-current="page"{% endif %}>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 4h3l2.5 11h11l2-8H6"/><circle cx="9" cy="19" r="1"/><circle cx="18" cy="19" r="1"/></svg>
         {% if cart_count %}<span>{{ cart_count }}</span>{% endif %}
       </a>
@@ -34,7 +46,9 @@
   </div>
 </header>
 {% for message in get_flashed_messages() %}<p class="wrap shop-notice" role="status">{{ message }}</p>{% endfor %}
+{% if catalog_stale %}<p class="wrap shop-notice" role="status">Каталог временно показан из сохранённой копии. Наличие и стоимость проверим перед заказом.</p>{% endif %}
 {% block content %}{% endblock %}
 {% include 'footer.html' %}
+<script type="module" src="/static/theme/shop.js?v=1"></script>
 </body>
 </html>

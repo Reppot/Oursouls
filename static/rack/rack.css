@@ -1,0 +1,449 @@
+.rack-section {
+  padding:46px 0 26px;
+  background:#f4f3ed;
+  overflow:clip
+}
+.rack-heading {
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:30px;
+  margin-bottom:26px
+}
+.rack-heading h1 {
+  font-size:clamp(38px,4.3vw,66px);
+  line-height:1.02;
+  margin:0 0 15px;
+  text-transform:none;
+  letter-spacing:-.025em
+}
+.rack-heading p {
+  margin:0;
+  max-width:46ch;
+  font-size:15px
+}
+.rack-catalog-link {
+  padding:12px 0;
+  white-space:nowrap;
+  border-bottom:1px solid #87917e
+}
+.rack-layout {
+  display:grid;
+  grid-template-columns:minmax(0,1.5fr) minmax(300px,1fr);
+  gap:38px
+}
+.rack-wardrobe {
+  min-width:0;
+  position:relative;
+  padding-top:17px;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+  background:#eae9e1
+}
+.rack-rail {
+  position:absolute;
+  left:18px;
+  right:18px;
+  top:34px;
+  height:7px;
+  border-radius:4px;
+  background:linear-gradient(#8b8d7e,#d5d5c9 45%,#676e60);
+  box-shadow:0 4px 8px #17201818
+}
+.rack-track {
+  display:flex;
+  overflow-x:auto;
+  scroll-snap-type:x proximity;
+  overscroll-behavior-x:contain;
+  scrollbar-width:thin;
+  scrollbar-color:#7d8672 transparent;
+  padding:0 10px 18px;
+  min-height:355px;
+  align-items:flex-start
+}
+.rack-piece {
+  flex:0 0 44%;
+  position:relative;
+  scroll-snap-align:center;
+  margin:0 -3%;
+  padding:56px 0 0;
+  text-decoration:none;
+  transform-origin:50% 5%;
+  transition:transform .3s cubic-bezier(.2,.8,.2,1);
+  color:#1a241b;
+  isolation:isolate
+}
+.rack-piece:first-child {
+  margin-left:0
+}
+.rack-piece:hover,.rack-piece.is-selected {
+  transform:translateY(-3px) rotate(-1deg);
+  z-index:2
+}
+.rack-hanger {
+  position:absolute;
+  top:5px;
+  left:9%;
+  width:82%;
+  height:90px;
+  stroke:#746b55;
+  stroke-width:3;
+  stroke-linecap:round;
+  stroke-linejoin:round
+}
+.rack-piece img {
+  position:relative;
+  display:block;
+  width:100%;
+  height:285px;
+  object-fit:contain;
+  object-position:top center;
+  mix-blend-mode:multiply;
+  filter:drop-shadow(4px 12px 7px #20251822)
+}
+.rack-piece img.is-cutout {
+  mix-blend-mode:normal
+}
+.rack-piece-name {
+  display:block;
+  text-align:center;
+  padding:12px 8px 0;
+  font-size:13px;
+  line-height:1.3;
+  font-weight:600
+}
+.rack-navigation {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin:12px 20px 0;
+  padding:12px 0;
+  border-top:1px solid #bfc4b7;
+  font-size:12px
+}
+.rack-navigation p {
+  margin:0
+}
+.rack-navigation button {
+  width:44px;
+  height:44px;
+  border:1px solid #b3baaa;
+  background:transparent;
+  color:#243723;
+  cursor:pointer
+}
+.rack-navigation button:disabled {
+  opacity:.3;
+  cursor:default
+}
+.rack-detail {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(125px,.72fr);
+  align-items:center;
+  gap:17px;
+  min-width:0;
+  scroll-margin-top:85px
+}
+.rack-large {
+  display:block;
+  position:relative;
+  width:100%;
+  padding:0;
+  border:0;
+  background:transparent;
+  cursor:zoom-in
+}
+.rack-large img {
+  width:100%;
+  height:365px;
+  object-fit:contain;
+  mix-blend-mode:multiply;
+  filter:drop-shadow(4px 16px 10px #1b251422)
+}
+.rack-large img.is-cutout {
+  mix-blend-mode:normal
+}
+.rack-large>span {
+  display:block;
+  font-size:11px;
+  color:#52634d;
+  margin-top:5px
+}
+.rack-detail h2 {
+  font-size:28px;
+  line-height:1.13;
+  margin:9px 0 14px;
+  text-transform:none
+}
+.rack-category {
+  font-size:12px;
+  color:#627159;
+  margin:0
+}
+.rack-detail [data-rack-price] {
+  font-size:13px
+}
+.rack-colors {
+  padding:0;
+  border:0;
+  margin:18px 0 12px
+}
+.rack-colors legend {
+  font-size:12px;
+  margin-bottom:4px
+}
+.rack-colors legend span {
+  display:block;
+  color:#5b6c52;
+  margin:3px 0
+}
+.rack-colors>div {
+  display:flex;
+  flex-wrap:wrap;
+  gap:2px
+}
+.rack-colors button {
+  width:44px;
+  height:44px;
+  border:0;
+  background:transparent;
+  position:relative;
+  cursor:pointer
+}
+.rack-colors button:before {
+  content:'';
+  position:absolute;
+  inset:9px;
+  border-radius:50%;
+  background:var(--swatch);
+  border:1px solid #a9b19f
+}
+.rack-colors button[aria-pressed=true]:after {
+  content:'';
+  position:absolute;
+  inset:4px;
+  border:1px solid #3c6037;
+  border-radius:50%
+}
+.rack-size {
+  display:block;
+  font-size:12px
+}
+.rack-size select {
+  width:100%;
+  margin:6px 0 12px;
+  padding:10px 7px;
+  border:1px solid #b5bdac;
+  background:#f9f8f2;
+  font:inherit;
+  min-height:44px
+}
+.rack-detail .button {
+  width:100%;
+  min-height:44px;
+  text-align:center;
+  font-size:13px;
+  padding:12px 8px
+}
+.rack-details-link {
+  display:block;
+  margin-top:14px;
+  font-size:12px
+}
+.rack-hint {
+  padding:22px 0 0;
+  margin:0;
+  font-size:14px;
+  border-top:1px solid #cbd0c2;
+  margin-top:25px
+}
+.rack-hint a {
+  color:#365a31;
+  text-underline-offset:4px
+}
+.rack-zoom {
+  border:0;
+  background:#f4f3ed;
+  width:min(900px,95vw);
+  max-height:94dvh;
+  padding:24px
+}
+.rack-zoom::backdrop {
+  background:#0e160ec9
+}
+.rack-zoom img {
+  display:block;
+  width:100%;
+  max-height:82dvh;
+  object-fit:contain
+}
+.rack-zoom button {
+  position:absolute;
+  right:12px;
+  top:12px;
+  width:44px;
+  height:44px;
+  background:#f4f3ed;
+  border:1px solid #b7bfae;
+  font-size:24px;
+  cursor:pointer
+}
+@media(min-width:1500px) {
+  .rack-piece img {
+    height:340px
+  }
+  .rack-track {
+    min-height:410px
+  }
+  .rack-large img {
+    height:420px
+  }
+}
+@media(max-width:1050px) {
+  .rack-layout {
+    grid-template-columns:minmax(0,1fr) minmax(270px,1fr);
+    gap:22px
+  }
+  .rack-detail {
+    grid-template-columns:1fr
+  }
+  .rack-detail-copy {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:0 12px
+  }
+  .rack-detail-copy form {
+    grid-column:2;
+    grid-row:1/5
+  }
+  .rack-detail h2 {
+    font-size:25px
+  }
+  .rack-large img {
+    height:250px
+  }
+  .rack-colors {
+    margin-top:0
+  }
+  .rack-heading h1 {
+    font-size:48px
+  }
+}
+@media(max-width:650px) {
+  .rack-section {
+    padding:25px 0 20px
+  }
+  .rack-heading {
+    align-items:flex-start;
+    gap:12px;
+    margin-bottom:18px
+  }
+  .rack-heading h1 {
+    font-size:38px
+  }
+  .rack-heading p {
+    font-size:14px;
+    max-width:28ch
+  }
+  .rack-catalog-link {
+    font-size:12px;
+    white-space:normal;
+    max-width:70px
+  }
+  .rack-layout {
+    grid-template-columns:1fr;
+    gap:22px
+  }
+  .rack-track {
+    min-height:325px
+  }
+  .rack-piece {
+    flex-basis:65%;
+    margin:0 -4%
+  }
+  .rack-piece img {
+    height:250px
+  }
+  .rack-navigation {
+    margin-top:0
+  }
+  .rack-detail {
+    grid-template-columns:1fr 1fr;
+    gap:12px
+  }
+  .rack-detail-copy {
+    display:block
+  }
+  .rack-large img {
+    height:285px
+  }
+  .rack-detail h2 {
+    font-size:27px
+  }
+  .rack-hint {
+    line-height:1.6
+  }
+  .rack-heading h1 br {
+    display:none
+  }
+  .rack-heading h1 {
+    max-width:9ch
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  .rack-piece {
+    transition:none;
+    transform:none!important
+  }
+}
+.rack-mobile-detail {
+  width:min(640px,96vw);
+  max-height:92dvh;
+  overflow:auto;
+  border:0;
+  padding:25px;
+  background:#f4f3ed;
+  color:#1c271d
+}
+.rack-mobile-detail::backdrop {
+  background:#101b11b8
+}
+.rack-mobile-close {
+  display:block;
+  margin-left:auto;
+  width:44px;
+  height:44px;
+  border:1px solid #b2bda6;
+  background:transparent;
+  font-size:26px
+}
+.rack-mobile-detail .rack-detail {
+  display:grid!important;
+  grid-template-columns:1fr;
+  gap:18px
+}
+.rack-mobile-detail .rack-detail-copy {
+  display:block
+}
+.rack-mobile-detail .rack-large img {
+  height:40dvh
+}
+.rack-mobile-detail .rack-colors>div {
+  gap:5px
+}
+.rack-mobile-detail .rack-size {
+  font-size:14px
+}
+.rack-mobile-detail .rack-detail h2 {
+  font-size:32px
+}
+.rack-mobile-detail .rack-detail form {
+  max-width:none
+}
+@media(max-width:650px) {
+  .rack-section[data-enhanced=true] .rack-layout>.rack-detail {
+    display:none
+  }
+}

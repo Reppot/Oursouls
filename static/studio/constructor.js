@@ -1,11 +1,16 @@
-(() => {
+(async () => {
     'use strict';
     const root = document.getElementById('our-print');
     if (!root || root.dataset.ready) return;
     root.dataset.ready = '1';
     const q = id => root.querySelector('#op-' + id);
     const all = selector => [...root.querySelectorAll(selector)];
-    const cv = q('canvas'), ctx = cv.getContext('2d');
+    const {drafts} = await import('./draft-store.js');
+    const {createHistory} = await import('./history.mjs');
+    const {validatePrintFile} = await import('./image-info.mjs');
+    const history = createHistory(30), sources = new Map();
+    let restoring = true, saveTimer, projectId = crypto.randomUUID(), persistToken = 0;
+    const cv = q('canvas'), ctx = cv.getContext('2d'), processingScratch=document.createElement('canvas');
     const layers = { front: [], back: [] }, selected = { front: null, back: null };
     const empty = fresh(), limit = 10;
     const active = key => layers[key].find(layer => layer.id === selected[key]) || empty;
@@ -59,7 +64,7 @@
         if (s.cache && s.cache.key === key) return s.cache.output;
         const e = s.effects, ratio = Math.min(1,1600/Math.max(s.img.width,s.img.height));
         const w = Math.max(1,Math.round(s.img.width*ratio)), h = Math.max(1,Math.round(s.img.height*ratio));
-        const raw = s.cache ? s.cache.raw : document.createElement('canvas');
+        const raw = processingScratch;
         const output = s.cache ? s.cache.output : document.createElement('canvas');
         raw.width = output.width = w; raw.height = output.height = h;
         const c = raw.getContext('2d');
@@ -91,7 +96,7 @@
             }
             target.putImageData(data,0,0);
         }
-        s.cache = {key,raw,output}; return output;
+        s.cache = {key,output}; return output;
     }
 
 var atlasImage=null,photoError=false,photoViews={},photoLayers={};
@@ -137,7 +142,10 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
                 const d = dimensions(s);
                 c.save(); c.translate(s.x,s.y); c.rotate(s.angle*Math.PI/180);
                 c.strokeStyle='rgba(70,87,61,.65)'; c.setLineDash([7,6]); c.lineWidth=1.3;
-                c.strokeRect(-d.w/2-4,-d.h/2-4,d.w+8,d.h+8); c.restore();
+                c.strokeRect(-d.w/2-4,-d.h/2-4,d.w+8,d.h+8);
+                c.setLineDash([]);c.fillStyle='#f5f7ed';c.strokeStyle='#355d31';c.lineWidth=2;
+                for(const x of [-d.w/2,d.w/2])for(const y of [-d.h/2,d.h/2]){c.beginPath();c.arc(x,y,5,0,Math.PI*2);c.fill();c.stroke()}
+                c.beginPath();c.moveTo(0,-d.h/2);c.lineTo(0,-d.h/2-28);c.stroke();c.beginPath();c.arc(0,-d.h/2-28,6,0,Math.PI*2);c.fill();c.stroke();c.restore();
             }
         }
         c.font = '16px Arial';
@@ -155,17 +163,7 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
         q('move-mode').setAttribute('aria-pressed', String(mode === 'print'));
         q('gesture').textContent = mode === 'print' ? 'Перетащи принт по ткани. Стрелки помогают двигать точнее.' : viewer ? 'Потяни модель, чтобы повернуть. Кнопки + и − меняют масштаб.' : 'Выбери перед или спину для студийного просмотра.';
     }
-    function syncPreview() {
-        if (viewer) {
-            viewer.setGarment(q('garment').value); viewer.setColor(fabricColor);
-            for (const key of ['front','back']) {
-                const stack = layers[key];
-                for (const layer of stack) { clamp(layer); renderPrint(layer); }
-                const stamp = JSON.stringify(stack.map(s => [s.id, s.x, s.y, s.scale, s.angle, s.cache.key]));
-                viewer.setPrint(key, c => stack.forEach(s => paintLayer(c, s)), stamp);
-            }
-        } else if (fallback) garment(ctx,side,mode === 'print');
-    }
+    function syncPreview() {if(fallback)garment(ctx,side,mode==='print');syncTouchTarget();}
     function draw() {
         const s = sides[side], e = s.effects;
         pressed('[data-garment]', 'garment', q('garment').value);
@@ -204,21 +202,23 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
         for (const k of ['X','Y']) q('flip'+k).setAttribute('aria-pressed', String(e['flip'+k]));
         const printed = ['front','back'].filter(k => sides[k].img).map(sideName);
         q('order-summary').textContent = `${garmentName()} · ${colorName()} · ${printed.length ? printed.join(' и ') : 'принт не добавлен'}`;
+        updateDraftControls();
+        renderThumbnails();
+        scheduleSave();
         q('position').textContent = s.img ? `${sideName(side)} · ${s.scale}% · ${s.angle}°` : sideName(side);
         syncPreview();
     }
     function selectSide(next, orient = true) {
         if (next === side && !orient) return;
         side = next; q('file').value = '';
-        if (viewer) { if (orient) viewer.showSide(next); else viewer.syncSide(next); }
         setMode(mode); status(''); draw();
     }
     const narrowStudio = matchMedia('(max-width: 850px)');
     function syncPanels() {
-        q('panel-garment').hidden = narrowStudio.matches && tab !== 'garment';
-        q('panel-print').hidden = tab === 'order' || (narrowStudio.matches && tab !== 'print');
+        q('panel-garment').hidden = tab !== 'garment';
+        q('panel-print').hidden = tab !== 'print';
         q('panel-order').hidden = tab !== 'order';
-        q('panel-print').closest('.os-studio-settings').hidden = narrowStudio.matches && tab === 'garment';
+        q('panel-print').closest('.os-studio-settings').hidden = tab === 'garment';
     }
     narrowStudio.addEventListener('change', syncPanels);
     syncPanels();
@@ -230,13 +230,13 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
 
         }
         syncPanels();
-        if (next !== 'print') setMode('orbit');
+        setMode(next === 'print' ? 'print' : 'orbit');
         if (focus) q('tab-'+next).focus({preventScroll:true});
         status(''); draw();
     }
     function move(key, x, y) {
         const s = sides[key]; if (!s.img) return;
-        s.x = x; s.y = y; clamp(s); syncPreview();
+        s.x = x; s.y = y; clamp(s); syncPreview();scheduleSave();
     }
     async function loadFile(file, key, sample = false) {
         if (!file) return;
@@ -247,12 +247,16 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
         pending++; draw(); status('Открываем изображение…');
         let url;
         try {
+            await validatePrintFile(file);
             url = URL.createObjectURL(file);
             const im = await new Promise((resolve,reject) => {
                 const image = new Image(); image.onload = () => resolve(image); image.onerror = reject; image.src = url;
             });
             if (im.width * im.height > 40_000_000) throw new Error('Image too large');
-            const layer = Object.assign(fresh(), {id:++nextId,img:im,file,name:sample ? 'Пример — мотылёк.png' : file.name});
+            const preview=document.createElement('canvas'), factor=Math.min(1,720/Math.max(im.width,im.height));
+            preview.width=Math.round(im.width*factor);preview.height=Math.round(im.height*factor);preview.getContext('2d').drawImage(im,0,0,preview.width,preview.height);
+            const assetId=crypto.randomUUID();sources.set(assetId,file);
+            const layer = Object.assign(fresh(), {id:++nextId,assetId,img:preview,file,name:sample ? 'Пример — мотылёк.png' : file.name});
             if (layers[key].length) {
                 const slot = layers[key].length - 1;
                 layer.x = 215 + slot % 3 * 85; layer.y = 265 + Math.floor(slot / 3) * 85; layer.scale = 42;
@@ -354,65 +358,137 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
         return new Promise((resolve, reject) => canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('PNG encoding failed')), 'image/png'));
     }
 
-    q('download-order').onclick = async () => {
-        if (!ready() || pending) return;
-        const button = q('download-order');
-        button.disabled = true;
-        status('Собираем архив заказа…');
-        try {
-            let mockup;
-            if (viewer) mockup = viewer.exportPair();
-            else {
-                if (!atlasImage) throw new Error('Preview unavailable');
-                mockup = document.createElement('canvas'); mockup.width = 1200; mockup.height = 700;
-                const c = mockup.getContext('2d');
-                garment(c,'front',false); c.translate(600,0); garment(c,'back',false);
+    async function processedBlob(layer){
+        const url=URL.createObjectURL(layer.file);
+        try{await validatePrintFile(layer.file);const image=new Image();image.src=url;await image.decode();const copy={...layer,img:image,cache:null};return await pngBlob(renderPrint(copy));}finally{URL.revokeObjectURL(url)}
+    }
+    async function packageProject(){
+        if(!atlasImage)throw new Error('Макет ещё загружается. Попробуй через несколько секунд.');
+        const exportFiles=[];
+        for(const key of ['front','back']){
+            const view=canvasLayer();garment(view.getContext('2d'),key,false);
+            exportFiles.push({path:key+'.png',blob:await pngBlob(view)});
+            for(const [index,layer] of layers[key].entries()){
+                exportFiles.push({path:'prints/'+key+'-'+(index+1)+(layer.file.type==='image/jpeg'?'.jpg':'.png'),blob:layer.file});
+                exportFiles.push({path:'prints/'+key+'-'+(index+1)+'-processed.png',blob:await processedBlob(layer)});
             }
-            const qty = bounded(Math.floor(+q('qty').value) || 1,1,9999); q('qty').value = qty;
-            const data = { version:6, mockupStyle:viewer?'garment-3d-v1':'studio-photo-v1', createdAt:new Date().toISOString(),
-                garment:garmentName(), garmentId:q('garment').value, color:colorName(), colorHex:fabricColor,
-                colorRGB:rgb(fabricColor), size:q('size').value, quantity:qty, comment:q('comment').value,
-                canvas:{width:600,height:700}, printArea:{x:45,y:72,w:510,h:548,clip:viewer?'garment-mesh':'garment-silhouette'},
-                mockup:'mockup.png', sides:{} };
-            const files = [], encodings = [];
-            for (const key of ['front','back']) {
-                data.sides[key] = layers[key].map((s, index) => {
-                    const prefix = 'prints/' + key + '-' + (index + 1);
-                    const source = prefix + (s.file.type === 'image/jpeg' ? '.jpg' : '.png');
-                    const processed = prefix + '-processed.png';
-                    files.push([source, s.file]);
-                    encodings.push(pngBlob(renderPrint(s)).then(blob => [processed, blob]));
-                    const {name, x, y, scale, angle, effects} = s;
-                    return {fileName:name, source, processed, x, y, scale, angle, effects:{...effects}};
-                });
-            }
-            encodings.push(pngBlob(mockup).then(blob => ['mockup.png', blob]));
-            files.push(['order.json',new Blob([JSON.stringify(data,null,2)], {type:'application/json'})]);
-            const [{createArchive}, images] = await Promise.all([import(root.dataset.archive), Promise.all(encodings)]);
-            save(await createArchive([...files, ...images]), 'our-souls-order.zip');
-            status('');
-            q('send-dialog').showModal();
-        } catch (error) { status('Не удалось собрать архив. Попробуй ещё раз.',true); }
-        finally { button.disabled = false; }
+        }
+        const pair=document.createElement('canvas');pair.width=1200;pair.height=700;const context=pair.getContext('2d');garment(context,'front',false);context.translate(600,0);garment(context,'back',false);
+        exportFiles.push({path:'mockup.png',blob:await pngBlob(pair)});
+        const state=snapshot(),ids=new Set([...state.layers.front,...state.layers.back].map(l=>l.assetId));
+        return {id:projectId,inCart:true,name:garmentName(),color:colorName(),snapshot:state,sources:[...sources].filter(([id])=>ids.has(id)),exportFiles,preview:exportFiles.find(f=>f.path===(layers.front.length?'front.png':'back.png')).blob};
+    }
+    q('download-order').onclick=async()=>{
+        if(!ready()||pending)return;const button=q('download-order');button.disabled=true;status('Подготавливаем макет…');
+        try{await persistCurrent();const project=await packageProject();const {prepareOrder}=await import('./order-export.js');await prepareOrder(document.querySelector('input[name=csrf]')?.value||root.dataset.csrf,project);status('')}
+        catch(error){status(error.message||'Не удалось подготовить заказ. Макет сохранён.',true)}finally{button.disabled=false}
     };
     q('print-png').onclick = () => { const key=side, s=sides[key]; if (s.img) renderPrint(s).toBlob(blob=>save(blob,`our-souls-print-${key}.png`),'image/png'); };
 
     function flatPoint(event) { const r=cv.getBoundingClientRect();return {x:(event.clientX-r.left)*600/r.width,y:(event.clientY-r.top)*700/r.height}; }
     cv.onpointerdown = event => {
-        const s=sides[side]; if (mode!=='print'||!s.img) return;
-        cv.focus({preventScroll:true}); cv.setPointerCapture(event.pointerId);
-        const p=flatPoint(event); drag={x:p.x-s.x,y:p.y-s.y}; event.preventDefault();
+        if (tab !== 'print') return;
+        const p=flatPoint(event), current=active(side);
+        if(current.img){
+            const d=dimensions(current),r=-current.angle*Math.PI/180,dx=p.x-current.x,dy=p.y-current.y,x=dx*Math.cos(r)-dy*Math.sin(r),y=dx*Math.sin(r)+dy*Math.cos(r),hit=24*600/cv.getBoundingClientRect().width;
+            let kind=null;
+            if(Math.hypot(x,y+d.h/2+28)<hit)kind='rotate';
+            else if([-1,1].some(a=>[-1,1].some(b=>Math.hypot(x-a*d.w/2,y-b*d.h/2)<hit)))kind='scale';
+            if(kind){drag={kind,original:{x:current.x,y:current.y,scale:current.scale,angle:current.angle},radius:Math.hypot(dx,dy),angle:Math.atan2(dy,dx)};cv.setPointerCapture(event.pointerId);event.preventDefault();return;}
+        }
+        let chosen=null;
+        for (const layer of [...layers[side]].reverse()) {
+            const d=dimensions(layer), angle=-layer.angle*Math.PI/180,dx=p.x-layer.x,dy=p.y-layer.y;
+            const x=dx*Math.cos(angle)-dy*Math.sin(angle),y=dx*Math.sin(angle)+dy*Math.cos(angle);
+            if(Math.abs(x)>d.w/2+12||Math.abs(y)>d.h/2+12)continue;
+            if(Math.abs(x)<d.w/2&&Math.abs(y)<d.h/2){const raster=renderPrint(layer),px=Math.floor((x/d.w+.5)*raster.width),py=Math.floor((y/d.h+.5)*raster.height);if(raster.getContext('2d').getImageData(px,py,1,1).data[3]<16)continue;}
+            chosen=layer;break;
+        }
+        if(!chosen)return;
+        selected[side]=chosen.id;setMode('print');draw();
+        cv.focus({preventScroll:true});cv.setPointerCapture(event.pointerId);
+        drag={kind:'move',x:p.x-chosen.x,y:p.y-chosen.y,original:{x:chosen.x,y:chosen.y,scale:chosen.scale,angle:chosen.angle}};event.preventDefault();
     };
-    cv.onpointermove = event => { if (drag) { const p=flatPoint(event); move(side,p.x-drag.x,p.y-drag.y); } };
-    cv.onpointerup = cv.onpointercancel = cv.onlostpointercapture = () => { drag=null; };
+    cv.onpointermove = event => {
+        if(!drag)return;const p=flatPoint(event),s=active(side);
+        if(drag.kind==='scale'){s.scale=bounded(Math.round(drag.original.scale*Math.hypot(p.x-s.x,p.y-s.y)/Math.max(1,drag.radius)),15,160);draw()}
+        else if(drag.kind==='rotate'){let value=drag.original.angle+(Math.atan2(p.y-s.y,p.x-s.x)-drag.angle)*180/Math.PI;value=(value+540)%360-180;s.angle=Math.round(value);draw()}
+        else move(side,p.x-drag.x,p.y-drag.y);
+    };
+    cv.onpointerup = cv.onpointercancel = cv.onlostpointercapture = event => {if(drag){if(event.type==='pointercancel')Object.assign(active(side),drag.original);drag=null;draw()}};
     cv.onkeydown = event => {
         const m={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down'}[event.key];
         if (mode!=='print'||!m) return; event.preventDefault(); const [x,y]=direction[m],s=sides[side],step=event.shiftKey?10:2; move(side,s.x+x*step,s.y+y*step);
     };
 
+    function syncTouchTarget(){
+        const target=q('touch-target'),s=active(side);target.hidden=mode!=='print'||!s.img;
+        if(target.hidden)return;
+        const d=dimensions(s),r=cv.getBoundingClientRect(),host=q('viewport').getBoundingClientRect(),scale=r.width/600;
+        target.style.width=(d.w+50)*scale+'px';target.style.height=(d.h+85)*scale+'px';
+        target.style.left=(r.left-host.left+s.x*scale)+'px';target.style.top=(r.top-host.top+s.y*scale)+'px';
+        target.style.transform=`translate(-50%,-50%) rotate(${s.angle}deg)`;
+    }
+    q('touch-target').onpointerdown=event=>cv.onpointerdown(event);
+    q('import-button').onclick=()=>q('import-project').click();
+    function snapshot(){return {id:projectId,version:7,templateVersion:'studio-photo-v1',canvas:{width:600,height:700},colorRGB:rgb(fabricColor),garment:q('garment').value,color:fabricColor,side,tab,size:q('size').value,quantity:bounded(Math.floor(+q('qty').value)||1,1,9999),comment:q('comment').value.slice(0,1000),selected:{...selected},nextId,layers:Object.fromEntries(['front','back'].map(key=>[key,layers[key].map(l=>({id:l.id,assetId:l.assetId,name:l.name,x:l.x,y:l.y,scale:l.scale,angle:l.angle,cx:l.x/600,cy:l.y/700,width:dimensions(l).w/600,height:dimensions(l).h/700,rotation:l.angle,effects:{...l.effects}}))]))};}
+    function updateDraftControls(){q('undo').disabled=!history.canUndo||restoring;q('redo').disabled=!history.canRedo||restoring;}
+    async function restoreSnapshot(state){
+        restoring=true;const decoded={};
+        try{
+            for(const key of ['front','back']){
+                const stack=[];
+                for(const data of state.layers[key]){
+                    const file=sources.get(data.assetId);if(!file)throw new Error('В черновике отсутствует файл принта.');
+                    const old=layers[key].find(l=>l.assetId===data.assetId);
+                    let img=old?.img;
+                    if(!img){await validatePrintFile(file);const url=URL.createObjectURL(file);try{const im=new Image();im.src=url;await im.decode();const ratio=Math.min(1,720/Math.max(im.width,im.height));img=document.createElement('canvas');img.width=Math.round(im.width*ratio);img.height=Math.round(im.height*ratio);img.getContext('2d').drawImage(im,0,0,img.width,img.height)}finally{URL.revokeObjectURL(url)}}
+                    stack.push({...data,effects:{...data.effects},file,img});
+                }
+                decoded[key]=stack;
+            }
+            for(const key of ['front','back']){layers[key].splice(0,layers[key].length,...decoded[key]);selected[key]=state.selected[key]}
+            projectId=state.id||crypto.randomUUID();
+            nextId=state.nextId;q('garment').value=state.garment;q('size').value=state.size;q('qty').value=state.quantity;q('comment').value=state.comment;side=state.side;tab=state.tab||'garment';
+            setColor(state.color);openTab(tab);draw();
+        }finally{restoring=false;updateDraftControls()}
+    }
+    function scheduleSave(){
+        if(restoring||pending||drag)return;
+        clearTimeout(saveTimer);saveTimer=setTimeout(async()=>{
+            if(restoring||pending||drag)return;
+            const state=snapshot(),changed=history.push(state);updateDraftControls();if(!changed)return;const retained=history.referencedAssets;for(const id of sources.keys())if(!retained.has(id))sources.delete(id);
+            const revision=++persistToken;q('draft-status').textContent='Сохраняем…';
+            try{const ids=new Set([...state.layers.front,...state.layers.back].map(l=>l.assetId));await drafts.save({id:'current',snapshot:state,sources:[...sources].filter(([id])=>ids.has(id))});if(revision===persistToken)q('draft-status').textContent='Сохранено на этом устройстве'}
+            catch{q('draft-status').textContent='Не удалось сохранить. Скачай файл заказа перед выходом';}
+        },450);
+    }
+    function renderThumbnails(){
+        const host=q('layer-thumbs'), signature=side+':'+layers[side].map(l=>l.id).join(',')+':'+selected[side];if(host.dataset.signature===signature)return;host.dataset.signature=signature;
+        host.replaceChildren(...layers[side].map(l=>{const b=document.createElement('button');b.type='button';b.title=l.name;b.setAttribute('aria-label','Выбрать '+l.name);b.setAttribute('aria-pressed',String(l.id===selected[side]));const im=document.createElement('img');const thumb=document.createElement('canvas');thumb.width=72;thumb.height=72;const ratio=Math.min(72/l.img.width,72/l.img.height);thumb.getContext('2d').drawImage(l.img,(72-l.img.width*ratio)/2,(72-l.img.height*ratio)/2,l.img.width*ratio,l.img.height*ratio);im.src=thumb.toDataURL();im.alt='';b.append(im);b.onclick=()=>{selected[side]=l.id;setMode('print');draw()};return b}));
+    }
+    q('undo').onclick=async()=>{const state=history.undo();if(state){clearTimeout(saveTimer);await restoreSnapshot(state);await persistCurrent()}};
+    q('redo').onclick=async()=>{const state=history.redo();if(state){clearTimeout(saveTimer);await restoreSnapshot(state);await persistCurrent()}};
+    async function persistCurrent(){try{const state=snapshot(),ids=new Set([...state.layers.front,...state.layers.back].map(l=>l.assetId));await drafts.save({id:'current',snapshot:state,sources:[...sources].filter(([id])=>ids.has(id))});q('draft-status').textContent='Сохранено на этом устройстве'}catch{q('draft-status').textContent='Не удалось сохранить черновик'}}
+    q('duplicate').onclick=()=>{if(count()>=limit)return status('На макете уже 10 принтов.',true);const l=active(side);if(!l.img)return;const copy={...l,id:++nextId,x:l.x+18,y:l.y+18,effects:{...l.effects},cache:null};layers[side].push(copy);selected[side]=copy.id;draw()};
+    q('new-design').onclick=()=>{projectId=crypto.randomUUID();for(const key of ['front','back']){layers[key].splice(0);selected[key]=null}q('comment').value='';openTab('garment');draw();status('Новый макет. Предыдущий можно вернуть кнопкой «Отменить».')};
+    q('to-cart').onclick=async()=>{
+        if(!ready())return;q('to-cart').disabled=true;
+        try{const project=await packageProject();await drafts.save(project);window.location.href='/cart/'}catch(error){status(error.message||'Не удалось добавить макет. Можно скачать заказ прямо здесь.',true)}finally{q('to-cart').disabled=false}
+    };
+    q('import-project').onchange=async event=>{
+        const file=event.target.files[0];if(!file)return;status('Открываем проект…');
+        try{const {importDesignArchive}=await import('./project-import.js');const projects=await importDesignArchive(file);
+            const open=async project=>{for(const [id,source] of project.sources)sources.set(id,source);await restoreSnapshot(project.state);history.push(snapshot());await persistCurrent();draw();status('Проект открыт.');};
+            if(projects.length===1)await open(projects[0]);else{const select=q('import-choice');select.hidden=false;select.replaceChildren(new Option('Выбери макет из заказа',''),...projects.map((p,i)=>new Option((p.state.garment==='tee'?'Футболка':p.state.garment==='long'?'Лонгслив':'Худи')+' · '+p.state.size+' · '+(i+1),String(i))));select.onchange=()=>{if(select.value!==''){open(projects[+select.value]);select.hidden=true}};status('В архиве несколько макетов. Выбери нужный.');}
+        }catch(error){status(error.message||'Не удалось открыть проект.',true)}finally{event.target.value=''}
+    };
+    root.addEventListener('change',()=>{if(!restoring)scheduleSave()});
+    q('comment').addEventListener('input',scheduleSave);q('qty').addEventListener('input',scheduleSave);
+    document.addEventListener('keydown',event=>{if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='z'&&!['INPUT','TEXTAREA'].includes(event.target.tagName)){event.preventDefault();(event.shiftKey?q('redo'):q('undo')).click()}});
     function usePhoto() {
         viewer=null; fallback=true; q('webgl').hidden=true; cv.hidden=false; q('zoom-tools').hidden=true;
-        q('render-mode').textContent='Студийный вид'; q('loading').hidden=true; q('viewport').setAttribute('aria-busy','false');
+        q('render-mode').textContent='Фотографический 2D'; q('loading').hidden=true; q('viewport').setAttribute('aria-busy','false');
         setMode(mode); draw();
         if (!atlasImage && root.dataset.atlas) {
             const im = new Image(); im.onload=()=>{atlasImage=im;draw();}; im.onerror=()=>{photoError=true;draw();}; im.src=root.dataset.atlas;
@@ -424,20 +500,15 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
         openFitting.disabled = true;
         try {
             if (!fittingRoom) {
-                const {createFittingRoom} = await import('../fitting/fitting.js?v=3.0.1');
+                const {createFittingRoom} = await import('../fitting/photo-fitting.js?v=1');
                 fittingRoom = createFittingRoom(q('fitting'), {
                     side: () => side,
                     kind: () => q('garment').value,
                     garment(which) {
-                        if (viewer) return viewer.exportGarment(which);
                         if (!atlasImage) throw new Error('Предпросмотр одежды загружается. Попробуй ещё раз.');
                         const preview = canvasLayer();
                         garment(preview.getContext('2d'), which, false, true);
                         return preview;
-                    },
-                    avatar(profile) {
-                        if (!viewer) throw new Error('Для 3D-примерки нужен WebGL. Можно примерить на фото.');
-                        return viewer.fittingSnapshot(profile);
                     },
                 });
             }
@@ -447,18 +518,12 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
     };
     if (document.getElementById('fitting-product')) openFitting.click();
     setColor(fabricColor);
-    if (root.dataset.viewer) {
-        import(root.dataset.viewer).then(module => {
-            viewer = module.createViewer(q('webgl'), {
-                facing: key => selectSide(key,false),
-                position: key => sides[key].img ? sides[key] : null,
-                move,
-                unavailable: usePhoto,
-            });
-            cv.hidden=true; q('webgl').hidden=false; q('loading').hidden=true; q('zoom-tools').hidden=false;
-            q('render-mode').textContent='Интерактивное 3D'; q('viewport').setAttribute('aria-busy','false');
-            if (side==='back') viewer.showSide(side,false);
-            setMode(mode); draw(); viewer.resize();
-        }).catch(usePhoto);
-    } else usePhoto();
+    function fitCanvas(){const box=q('viewport'),w=Math.min(box.clientWidth,box.clientHeight*6/7);cv.style.width=w+'px';cv.style.height=w*7/6+'px';}
+    new ResizeObserver(fitCanvas).observe(q('viewport'));fitCanvas();
+    usePhoto();
+    try {
+        const stored=await drafts.load('current');
+        if(stored?.snapshot){for(const [key,file] of stored.sources)sources.set(key,file);await restoreSnapshot(stored.snapshot);q('draft-status').textContent='Черновик восстановлен';}
+    } catch {q('draft-status').textContent='Автосохранение недоступно — сохрани файл перед выходом';}
+    restoring=false;history.push(snapshot());updateDraftControls();
 })();

@@ -57,7 +57,7 @@ body.os-editorial .eyebrow {text-transform:uppercase;letter-spacing:.14em;font-s
 
 body.os-editorial .hero {
   min-height:clamp(540px,50vw,730px);
-  background:linear-gradient(90deg,#080908 0%,#080908d9 21%,#08090854 58%,#08090820 100%),url("hero.png") 60% center/cover;
+  background:linear-gradient(90deg,#080908 0%,#080908d9 21%,#08090854 58%,#08090820 100%),url("hero.webp") 60% center/cover;
 }
 body.os-editorial .hero h1 {font-family:var(--display);font-size:clamp(50px,5.7vw,85px);letter-spacing:-.025em}
 body.os-editorial .hero .hero-copy {max-width:760px}
@@ -88,9 +88,9 @@ body.os-editorial .os-preview-link {padding:0;background:#eeeae2;border:1px soli
 .brand-banner .center-title {margin-bottom:22px}
 .brand-banner .center-title p:not(.eyebrow) {color:#e0dcd0}
 .brand-banner .eyebrow {color:#ded3ba!important}
-.home-print-banner {background-image:linear-gradient(#0808087c,#080808b5),url("home-print-engraving.png")}
-.services-banner {min-height:480px;background-image:linear-gradient(#0a0a09a0,#0a0a09b4),url("services-open-book.png")}
-.about-banner {min-height:520px;background-image:linear-gradient(#080b08a1,#080b086a),url("hero.png")}
+.home-print-banner {background-image:linear-gradient(#0808087c,#080808b5),url("home-print-engraving.webp")}
+.services-banner {min-height:480px;background-image:linear-gradient(#0a0a09a0,#0a0a09b4),url("services-open-book.webp")}
+.about-banner {min-height:520px;background-image:linear-gradient(#080b08a1,#080b086a),url("hero.webp")}
 .about-banner .center-title {width:min(100%,530px);border:1px solid #b9a17a70;padding:32px 14px;margin:0 auto;background:#090b09aa}
 .print-promises,.service-types,.about-facts .wrap {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;text-align:center}
 .print-promises {max-width:930px;margin:30px auto}

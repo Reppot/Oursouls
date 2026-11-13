@@ -28,10 +28,10 @@
       {% if error %}<p class="shop-error" role="alert">{{ error }}</p>{% endif %}
       <form method="post" action="/services/#print-request" class="request-grid">
         <input type="hidden" name="csrf" value="{{ csrf() }}">
-        <label>Имя <input name="name" value="{{ form.name|default('') }}" maxlength="80" autocomplete="name" required></label>
-        <label>Telegram или телефон <input name="contact" value="{{ form.contact|default('') }}" maxlength="100" required></label>
-        <label>Тип одежды <select name="garment" required><option value="">Выбери основу</option>{% for kind in kinds %}<option {{ 'selected' if form.garment == kind }}>{{ kind }}</option>{% endfor %}</select></label>
-        <label>Тираж <input type="number" name="quantity" min="1" max="9999" required value="{{ form.quantity|default('1') }}"></label>
+        <label>Имя <input name="name" value="{{ form.name|default('') }}" maxlength="80" autocomplete="name" required aria-invalid="{{ 'true' if field_errors.get('name') else 'false' }}" aria-describedby="request-name-error"><small id="request-name-error">{{ field_errors.get('name','') }}</small></label>
+        <label>Telegram или телефон <input name="contact" value="{{ form.contact|default('') }}" maxlength="100" required aria-invalid="{{ 'true' if field_errors.get('contact') else 'false' }}" aria-describedby="request-contact-error"><small id="request-contact-error">{{ field_errors.get('contact','') }}</small></label>
+        <label>Тип одежды <select name="garment" required><option value="">Выбери основу</option>{% for kind in kinds %}<option {{ 'selected' if form.garment == kind }}>{{ kind }}</option>{% endfor %}</select><small>{{ field_errors.get('garment','') }}</small></label>
+        <label>Тираж <input type="number" name="quantity" min="1" max="9999" required value="{{ form.quantity|default('1') }}"><small>{{ field_errors.get('quantity','') }}</small></label>
         <label class="full">Описание заказа <textarea name="details" rows="4" maxlength="600" placeholder="Например, принт на спине и свой лонгслив">{{ form.details|default('') }}</textarea></label>
         <button class="button full">Продолжить в Telegram ↗</button>
       </form>

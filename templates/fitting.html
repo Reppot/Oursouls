@@ -1,12 +1,8 @@
 <dialog class="fit-dialog" id="op-fitting" aria-labelledby="fit-title">
   <header class="fit-header">
-    <div><p class="os-studio-kicker">OUR SOULS / ПРИМЕРКА</p><h2 id="fit-title">Виртуальная примерочная</h2></div>
+    <div><p class="os-studio-kicker">OUR SOULS / ПРИМЕРКА</p><h2 id="fit-title">Примерка на фото</h2></div>
     <form method="dialog"><button class="fit-close" aria-label="Закрыть примерочную">×</button></form>
   </header>
-  <div class="fit-modes" role="group" aria-label="Способ примерки">
-    <button type="button" data-fit-mode="photo" aria-pressed="true">На своём фото</button>
-    <button type="button" data-fit-mode="avatar" aria-pressed="false">На 3D-модели</button>
-  </div>
   <div class="fit-grid">
     <div class="fit-preview">
       <div class="fit-preview-view" data-fit-view="photo">
@@ -14,11 +10,7 @@
         <p data-fit-photo-empty>Добавь фото анфас с опущенными руками. Плечи и бёдра должны быть в кадре.</p>
         <canvas data-fit-photo-canvas aria-label="Примерка на твоём фото" hidden></canvas>
       </div>
-      <div class="fit-preview-view" data-fit-view="avatar" hidden>
-        <span class="fit-preview-label">Студийная 3D-модель</span>
-        <p data-fit-avatar-empty>Готовим модель…</p>
-        <canvas data-fit-avatar-canvas aria-label="Примерка на 3D-модели" hidden></canvas>
-      </div>
+
     </div>
     <div class="fit-controls">
       {% if fitting_product %}
@@ -36,24 +28,13 @@
           <button type="button" data-fit-reset>Сбросить положение</button><button type="button" data-fit-clear>Убрать фото</button>
         </div>
         <label>Сторона изделия<select data-fit-side><option value="front">Перед</option><option value="back">Спина</option></select></label>
-        <button type="button" class="fit-primary fit-auto" data-fit-auto disabled>Подогнать по фигуре</button>
+        <button type="button" class="fit-primary fit-auto" data-fit-auto disabled>Найти плечи на фото</button>
         <div class="fit-sliders" data-fit-sliders hidden>
           <label><span>Размер одежды<output data-fit-value="scale"></output></span><input type="range" data-fit-adjust="scale" min="10" max="155" value="53"></label>
           <label><span>Поворот<output data-fit-value="angle"></output></span><input type="range" data-fit-adjust="angle" min="-45" max="45" value="0"></label>
           <label><span>По горизонтали<output data-fit-value="x"></output></span><input type="range" data-fit-adjust="x" min="0" max="100" value="50"></label>
           <label><span>По вертикали<output data-fit-value="y"></output></span><input type="range" data-fit-adjust="y" min="0" max="100" value="39"></label>
         </div>
-      </div>
-      <div data-fit-panel="avatar" hidden>
-        <p class="fit-note">Форма и цвет одежды взяты из конструктора. Мерки меняют пропорции модели; точная посадка зависит от ткани и кроя.</p>
-        <form data-fit-measures class="fit-measures">
-          <label>Рост, см<input name="height" type="number" min="120" max="220" value="180" required></label>
-          <label>Обхват груди, см<input name="chest" type="number" min="60" max="160" value="96" required></label>
-          <label>Обхват талии, см<input name="waist" type="number" min="50" max="160" value="82" required></label>
-          <label>Ракурс<select name="angle"><option value="0">Перед</option><option value="45">Три четверти</option><option value="90">Справа</option><option value="180">Спина</option><option value="270">Слева</option></select></label>
-          <label class="fit-framing">Кадр<select name="framing"><option value="0">Весь рост</option><option value="1">Одежда крупно</option><option value="2">Лицо крупно</option></select></label>
-          <button type="submit" class="fit-primary">Обновить примерку</button>
-        </form>
       </div>
       {% if fitting_product %}
       <details class="fit-size"><summary>Подобрать размер</summary>

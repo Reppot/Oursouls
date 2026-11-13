@@ -7,15 +7,28 @@
 <div class="shop-pair"><label>Артикул<input name="sku" maxlength="80" value="{{ p.sku }}"></label>
 <label>Категория<input name="category" list="category-options" maxlength="80" value="{{ p.category }}" required><datalist id="category-options">{% for name in categories %}<option value="{{ name }}">{% endfor %}</datalist></label></div>
 <label>Описание<textarea name="description" rows="5" maxlength="6000">{{ p.description }}</textarea></label>
+<div class="shop-pair"><label>Тип изделия<select name="garment_type">{% for value,label in [('tee','Футболка'),('long','Лонгслив'),('hoodie','Худи')] %}<option value="{{ value }}" {% if p.get('garment_type','tee')==value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label><label>Состав<input name="material" maxlength="600" value="{{ p.get('material','') }}" placeholder="Только фактический состав"></label></div>
+<label>Уход<textarea name="care" rows="2" maxlength="1000">{{ p.get('care','') }}</textarea></label>
 <div class="shop-pair"><label>Обычная цена, ₽<input name="price" inputmode="decimal" value="{{ p.price/100 if p.price is not none else '' }}" placeholder="По запросу"></label>
 <label>Цена со скидкой, ₽<input name="sale_price" inputmode="decimal" value="{{ p.sale_price/100 if p.sale_price is not none else '' }}" placeholder="Без скидки"></label></div>
 <label>Цвет на фото<select name="color">{% for color in colors %}<option {% if color==p.color %}selected{% endif %}>{{ color }}</option>{% endfor %}</select></label>
-<div class="shop-photo-list">{% for image in p.images %}<label><img src="{{ image }}" alt="Фото {{ loop.index }}"><span><input type="checkbox" name="remove" value="{{ loop.index0 }}"> Убрать фото</span></label>{% endfor %}</div>
+<div class="shop-photo-list">{% for image in p.images %}<label data-existing-photo><input type="hidden" name="photo_order" value="{{ loop.index0 }}"><img src="{{ image }}" alt="Фото {{ loop.index }}"><span><button type="button" data-photo-prev aria-label="Переместить фото раньше">←</button><button type="button" data-photo-next aria-label="Переместить фото позже">→</button></span><span><input type="checkbox" name="remove" value="{{ loop.index0 }}"> Убрать фото</span></label>{% endfor %}</div>
 <label>Добавить фото<input type="file" name="photos" accept="image/jpeg,image/png,image/webp" multiple><small>До 8 фото на карточку. Первое фото показывается в каталоге.</small></label>
+<h2>Цвета и размеры</h2><p>Каждый цвет использует своё фото. Неизвестное наличие оставь «Под заказ».</p><input type="hidden" name="variants_present" value="1">
+<div id="admin-variants">{% for v in p.get('variants',[]) %}{% set n=loop.index0 %}
+<fieldset class="admin-variant" data-variant-row><legend>Вариант {{ loop.index }}</legend><input type="hidden" name="variant_index" value="{{ n }}"><input type="hidden" name="v{{ n }}_id" value="{{ v.id }}">
+<div class="shop-pair"><label>Название цвета<input name="v{{ n }}_color" value="{{ v.color_name }}" maxlength="60" required></label><label>HEX<input name="v{{ n }}_hex" value="{{ v.color_hex or '#202321' }}" pattern="#[0-9a-fA-F]{6}" required></label></div>
+<label>Наличие<select name="v{{ n }}_availability">{% for value,label in [('on_request','Под заказ / уточнить'),('in_stock','Подтверждено в наличии'),('unavailable','Недоступен')] %}<option value="{{ value }}" {% if value==v.availability %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+<div>Размеры: {% for size in sizes %}<label class="shop-check"><input type="checkbox" name="v{{ n }}_size" value="{{ size }}" {% if size in v.sizes %}checked{% endif %}>{{ size }}</label>{% endfor %}</div>
+<div class="shop-pair"><label>Фото переда<input type="file" name="v{{ n }}_front" accept="image/jpeg,image/png,image/webp"></label><label>Фото спины<input type="file" name="v{{ n }}_back" accept="image/jpeg,image/png,image/webp"></label></div>
+<label>Вырезка для вешалки (прозрачный PNG/WebP)<input type="file" name="v{{ n }}_rack" accept="image/png,image/webp"></label>{% if v.rack_image %}<img src="{{ v.rack_image }}" alt="Вырезка {{ v.color_name }}"><label class="shop-check"><input type="checkbox" name="v{{ n }}_clear_rack">Убрать вырезку</label>{% endif %}
+<label class="shop-check"><input type="checkbox" name="v{{ n }}_remove">Удалить этот вариант при сохранении</label></fieldset>{% endfor %}</div>
+<button type="button" class="button outline" id="admin-add-variant">Добавить цвет</button>
+<fieldset class="admin-variant"><legend>Вешалка на главной</legend><label class="shop-check"><input type="checkbox" name="home_featured" {% if p.get('home_featured',false) %}checked{% endif %}>Показывать на главной</label><label>Порядок (меньше — раньше)<input name="home_position" type="number" min="0" max="9999" value="{{ p.get('home_position',p.position) }}"></label></fieldset>
 <label class="shop-check"><input type="checkbox" name="published" {% if p.published %}checked{% endif %}> Показывать в каталоге</label>
 <label class="shop-check"><input type="checkbox" name="available" {% if p.available %}checked{% endif %}> В наличии</label>
 <details><summary>Замеры изделия для примерочной</summary>
 <input type="hidden" name="fit_measurements_present" value="1">
 <p>Ширина вещи в сантиметрах, от подмышки до подмышки, когда изделие лежит ровно. Заполняй только измеренные размеры.</p>
 <div class="shop-pair">{% for size in sizes %}<label>{{ size }}<input name="fit_{{ size }}" type="number" min="25" max="100" step=".1" value="{{ p.get('fit_measurements', {}).get(size, '') }}"></label>{% endfor %}</div>
-</details><button class="button">Сохранить карточку</button></form></div></div></main>{% endblock %}
+</details><button class="button">Сохранить карточку</button></form></div></div></main><script type="module" src="/static/admin/product-editor.js"></script>{% endblock %}

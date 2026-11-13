@@ -1,0 +1,34 @@
+<section class="rack-section" id="catalog" aria-labelledby="rack-heading" data-rack>
+  <div class="wrap">
+    <div class="rack-heading"><div><h1 id="rack-heading">Носи свою<br>тёмную сторону</h1><p>Футболки с мемами и хоррор-принтами. Выбери свою.</p></div><a class="rack-catalog-link" href="/catalog/">Весь каталог <span aria-hidden="true">↗</span></a></div>
+    {% if products %}
+    <div class="rack-layout">
+      <div class="rack-wardrobe"><div class="rack-rail" aria-hidden="true"></div>
+        <div class="rack-track" tabindex="0" aria-label="Вешалка. Листай вещи влево и вправо">
+        {% for p in products %}
+          <a class="rack-piece {{ 'is-selected' if loop.first }}" href="{{ url_for('product',slug=p.slug) }}" data-rack-index="{{ loop.index0 }}" aria-label="Рассмотреть {{ p.name }}">
+            <svg class="rack-hanger" viewBox="0 0 240 100" fill="none" aria-hidden="true"><path d="M120 34V22c0-16 23-16 23-3 0 8-10 10-17 13L21 84c-8 4-4 10 3 10h192c7 0 11-6 3-10l-93-47"/></svg>
+            <img src="{{ p.variants[0].rack_image or p.variants[0].images.front }}" alt="{{ p.name }}" width="600" height="700" loading="{{ 'eager' if loop.index < 4 else 'lazy' }}" data-rack-photo>
+            <span class="rack-piece-name">{{ p.name }}</span>
+          </a>
+        {% endfor %}
+        </div>
+        <div class="rack-navigation"><span data-rack-count>1 / {{ products|length }}</span><p>Листай и выбирай</p><div><button type="button" data-rack-prev aria-label="Предыдущая вещь">←</button><button type="button" data-rack-next aria-label="Следующая вещь">→</button></div></div>
+      </div>
+      <section class="rack-detail" aria-label="Выбранная вещь">
+        <button class="rack-large" type="button" data-rack-enlarge aria-label="Увеличить фото"><img data-rack-large src="{{ products[0].variants[0].images.front }}" alt="{{ products[0].name }}" width="600" height="700"><span>Рассмотреть ↗</span></button>
+        <div class="rack-detail-copy"><p class="rack-category" data-rack-category>{{ products[0].category }}</p><h2 data-rack-name>{{ products[0].name }}</h2><p data-rack-price>Цена по запросу</p>
+          <form method="post" action="/cart/" data-rack-form><input type="hidden" name="csrf" value="{{ csrf() }}"><input type="hidden" name="action" value="add"><input type="hidden" name="id" value="{{ products[0].id }}"><input type="hidden" name="variant_id" value="{{ products[0].variants[0].id }}"><input type="hidden" name="qty" value="1">
+            <fieldset class="rack-colors"><legend>Цвет <span data-rack-color-name></span></legend><div data-rack-colors></div></fieldset>
+            <label class="rack-size">Размер<select name="size" required aria-label="Размер"><option value="">Выбрать размер</option>{% for s in products[0].variants[0].sizes %}<option>{{ s }}</option>{% endfor %}</select></label>
+            <button class="button" type="submit" data-rack-add>В корзину</button><a class="rack-details-link" data-rack-link href="{{ url_for('product',slug=products[0].slug) }}">Подробнее об изделии</a>
+          </form>
+        </div>
+      </section>
+    </div>
+    <p class="rack-hint">Печать от одной вещи. Есть своя идея? <a href="/constructor/">Собрать свой принт →</a></p>
+    <script type="application/json" data-rack-data>{{ products|tojson }}</script>
+    {% else %}<p>Подборка готовится. <a href="/catalog/">Перейти в каталог</a></p>{% endif %}
+  </div>
+  <dialog class="rack-zoom" aria-label="Фото изделия"><button type="button" data-rack-close aria-label="Закрыть фото">×</button><img alt="" data-rack-zoom-photo></dialog>
+</section>

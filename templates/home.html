@@ -1,40 +1,14 @@
 {% extends 'base.html' %}
 {% block content %}
 <main id="main">
-  <section class="hero runway-hero" data-runway aria-label="Our Souls — подиум">
-    <div class="runway-stage"></div>
-    <div class="runway-shade" aria-hidden="true"></div>
-    <div class="wrap"><div class="hero-copy">
-      <p class="eyebrow">OUR SOULS / ОДЕЖДА И ПЕЧАТЬ</p>
-      <h1>Носи свою<br>тёмную сторону</h1>
-      <p>Футболки с мемами и хоррор-принтами.<br>Печать по твоему макету от одной вещи.</p>
-      <div class="actions"><a class="button" href="/catalog/">Смотреть каталог</a><a class="button outline" href="/constructor/">Создать свой принт</a></div>
-    </div></div>
-    <div class="runway-controls" aria-label="Управление подиумом" hidden>
-      <button type="button" data-runway-start hidden>Включить 3D</button>
-      <div data-runway-live hidden>
-        <a class="runway-name" data-runway-name aria-live="polite" href="/product/красная-тьма/">Красная тьма</a>
-        <button type="button" data-runway-look aria-label="Следующий образ">Образ 1 / 3 →</button>
-        <button type="button" data-runway-play aria-pressed="false">Автокамера</button>
-        <button type="button" data-runway-reset aria-label="Сбросить ракурс" title="Сбросить ракурс">↺</button>
-      </div>
-      <span data-runway-message role="status"></span>
-    </div>
-  </section>
-  <section id="catalog" class="section">
-    <div class="wrap">
-      <header class="center-title"><p class="eyebrow">Коллекция</p><h2>Лучшие принты</h2><p>Готовые дизайны Our Souls.</p></header>
-      {% include 'cards.html' %}
-      <p class="home-more"><a href="/catalog/">Смотреть все принты →</a></p>
-    </div>
-  </section>
+  {% include "rack.html" %}
   <section class="section os-custom-print">
     <div class="wrap os-custom-grid">
-      <div><p class="eyebrow">Конструктор</p><h2>Свой принт за 5 минут</h2><p>Выбери одежду, загрузи изображение и размести его на 3D-модели. Сохрани макет и отправь нам в Telegram.</p>
+      <div><p class="eyebrow">Конструктор</p><h2>Свой принт за 5 минут</h2><p>Выбери одежду, загрузи изображение и размести его на фотографическом макете. Сохрани макет и отправь нам в Telegram.</p>
         <ul class="feature-list"><li>Футболки, лонгсливы и худи</li><li>До 10 принтов на переде и спине</li><li>Свой цвет ткани и настройки изображения</li></ul>
         <a class="button" href="/constructor/">Открыть конструктор</a>
       </div>
-      <a class="os-preview-link" href="/constructor/"><img src="/static/theme/constructor-preview-v2.png" alt="Футболка с принтом спереди и сзади" loading="lazy"></a>
+      <a class="os-preview-link" href="/constructor/"><img src="/static/theme/constructor-preview-v2.webp" srcset="/static/theme/constructor-preview-v2-mobile.webp 960w, /static/theme/constructor-preview-v2.webp 1200w" sizes="(max-width:650px) 100vw, 50vw" width="1200" height="700" alt="Футболка с принтом спереди и сзади" loading="lazy"></a>
     </div>
   </section>
   <section class="brand-banner home-print-banner">
@@ -46,7 +20,7 @@
   </section>
   <section class="section">
     <div class="wrap home-story">
-      <img src="/static/theme/hero.png" alt="Розы и терновые ветви Our Souls" loading="lazy">
+      <img src="/static/theme/hero.webp" srcset="/static/theme/hero-mobile.webp 960w, /static/theme/hero.webp 1672w" sizes="(max-width:650px) 100vw, 50vw" width="1672" height="941" alt="Розы и терновые ветви Our Souls" loading="lazy">
       <div><p class="eyebrow">О нас</p><h2>Эстетика, которую можно носить</h2><p>Мемы, чёрный юмор и хоррор встречаются на одежде Our Souls. Выбери готовый дизайн или придумай принт, который хочется носить самому.</p><a href="/about/">Узнать о бренде →</a></div>
     </div>
   </section>
@@ -57,5 +31,5 @@
     </div>
   </section>
 </main>
-<script type="module" src="/static/runway/runway.js?v=5"></script>
+<script type="module" src="/static/rack/rack.js?v=1"></script>
 {% endblock %}

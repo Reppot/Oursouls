@@ -3,6 +3,7 @@
 <main class="section" id="main">
   <div class="wrap">
     <header class="shop-page-heading"><p class="breadcrumbs"><a href="/">Главная</a> / Корзина</p><h1>Корзина</h1></header>
+    <input type="hidden" data-cart-csrf value="{{ csrf() }}"><div data-local-projects></div><button type="button" class="button outline" data-cart-undo hidden>Вернуть удалённый макет</button><div data-local-checkout hidden><p>Стоимость индивидуального заказа согласуем перед печатью.</p><button type="button" class="button" data-prepare-order>Подготовить общий заказ</button></div>
     {% if lines %}
     <div class="osp-cart-layout">
       <div class="osp-cart-items">
@@ -26,9 +27,9 @@
       <aside class="osp-order-summary">
         <h2>Сводка заказа</h2>
         <dl><div><dt>Товары</dt><dd>{{ cart_count }} шт.</dd></div><div><dt>Доставка</dt><dd>Уточним в Telegram</dd></div><div class="basket-total"><dt>Итого</dt><dd>{{ 'По запросу' if total is none else total|rub }}</dd></div></dl>
-        <a class="button" href="{{ checkout }}" target="_blank" rel="noopener">Оформить через Telegram ↗</a>
+        <button class="button" type="button" data-prepare-order>Подготовить заказ</button><noscript><a href="{{ checkout }}" target="_blank" rel="noopener">Оформить через Telegram</a></noscript>
         <details><summary>Состав заказа</summary><textarea id="order-text" aria-label="Состав заказа" rows="6" readonly>{{ order_text }}</textarea>
-          <button type="button" class="basket-update" onclick="navigator.clipboard.writeText(document.getElementById('order-text').value).then(()=>this.textContent='Заказ скопирован')">Скопировать заказ</button>
+          <button type="button" class="basket-update" data-copy-order>Скопировать заказ</button>
         </details>
       </aside>
     </div>
@@ -37,4 +38,5 @@
     {% endif %}
   </div>
 </main>
+<script type="module" src="/static/cart/cart.js"></script>
 {% endblock %}

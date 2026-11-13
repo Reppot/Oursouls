@@ -3,8 +3,8 @@
 {%- endmacro %}
 {% if products %}<div class="products-grid">
 {% for p in products %}
-<article class="product-card"><a href="{{ url_for('product',slug=p.slug) }}"><img class="product-image" loading="lazy" src="{{ p.images[0] }}" alt="{{ p.name }}"></a>
+<article class="product-card"><a href="{{ url_for('product',slug=p.slug) }}"><img class="product-image" loading="lazy" width="800" height="1000" src="{{ p.images[0] }}" alt="{{ p.name }}"></a>
 <div class="product-info"><div class="tag">{{ p.category }}</div><h3><a href="{{ url_for('product',slug=p.slug) }}">{{ p.name }}</a></h3>
-{% if p.price is not none %}<div class="price">{{ price(p) }}</div>{% endif %}
+<div class="price">{% if p.price is not none %}{{ price(p) }}{% else %}Цена по запросу{% endif %}</div>
 <a class="button" href="{{ url_for('product',slug=p.slug) }}">Подробнее ↗</a></div></article>
-{% endfor %}</div>{% else %}<p>В этой категории пока нет товаров.</p>{% endif %}
+{% endfor %}</div>{% else %}<p>По выбранным условиям ничего не найдено. <a href="/catalog/">Сбросить фильтры</a></p>{% endif %}

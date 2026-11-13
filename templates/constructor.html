@@ -2,8 +2,8 @@
 {% block content %}
 
 <main id="main"><section id="our-print" class="os-print-studio"
-    data-atlas="/static/studio/garments-studio-v1.png"
-    data-viewer="/static/studio/garment-viewer.js?v=3.1.0"
+    data-csrf="{{ csrf() }}"
+    data-atlas="/static/studio/garments-studio-v1.webp"
     data-archive="/static/studio/order-archive.js"
     data-sample="/static/studio/example-print.png">
 <div class="os-studio-wrap">
@@ -16,8 +16,9 @@
                 <button type="button" id="op-tab-order" role="tab" data-tab="order" aria-controls="op-panel-order" aria-selected="false" tabindex="-1"><span>03</span>Заказ</button>
             </div>
     </header>
+    <div class="os-draft-bar"><button type="button" id="op-undo" disabled>Отменить</button><button type="button" id="op-redo" disabled>Повторить</button><button type="button" id="op-to-cart">Добавить макет в корзину</button><button type="button" id="op-import-button">Открыть проект</button><input type="file" id="op-import-project" accept=".zip,application/zip" hidden><select id="op-import-choice" aria-label="Макет из архива" hidden></select><button type="button" id="op-new-design">Новый макет</button><span id="op-draft-status" role="status">Макет на этом устройстве</span></div>
     <div class="os-studio-grid">
-            <div id="op-panel-garment" class="os-panel os-garment-rail" aria-label="Выбор одежды">
+            <div id="op-panel-garment" class="os-panel os-garment-rail" role="tabpanel" aria-labelledby="op-tab-garment">
                 <div class="os-panel-title"><h2>Выбери основу</h2><p>Форма, ткань и цвет будущей вещи.</p></div>
                 <div class="os-model-options" role="group" aria-label="Модель одежды">
                     <button type="button" data-garment="tee" aria-pressed="true"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M14 9l-6 2-5 8 7 4 3-4v13h14V19l3 4 7-4-5-8-6-2c-2 6-10 6-12 0z"/></svg><span>Футболка</span></button>
@@ -43,8 +44,8 @@
             <div class="os-stage-top"><span id="op-stage-model">Футболка</span><button class="os-secondary" type="button" id="op-open-fitting">Примерить</button><span id="op-render-mode" class="os-stage-badge">Загрузка…</span></div>
             <div class="os-stage-viewport" id="op-viewport" aria-busy="true">
                 <canvas id="op-canvas" width="600" height="700" tabindex="0" aria-label="Студийный макет одежды"></canvas>
-                <div id="op-webgl" class="os-webgl" hidden></div>
-                <div class="os-stage-loading" id="op-loading"><span></span>Подготавливаем модель</div>
+                <div id="op-touch-target" aria-hidden="true" hidden></div><div id="op-webgl" class="os-webgl" hidden></div>
+                <div class="os-stage-loading" id="op-loading"><span></span>Подготавливаем макет</div>
             </div>
             <div class="os-stage-toolbar">
                 <div class="os-segment" role="group" aria-label="Ракурс"><button type="button" data-side="front" aria-pressed="true">Перед</button><button type="button" data-side="back" aria-pressed="false">Спина</button></div>
@@ -66,13 +67,13 @@
                     <span><strong id="op-upload-title">Выбрать файл</strong><small>PNG или JPEG до 20 МБ каждый</small></span>
                     <input id="op-file" type="file" multiple accept="image/png,image/jpeg" aria-label="Загрузить принт для выбранной стороны">
                 </label>
-                <div class="os-layer-picker" id="op-file-info" hidden>
+                <div class="os-layer-thumbs" id="op-layer-thumbs"></div><div class="os-layer-picker" id="op-file-info" hidden>
                     <label>Редактируемый принт<select id="op-layers" aria-describedby="op-file-name"></select></label>
                     <span id="op-file-name" hidden></span>
                     <div class="os-inline">
                         <button type="button" id="op-layer-up" class="os-text-button">Выше ↑</button>
                         <button type="button" id="op-layer-down" class="os-text-button">Ниже ↓</button>
-                        <button type="button" id="op-remove" class="os-text-button">Удалить</button>
+                        <button type="button" id="op-duplicate" class="os-text-button">Дублировать</button><button type="button" id="op-remove" class="os-text-button">Удалить</button>
                     </div>
                 </div>
                 <button type="button" id="op-example" class="os-text-button os-example">Попробовать с примером ↗</button>
@@ -111,15 +112,9 @@
                 <select id="op-size" hidden aria-label="Размер одежды"><option>S</option><option selected>M</option><option>L</option><option>XL</option><option>2XL</option><option>3XL</option></select>
                 <label>Количество<input id="op-qty" type="number" min="1" max="9999" step="1" value="1"></label>
                 <label>Пожелания к заказу<textarea id="op-comment" rows="3" placeholder="Например, хочу печать на своей футболке"></textarea></label>
-                <button type="button" id="op-download-order" class="os-primary os-next">Скачать заказ <span aria-hidden="true">↓</span></button>
+                <button type="button" id="op-download-order" class="os-primary os-next">Подготовить заказ <span aria-hidden="true">→</span></button>
                 <p class="os-small">В ZIP будут макет, детали заказа и файлы принтов. Стоимость и наличие согласуем в Telegram.</p>
-                <dialog id="op-send-dialog" aria-labelledby="op-send-title">
-                    <form method="dialog"><button type="submit" class="os-secondary os-dialog-close" aria-label="Закрыть">×</button></form>
-                    <p class="os-studio-kicker">OUR SOULS / ПЕЧАТЬ НА ЗАКАЗ</p>
-                    <h2 id="op-send-title">Отправь архив в Telegram</h2>
-                    <p>Прикрепи скачанный <strong>our-souls-order.zip</strong> в чат с @oursouls33. В архиве уже есть макет и все параметры заказа.</p>
-                    <a class="os-primary" href="{{ telegram }}" target="_blank" rel="noopener">Открыть Telegram ↗</a>
-                </dialog>
+
             </div>
             <p id="op-status" class="os-studio-status" role="status" aria-live="polite"></p>
         </section>
