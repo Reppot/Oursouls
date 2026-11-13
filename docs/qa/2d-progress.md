@@ -13,5 +13,5 @@ Pre-flight: variants feed rack/product/cart; shared 2D preview feeds constructor
 - [x] Photo fitting and shared order flow.
 - [x] Reliability/metadata and verification.
 
-Verification: check_shop PASS; Python 10 PASS; Node 9 PASS; browser rack/mobile/editor/photo/import/mixed cart/admin PASS. See 2d-acceptance.md for measured results and outstanding art/device checks.
+Verification: check_shop PASS; Python 10 PASS; Node 10 PASS; browser rack/mobile/editor/photo/import/mixed cart/admin PASS. See 2d-acceptance.md for measured results and outstanding art/device checks.
 Ruling: retain approved 512px photographic templates for this rollout; do not claim the planned new 2K photo masters were created. Original images remain available and all 3D assets are inactive.

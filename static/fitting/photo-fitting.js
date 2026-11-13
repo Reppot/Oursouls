@@ -1,5 +1,9 @@
 import {studioCutout} from '../shared/cutout.js';
 const bound=(n,a,b)=>Math.max(a,Math.min(b,n));
+export function shoulderAngle(a,b,width,height){
+ const [left,right]=a.x<=b.x?[a,b]:[b,a];
+ return bound(Math.atan2((right.y-left.y)*height,(right.x-left.x)*width)*180/Math.PI,-45,45);
+}
 export function createFittingRoom(dialog,studio){
  const q=key=>dialog.querySelector('[data-fit-'+key+']'), canvas=q('photo-canvas'),ctx=canvas.getContext('2d');
  const productNode=dialog.querySelector('#fitting-product'), product=productNode?JSON.parse(productNode.textContent):null;
@@ -44,7 +48,7 @@ export function createFittingRoom(dialog,studio){
   try{const bitmap=await createImageBitmap(photo);const points=await new Promise((resolve,reject)=>{
    worker?.terminate();worker=new Worker(new URL('./pose/worker.js',import.meta.url));const timer=setTimeout(()=>{worker?.terminate();worker=null;reject(new Error('Автоподгонка заняла слишком много времени. Размести одежду вручную.'))},20000);
    worker.onmessage=event=>{clearTimeout(timer);event.data.points?resolve(event.data.points):reject(new Error('Не удалось найти плечи. Размести одежду вручную.'))};worker.onerror=()=>{clearTimeout(timer);reject(new Error('Автоподгонка недоступна. Используй ползунки.'))};worker.postMessage(bitmap,[bitmap]);
-  });if(current!==revision)return;const a=points[11],b=points[12];if(!a||!b)throw new Error('Плечи не найдены.');placement.x=(a.x+b.x)*50;placement.y=(a.y+b.y)*50;placement.scale=bound(Math.hypot((a.x-b.x)*photo.width,(a.y-b.y)*photo.height)/photo.width/.62*100,10,155);placement.angle=Math.atan2((b.y-a.y)*photo.height,Math.abs(b.x-a.x)*photo.width)*180/Math.PI;placement.angle=bound(placement.angle,-45,45);status('Проверь положение и при необходимости поправь вручную.');draw();
+  });if(current!==revision)return;const a=points[11],b=points[12];if(!a||!b)throw new Error('Плечи не найдены.');placement.x=(a.x+b.x)*50;placement.y=(a.y+b.y)*50;placement.scale=bound(Math.hypot((a.x-b.x)*photo.width,(a.y-b.y)*photo.height)/photo.width/.62*100,10,155);placement.angle=shoulderAngle(a,b,photo.width,photo.height);status('Проверь положение и при необходимости поправь вручную.');draw();
   }catch(error){if(current===revision)status(error.message)}finally{button.disabled=!photo}
  };
  q('size')?.addEventListener('click',()=>{const chest=+q('chest').value;if(chest<60||chest>160)return q('size-result').textContent='Укажи обхват груди от 60 до 160 см.';const candidates=Object.entries(product?.measurements||{}).filter(([,w])=>w*2-chest>=6).sort((a,b)=>a[1]-b[1]);q('size-result').textContent=candidates.length?'Ориентир — '+candidates[0][0]+'. Проверь остальные замеры.':'Подходящий размер по имеющимся замерам не найден.'});
