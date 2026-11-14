@@ -278,3 +278,6 @@ body.page-constructor #our-print .os-cart-design{width:100%;margin-top:10px;min-
 /* The display canvas and its surround form one studio surface. */
 body.page-constructor #our-print .os-stage-viewport{background:#2b3730}
 body.os-editorial .product-card .product-image,body.os-editorial .product-gallery-main{background:#d5d7d4}
+
+/* Trim the exterior fringe of the eight legacy alpha mattes only. */
+body.os-editorial .rack-piece [data-rack-photo][src*="/static/rack/images/"]{filter:url(#rack-edge-trim) drop-shadow(4px 12px 12px #08100b55)}
