@@ -107,6 +107,8 @@
             <div id="op-panel-order" class="os-panel" role="tabpanel" aria-labelledby="op-tab-order" hidden>
                 <div class="os-panel-title"><h2>Детали заказа</h2><p>Сохрани макет и пришли его в Telegram.</p></div>
                 <div id="op-order-summary" class="os-order-summary"></div>
+                <div class="os-review-pair" aria-label="Обе стороны макета"><button type="button" data-review-side="front" aria-label="Рассмотреть перед"><canvas id="op-review-front" width="600" height="700" aria-label="Макет спереди"></canvas><span>Перед · <b id="op-review-front-count">0</b></span></button><button type="button" data-review-side="back" aria-label="Рассмотреть спину"><canvas id="op-review-back" width="600" height="700" aria-label="Макет сзади"></canvas><span>Спина · <b id="op-review-back-count">0</b></span></button></div>
+                <dl class="os-review-details"><div><dt>Основа</dt><dd id="op-review-garment"></dd></div><div><dt>Цвет ткани</dt><dd id="op-review-color"></dd></div><div><dt>Принтов</dt><dd id="op-review-total"></dd></div><div><dt>Стоимость</dt><dd>Согласуем до печати</dd></div></dl>
                 <div class="os-field-heading"><h3>Размер</h3></div>
                 <div class="os-sizes" role="group" aria-label="Размер одежды">{% for size in sizes %}<button type="button" data-size="{{ size }}" aria-pressed="{{ 'true' if size == 'M' else 'false' }}">{{ size }}</button>{% endfor %}</div>
                 <select id="op-size" hidden aria-label="Размер одежды"><option>S</option><option selected>M</option><option>L</option><option>XL</option><option>2XL</option><option>3XL</option></select>
@@ -114,6 +116,7 @@
                 <label>Пожелания к заказу<textarea id="op-comment" rows="3" placeholder="Например, хочу печать на своей футболке"></textarea></label>
                 <button type="button" id="op-download-order" class="os-primary os-next">Подготовить заказ <span aria-hidden="true">→</span></button>
                 <p class="os-small">В ZIP будут макет, детали заказа и файлы принтов. Стоимость и наличие согласуем в Telegram.</p>
+                <button type="button" class="os-text-button" data-next="print">← Вернуться к принтам</button>
 
             </div>
             <p id="op-status" class="os-studio-status" role="status" aria-live="polite"></p>
@@ -123,5 +126,5 @@
 {% include "fitting.html" %}
 </section></main>
 
-<script defer src='/static/studio/constructor.js?v=3.0.1'></script>
+<script defer src='/static/studio/constructor.js?v=4.1'></script>
 {% endblock %}

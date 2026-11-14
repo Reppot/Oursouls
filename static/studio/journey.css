@@ -1,0 +1,31 @@
+body.page-constructor #our-print .os-studio-stage { position:sticky;top:96px;align-self:start; }
+body.page-constructor #our-print .os-studio-intro { align-items:end; }
+body.page-constructor #our-print .os-tabs button { min-height:52px;font-size:14px; }
+body.page-constructor #our-print .os-tabs button[aria-selected=true] { color:#274c25;border-bottom-color:#355d31; }
+body.page-constructor #our-print .os-stage-top { min-height:56px;height:auto;padding-bottom:10px;flex-wrap:wrap; }
+body.page-constructor #our-print .os-stage-foot { padding-top:12px; }
+body.page-constructor #our-print .os-panel-title h2 { font-size:30px; }
+body.page-constructor #our-print .os-studio-settings .os-panel-title p { max-width:38ch; }
+#our-print .os-review-pair { display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0; }
+#our-print .os-review-pair button { padding:0;background:#e9ece1;border:1px solid #b6c3ab!important;color:#263b22!important;min-width:0; }
+#our-print .os-review-pair button[aria-pressed=true] { outline:2px solid #8ca879;outline-offset:2px; }
+#our-print .os-review-pair canvas { display:block;width:100%;height:auto; }
+#our-print .os-review-pair span { display:block;padding:10px;font-size:14px; }
+#our-print .os-review-details { margin:16px 0 24px; }
+#our-print .os-review-details>div { display:flex;justify-content:space-between;gap:16px;padding:11px 0;border-bottom:1px solid #4c5b46;font-size:14px; }
+#our-print .os-review-details dt { color:#cdd7c3; }
+#our-print .os-review-details dd { margin:0;text-align:right;max-width:65%;overflow-wrap:anywhere;color:#f5f2e8; }
+#our-print[data-step=order] .os-order-summary { padding:0!important;background:transparent!important;border:0!important;font-size:15px;line-height:1.6; }
+@media(max-width:760px) {
+ body.page-constructor #our-print .os-studio-stage { position:relative;top:auto; }
+ body.page-constructor #our-print .os-tabs { position:sticky;top:64px;z-index:8;background:#f4f3ed;padding:8px 0; }
+ body.page-constructor #our-print .os-tabs button { font-size:13px; }
+ body.page-constructor #our-print .os-draft-bar { gap:6px; }
+ body.page-constructor #our-print .os-draft-bar button { font-size:13px;padding:8px; }
+}
+
+@media(max-width:760px) {
+ body.page-constructor #our-print[data-step=order] .os-studio-stage { position:sticky;top:64px;z-index:6;background:#f4f3ed; }
+ body.page-constructor #our-print[data-step=order] .os-stage-viewport { height:220px;min-height:180px;max-height:30dvh; }
+ body.page-constructor #our-print[data-step=order] .os-stage-foot { display:none; }
+}

@@ -2,7 +2,7 @@
     'use strict';
     const root = document.getElementById('our-print');
     if (!root || root.dataset.ready) return;
-    root.dataset.ready = '1';
+    root.dataset.ready = '1';root.inert=true;
     const q = id => root.querySelector('#op-' + id);
     const all = selector => [...root.querySelectorAll(selector)];
     const {drafts} = await import('./draft-store.js');
@@ -164,6 +164,7 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
         q('gesture').textContent = mode === 'print' ? 'Перетащи принт по ткани. Стрелки помогают двигать точнее.' : viewer ? 'Потяни модель, чтобы повернуть. Кнопки + и − меняют масштаб.' : 'Выбери перед или спину для студийного просмотра.';
     }
     function syncPreview() {if(fallback)garment(ctx,side,mode==='print');syncTouchTarget();}
+    let reviewStamp='';
     function draw() {
         const s = sides[side], e = s.effects;
         pressed('[data-garment]', 'garment', q('garment').value);
@@ -202,6 +203,7 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
         for (const k of ['X','Y']) q('flip'+k).setAttribute('aria-pressed', String(e['flip'+k]));
         const printed = ['front','back'].filter(k => sides[k].img).map(sideName);
         q('order-summary').textContent = `${garmentName()} · ${colorName()} · ${printed.length ? printed.join(' и ') : 'принт не добавлен'}`;
+        renderReview();
         updateDraftControls();
         renderThumbnails();
         scheduleSave();
@@ -215,6 +217,7 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
     }
     const narrowStudio = matchMedia('(max-width: 850px)');
     function syncPanels() {
+        root.dataset.step=tab;
         q('panel-garment').hidden = tab !== 'garment';
         q('panel-print').hidden = tab !== 'print';
         q('panel-order').hidden = tab !== 'order';
@@ -223,7 +226,7 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
     narrowStudio.addEventListener('change', syncPanels);
     syncPanels();
     function openTab(next, focus = false) {
-        tab = next;
+        const changed=tab!==next;tab = next;root.dataset.step=next;
         for (const key of tabs) {
             const selected = key === next, button = q('tab-'+key);
             button.setAttribute('aria-selected', String(selected)); button.tabIndex = selected ? 0 : -1;
@@ -233,7 +236,17 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
         setMode(next === 'print' ? 'print' : 'orbit');
         if (focus) q('tab-'+next).focus({preventScroll:true});
         status(''); draw();
+        const panel=q('panel-'+next);
+        if(changed&&!restoring&&!matchMedia('(prefers-reduced-motion: reduce)').matches){panel.getAnimations().forEach(a=>a.cancel());panel.animate([{opacity:0,transform:'translateY(14px)',clipPath:'inset(0 0 5% 0)'},{opacity:1,transform:'translateY(0)',clipPath:'inset(0)'}],{duration:380,easing:'cubic-bezier(.16,1,.3,1)'})}
     }
+    function renderReview(){
+        if(tab!=='order'||!q('review-front'))return;
+        q('review-garment').textContent=garmentName();q('review-color').textContent=colorName()+' · '+fabricColor.toUpperCase();q('review-total').textContent=count()+' / 10';
+        const stamp=JSON.stringify([!!atlasImage,q('garment').value,fabricColor,...['front','back'].map(key=>layers[key].map(l=>[l.id,l.x,l.y,l.scale,l.angle,l.cache?.key]))]);
+        for(const key of ['front','back']){q('review-'+key+'-count').textContent=layers[key].length;const button=root.querySelector('[data-review-side='+key+']');button.setAttribute('aria-pressed',String(key===side));if(stamp!==reviewStamp)garment(q('review-'+key).getContext('2d'),key,false)}
+        reviewStamp=stamp;
+    }
+    all('[data-review-side]').forEach(button=>button.onclick=()=>{selectSide(button.dataset.reviewSide);renderReview()});
     function move(key, x, y) {
         const s = sides[key]; if (!s.img) return;
         s.x = x; s.y = y; clamp(s); syncPreview();scheduleSave();
@@ -484,7 +497,7 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
         }catch(error){status(error.message||'Не удалось открыть проект.',true)}finally{event.target.value=''}
     };
     root.addEventListener('change',()=>{if(!restoring)scheduleSave()});
-    q('comment').addEventListener('input',scheduleSave);q('qty').addEventListener('input',scheduleSave);
+    q('comment').addEventListener('input',scheduleSave);q('qty').addEventListener('input',()=>{renderReview();scheduleSave()});
     document.addEventListener('keydown',event=>{if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='z'&&!['INPUT','TEXTAREA'].includes(event.target.tagName)){event.preventDefault();(event.shiftKey?q('redo'):q('undo')).click()}});
     function usePhoto() {
         viewer=null; fallback=true; q('webgl').hidden=true; cv.hidden=false; q('zoom-tools').hidden=true;
@@ -518,12 +531,12 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
     };
     if (document.getElementById('fitting-product')) openFitting.click();
     setColor(fabricColor);
-    function fitCanvas(){const box=q('viewport'),w=Math.min(box.clientWidth,box.clientHeight*6/7);cv.style.width=w+'px';cv.style.height=w*7/6+'px';}
+    function fitCanvas(){const box=q('viewport'),w=Math.min(box.clientWidth,box.clientHeight*6/7);cv.style.width=w+'px';cv.style.height=w*7/6+'px';syncTouchTarget();}
     new ResizeObserver(fitCanvas).observe(q('viewport'));fitCanvas();
     usePhoto();
     try {
         const stored=await drafts.load('current');
         if(stored?.snapshot){for(const [key,file] of stored.sources)sources.set(key,file);await restoreSnapshot(stored.snapshot);q('draft-status').textContent='Черновик восстановлен';}
     } catch {q('draft-status').textContent='Автосохранение недоступно — сохрани файл перед выходом';}
-    restoring=false;history.push(snapshot());updateDraftControls();
+    restoring=false;root.inert=false;history.push(snapshot());updateDraftControls();
 })();
