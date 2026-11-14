@@ -280,4 +280,9 @@ body.page-constructor #our-print .os-stage-viewport{background:#2b3730}
 body.os-editorial .product-card .product-image,body.os-editorial .product-gallery-main{background:#d5d7d4}
 
 /* Trim the exterior fringe of the eight legacy alpha mattes only. */
-body.os-editorial .rack-piece [data-rack-photo][src*="/static/rack/images/"]{filter:url(#rack-edge-trim) drop-shadow(4px 12px 12px #08100b55)}
+
+/* A light diagonal studio backdrop stays behind every garment. */
+body.page-home .rack-track::before{content:"";position:absolute;inset:0 -60px;z-index:0;background:#f1f2ef;clip-path:polygon(0 4%,100% 29%,100% calc(var(--rack-band-bottom,94%) + 8%),0 var(--rack-band-bottom,94%));pointer-events:none}
+body.page-home .is-depth.is-moving .rack-piece{transition:none}
+body.page-home .rack-piece [data-rack-photo]{filter:drop-shadow(3px 9px 8px #16221824)}
+@media(max-width:600px){body.page-home .rack-track::before{inset:0 -25px;clip-path:polygon(0 2%,100% 14%,100% calc(var(--rack-band-bottom,75%) + 8%),0 var(--rack-band-bottom,75%))}}

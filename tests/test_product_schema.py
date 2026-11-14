@@ -1,5 +1,5 @@
 import unittest
-from product_schema import normalize_product, validate_variant_selection
+from product_schema import normalize_product, validate_variant_selection, RACK_CUTOUTS
 
 
 class ProductSchemaTests(unittest.TestCase):
@@ -33,10 +33,19 @@ class ProductSchemaTests(unittest.TestCase):
 
     def test_derived_rack_photo_is_not_reused_after_front_replacement(self):
         p=normalize_product(self.seed)
-        self.assertTrue(p['variants'][0]['rack_image'].startswith('/static/rack/images/'))
+        self.assertEqual(p['variants'][0]['rack_image'],RACK_CUTOUTS[self.seed['images'][0]])
         p['variants'][0]['images']['front']='/static/new-product-photo.webp'
         self.assertIsNone(normalize_product(p)['variants'][0]['rack_image'])
 
+    def test_old_generated_alpha_is_upgraded_to_current_mask(self):
+        p=normalize_product(self.seed)
+        p['variants'][0]['rack_image']='/static/rack/images/obsolete.webp'
+        self.assertEqual(normalize_product(p)['variants'][0]['rack_image'],RACK_CUTOUTS[self.seed['images'][0]])
+
+    def test_manually_uploaded_alpha_is_not_overwritten(self):
+        p=normalize_product(self.seed)
+        p['variants'][0]['rack_image']='/static/uploads/custom-alpha.webp'
+        self.assertEqual(normalize_product(p)['variants'][0]['rack_image'],'/static/uploads/custom-alpha.webp')
 
 if __name__ == '__main__':
     unittest.main()

@@ -31,7 +31,8 @@ def normalize_product(doc):
             rack_image=None)]
     for variant in p['variants']:
         default=RACK_CUTOUTS.get(variant['images']['front'])
-        if variant.get('rack_image') in _derived_cutouts and variant['rack_image']!=default:
+        derived=variant.get('rack_image') or ''
+        if (derived in _derived_cutouts or derived.startswith(('/static/rack/images/','/static/rack/masked/'))) and derived!=default:
             variant['rack_image']=None
         if not variant.get('rack_image') and default:
             variant['rack_image']=default

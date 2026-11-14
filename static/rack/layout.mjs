@@ -3,7 +3,7 @@ export const clampPhase=(value,count)=>Math.max(0,Math.min(Math.max(0,count-1),v
 // All anchors share one physical rail. Depth changes image size, never its artwork.
 export function rackLayout(item,phase,width,height,{hovered=false,picked=false}={}){
  const mobile=width<600;
- const pieceWidth=Math.min(width*(mobile ? .80 : .58),height*.70);
+ const pieceWidth=Math.min(width*(mobile ? .80 : .58),height*.65);
  const depth=item-phase;
  const visibleDepth=depth>=0?depth/(1+.12*depth):depth*3;
  const stepX=width*(mobile ? .15 : .16),stepY=height*.09;
