@@ -611,3 +611,15 @@ body.page-constructor #our-print .os-stage-viewport canvas[data-mode=print] {
   transform-origin:center;
   pointer-events:auto
 }
+
+/* Override the retired stacked mobile header, including narrow tablets. */
+@media(max-width:800px){
+ body.os-editorial .site-header .header-row{display:flex;flex-direction:row;align-items:center;justify-content:space-between;flex-wrap:nowrap;gap:8px;height:64px;min-height:64px;padding-top:0;padding-bottom:0}
+ body.os-editorial .site-header .wordmark{padding-right:0;min-height:44px;font-size:23px;white-space:nowrap;margin-right:auto}
+ body.os-editorial .mobile-menu-toggle{display:grid;place-items:center;order:3;flex:0 0 44px;min-height:44px;height:44px}
+ body.os-editorial .header-actions{display:flex;gap:0;margin:0;flex-shrink:0}
+ body.os-editorial .header-actions a{width:44px;height:44px}
+ body.os-editorial .site-header .site-nav{display:none;position:absolute;top:100%;left:0;right:0;width:auto;padding:12px 20px 22px;background:#172017;border-top:1px solid #46513c;z-index:20}
+ body.os-editorial .site-header .site-nav.is-open{display:grid;grid-template-columns:1fr;gap:0}
+ body.os-editorial .site-header .site-nav a{padding:12px 0;font-size:16px}
+}

@@ -12,7 +12,7 @@ export function rackLayout(item,phase,width,height,{hovered=false,picked=false}=
  let scale=depth>=0?1/(1+.20*depth):1-depth*.15;
  if(hovered)scale*=1.045;
  if(picked)scale*=1.045;
- return {pieceWidth,hookX:pieceWidth*(.5+.70*11/240),hookY:pieceWidth*.70*11/240,
+ return {pieceWidth,hookX:pieceWidth*.5,hookY:pieceWidth*.006,
   x:width*(mobile ? .44 : .325)+stepX*anchorDepth,y:height*.03+stepY*anchorDepth,
   scale,angle:hovered?-1.5:0,opacity:depth<0?Math.max(0,1+depth*1.5):depth>9?0:1,
   zIndex:picked?6000:hovered?5000:Math.round(3000-depth*30),stepX,stepY};

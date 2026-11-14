@@ -27,7 +27,7 @@ export async function prepareOrder(csrf,currentProject=null){
  try{
   const response=await fetch('/api/cart/validate/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({csrf})});
   if(!response.ok){if(response.status===409){const result=await response.json();const error=new Error(result.errors.join(' ')+' Проверь корзину, затем повтори подготовку.');error.cart=true;throw error}throw new Error('Не удалось проверить товары. Обнови страницу и повтори. Макет сохранён на устройстве.')}
-  const {items}=await response.json();let projects=[];try{projects=(await drafts.list()).filter(p=>p.inCart)}catch{if(!currentProject&&items.length===0)throw new Error('Не удалось открыть локальные макеты. Попробуй повторить.')}
+  const {items}=await response.json();let projects=[];try{projects=(await drafts.list()).filter(p=>p.inCart)}catch{throw new Error('Не удалось открыть локальные макеты. Заказ не собран, чтобы не потерять часть позиций. Повтори попытку или открой конструктор.')}
   if(currentProject)projects=[...projects.filter(p=>p.id!==currentProject.id),currentProject];
   if(!items.length&&!projects.length)throw new Error('Добавь товар или свой макет в корзину.');
   const result=await buildOrder(items,projects);

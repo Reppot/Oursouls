@@ -376,6 +376,8 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
         try{await validatePrintFile(layer.file);const image=new Image();image.src=url;await image.decode();const copy={...layer,img:image,cache:null};return await pngBlob(renderPrint(copy));}finally{URL.revokeObjectURL(url)}
     }
     async function packageProject(){
+        if(pending)throw new Error("Дождись загрузки изображений.");
+        const wasInert=root.inert;root.inert=true;try{
         if(!atlasImage)throw new Error('Макет ещё загружается. Попробуй через несколько секунд.');
         const exportFiles=[];
         for(const key of ['front','back']){
@@ -390,6 +392,7 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
         exportFiles.push({path:'mockup.png',blob:await pngBlob(pair)});
         const state=snapshot(),ids=new Set([...state.layers.front,...state.layers.back].map(l=>l.assetId));
         return {id:projectId,inCart:true,name:garmentName(),color:colorName(),snapshot:state,sources:[...sources].filter(([id])=>ids.has(id)),exportFiles,preview:exportFiles.find(f=>f.path===(layers.front.length?'front.png':'back.png')).blob};
+        }finally{root.inert=wasInert}
     }
     q('download-order').onclick=async()=>{
         if(!ready()||pending)return;const button=q('download-order');button.disabled=true;status('Подготавливаем макет…');

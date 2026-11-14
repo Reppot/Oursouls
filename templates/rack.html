@@ -1,19 +1,19 @@
 <section class="rack-section" id="catalog" aria-labelledby="rack-heading" data-rack>
   <div class="wrap">
-    <div class="rack-heading"><div><h1 id="rack-heading">Носи свою<br>тёмную сторону</h1><p>Футболки с мемами и хоррор-принтами. Выбери свою.</p></div><a class="rack-catalog-link" href="/catalog/">Весь каталог <span aria-hidden="true">↗</span></a></div>
+    <h1 id="rack-heading" class="rack-sr-only">Каталог Our Souls</h1>
     {% if products %}
     <div class="rack-layout">
       <div class="rack-wardrobe"><div class="rack-rail" aria-hidden="true"></div>
         <div class="rack-track" tabindex="0" aria-label="Вешалка. Листай вещи влево и вправо">
         {% for p in products %}
           <a class="rack-piece {{ 'is-selected' if loop.first }}" href="{{ url_for('product',slug=p.slug) }}" data-rack-index="{{ loop.index0 }}" aria-label="Рассмотреть {{ p.name }}" draggable="false">
-            <svg class="rack-hanger" viewBox="0 0 240 100" fill="none" aria-hidden="true"><path d="M120 34V22c0-16 23-16 23-3 0 8-10 10-17 13L21 84c-8 4-4 10 3 10h192c7 0 11-6 3-10l-93-47"/></svg>
+            <img class="rack-hanger" src="/static/rack/wood-hanger.webp" alt="" aria-hidden="true" draggable="false">
             <img src="{{ p.variants[0].rack_image or p.variants[0].images.front }}" alt="{{ p.name }}" width="600" height="700" loading="{{ 'eager' if loop.index < 4 else 'lazy' }}" data-rack-photo draggable="false">
             <span class="rack-piece-name">{{ p.name }}</span>
           </a>
         {% endfor %}
         </div>
-        <div class="rack-navigation"><span data-rack-count role="status" aria-live="polite">1 / {{ products|length }}</span><p>Потяни вешалку влево или вправо</p><div><button type="button" data-rack-prev aria-label="Предыдущая вещь">←</button><button type="button" data-rack-next aria-label="Следующая вещь">→</button></div></div>
+        <div class="rack-navigation"><span data-rack-count role="status" aria-live="polite">1 / {{ products|length }}</span><p class="rack-sr-only">Листай колесом мыши или стрелками</p><div><button type="button" data-rack-prev aria-label="Предыдущая вещь">←</button><button type="button" data-rack-next aria-label="Следующая вещь">→</button></div></div>
         <button class="rack-return" type="button" data-rack-return hidden>← Вернуть на вешалку</button>
       </div>
       <section class="rack-detail" aria-label="Выбранная вещь">
@@ -27,7 +27,7 @@
         </div>
       </section>
     </div>
-    <p class="rack-hint">Печать от одной вещи. Есть своя идея? <a href="/constructor/">Собрать свой принт →</a></p>
+
     <script type="application/json" data-rack-data>{{ products|tojson }}</script>
     {% else %}<p>Подборка готовится. <a href="/catalog/">Перейти в каталог</a></p>{% endif %}
   </div>

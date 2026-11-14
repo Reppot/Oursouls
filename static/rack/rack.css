@@ -128,3 +128,25 @@ body.os-editorial .rack-section.is-depth { padding:0 0 24px; }
 @media(max-width:700px) { body.os-editorial .rack-section.is-depth { padding-top:24px; } .is-depth .rack-navigation p { font-size:14px;max-width:15ch; } }
 
 .is-depth.is-moving .rack-piece { transition:opacity .38s ease; }
+
+/* Rack-only storefront. Product controls belong to the inspection dialog. */
+body.page-home { overflow:hidden; }
+body.page-home #main { height:calc(100dvh - 81px); }
+body.page-home .rack-section.is-depth { height:100%;padding:0;box-sizing:border-box; }
+body.page-home .is-depth>.wrap { display:block;height:100%;max-width:none;padding:0 28px;position:relative; }
+body.page-home .is-depth .rack-wardrobe { height:100%; }
+body.page-home .is-depth .rack-layout>.rack-detail { display:none!important; }
+body.page-home .rack-navigation { justify-content:center;border:0;min-height:56px;padding:0;gap:22px; }
+.rack-sr-only { position:absolute!important;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap; }
+.is-depth .rack-piece>.rack-hanger { position:absolute;left:15%;top:0;width:70%;height:auto;object-fit:contain;filter:drop-shadow(1px 3px 2px #24201720);mix-blend-mode:normal;pointer-events:none; }
+.rack-navigation .rack-return { width:auto;height:auto;white-space:nowrap;flex-shrink:0; }
+.rack-mobile-detail { width:min(820px,95vw); }
+.rack-mobile-detail .rack-detail { display:grid!important;grid-template-columns:1.1fr 1fr;align-items:center;gap:24px; }
+.rack-mobile-detail .rack-large img { height:min(60dvh,500px); }
+.rack-mobile-detail .rack-description { display:none; }
+.rack-dialog-return { display:block;margin-top:20px;width:100%;min-height:48px;cursor:pointer; }
+@media(max-width:760px) { body.page-home #main { height:calc(100dvh - 65px); } body.page-home .is-depth>.wrap { padding:0 12px; } .rack-mobile-detail .rack-detail { grid-template-columns:1fr;gap:12px; } .rack-mobile-detail .rack-large img { height:38dvh; } }
+
+body.page-home .rack-track{touch-action:none}
+
+@media(max-width:800px){body.page-home #main{height:calc(100dvh - 65px)}}
