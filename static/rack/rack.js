@@ -1,8 +1,10 @@
 import {rackLayout,clampPhase} from './layout.mjs';
 import {advanceRack,wheelDistance} from './motion.mjs';
+import {mountHalftone} from './halftone.js?v=1';
 
 const root=document.querySelector('[data-rack]');
 if(root?.querySelector('[data-rack-data]')){
+ const ambient=mountHalftone(root);
  const products=JSON.parse(root.querySelector('[data-rack-data]').textContent);
  const pieces=[...root.querySelectorAll('[data-rack-index]')],track=root.querySelector('.rack-track');
  const q=name=>root.querySelector('[data-rack-'+name+']');
@@ -86,6 +88,7 @@ if(root?.querySelector('[data-rack-data]')){
   const canMove=pieces[checkpoint]?.classList.contains('is-ready');
   if(canMove){visualPhase=instantTarget||reduced.matches?phase:advanceRack(visualPhase,phase,dt);instantTarget=false}
   animation=Math.abs(phase-visualPhase)>.0005;
+  ambient.setBusy(animation||!!drag||dialog.open||zoom.open);
   root.classList.toggle('is-moving',animation);
   const front=rackLayout(0,0,width,height),slope=front.stepY/front.stepX;
   const startX=front.x-width*.35,startY=front.y-width*.35*slope,length=width*1.28;
@@ -107,7 +110,7 @@ if(root?.querySelector('[data-rack-data]')){
  }
  function schedule(){if(!frame)frame=requestAnimationFrame(layout)}
  function go(value,{choose=true,instant=false}={}){
-  phase=clampPhase(value,products.length);instantTarget=instantTarget||instant;hovered=-1;picked=false;
+  ambient.setBusy(true);phase=clampPhase(value,products.length);instantTarget=instantTarget||instant;hovered=-1;picked=false;
   if(choose&&dialog.open)updateDetails(Math.round(phase));schedule();
  }
  const observer=new ResizeObserver(entries=>{width=entries[0].contentRect.width;height=entries[0].contentRect.height;schedule()});observer.observe(track);
@@ -132,7 +135,7 @@ if(root?.querySelector('[data-rack-data]')){
  });
  track.addEventListener('pointerdown',event=>{
   if(event.button!==0||event.isPrimary===false)return;
-  phase=visualPhase;animation=null;instantTarget=false;root.classList.remove('is-moving');
+  ambient.setBusy(true);phase=visualPhase;animation=null;instantTarget=false;root.classList.remove('is-moving');
   drag={id:event.pointerId,x:event.clientX,y:event.clientY,phase,lastX:event.clientX,lastTime:event.timeStamp,velocity:0,moved:false};
  });
  track.addEventListener('pointermove',event=>{
@@ -144,7 +147,7 @@ if(root?.querySelector('[data-rack-data]')){
  });
  function release(event){
   if(!drag||event.pointerId!==drag.id)return;const state=drag;drag=null;root.classList.remove('is-dragging');
-  if(state.moved){suppressClick=true;setTimeout(()=>suppressClick=false,350);const momentum=event.type==='pointercancel'?0:Math.max(-.7,Math.min(.7,state.velocity*.25));go(Math.round(phase+momentum));}
+  if(state.moved){suppressClick=true;setTimeout(()=>suppressClick=false,350);const momentum=event.type==='pointercancel'?0:Math.max(-.7,Math.min(.7,state.velocity*.25));go(Math.round(phase+momentum));}schedule();
  }
  track.addEventListener('pointerup',release);track.addEventListener('pointercancel',release);track.addEventListener('lostpointercapture',release);
  track.addEventListener('dragstart',event=>event.preventDefault());
@@ -154,7 +157,8 @@ if(root?.querySelector('[data-rack-data]')){
   const delta=primary*(event.deltaMode===1?16:event.deltaMode===2?height:1);if(!delta)return;
   event.preventDefault();wheelDirection=Math.sign(delta);go(phase+wheelDistance(delta));clearTimeout(wheelTimer);wheelTimer=setTimeout(()=>go(wheelDirection>0?Math.ceil(phase-.001):Math.floor(phase+.001)),220);
  },{passive:false});
- q('enlarge').onclick=()=>{q('zoom-photo').src=large.src;q('zoom-photo').alt=large.alt;zoom.showModal()};q('close').onclick=()=>zoom.close();zoom.onclick=event=>{if(event.target===zoom)zoom.close()};
+ zoom.addEventListener('close',schedule);
+ q('enlarge').onclick=()=>{ambient.setBusy(true);q('zoom-photo').src=large.src;q('zoom-photo').alt=large.alt;zoom.showModal()};q('close').onclick=()=>zoom.close();zoom.onclick=event=>{if(event.target===zoom)zoom.close()};
  document.addEventListener('visibilitychange',()=>{if(document.hidden){clearTimeout(wheelTimer);if(frame)cancelAnimationFrame(frame);frame=0;phase=Math.round(phase);visualPhase=phase;animation=null;root.classList.remove('is-dragging');drag=null}else schedule()});
  window.addEventListener('pagehide',()=>{observer.disconnect();clearTimeout(wheelTimer);if(frame)cancelAnimationFrame(frame)});
  window.addEventListener('pageshow',event=>{if(event.persisted){observer.observe(track);schedule()}});

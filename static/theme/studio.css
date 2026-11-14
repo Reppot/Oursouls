@@ -296,3 +296,8 @@ body.os-editorial.page-home .rack-navigation button{background:#fff;border-color
 body.os-editorial.page-home .rack-navigation button:hover:not(:disabled){background:#edf2ee}
 body.os-editorial.page-home .rack-track:focus-visible,body.os-editorial.page-home .rack-piece:focus-visible,body.os-editorial.page-home .rack-navigation button:focus-visible,body.os-editorial.page-home .site-header :focus-visible{outline-color:#355b42}
 @media(max-width:800px){body.os-editorial.page-home .site-header .site-nav{background:#fff;border-color:#dce3dd}}
+
+/* Selected ambient art: offset halftone, behind all rack interaction. */
+body.page-home .rack-section{position:relative;isolation:isolate}
+body.page-home .rack-ambient{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;user-select:none}
+body.page-home .rack-section>.wrap{position:relative;z-index:1}
