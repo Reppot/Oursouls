@@ -281,8 +281,18 @@ body.os-editorial .product-card .product-image,body.os-editorial .product-galler
 
 /* Trim the exterior fringe of the eight legacy alpha mattes only. */
 
-/* A light diagonal studio backdrop stays behind every garment. */
-body.page-home .rack-track::before{content:"";position:absolute;inset:0 -60px;z-index:0;background:#f1f2ef;clip-path:polygon(0 4%,100% 29%,100% calc(var(--rack-band-bottom,94%) + 8%),0 var(--rack-band-bottom,94%));pointer-events:none}
 body.page-home .is-depth.is-moving .rack-piece{transition:none}
 body.page-home .rack-piece [data-rack-photo]{filter:drop-shadow(3px 9px 8px #16221824)}
-@media(max-width:600px){body.page-home .rack-track::before{inset:0 -25px;clip-path:polygon(0 2%,100% 14%,100% calc(var(--rack-band-bottom,75%) + 8%),0 var(--rack-band-bottom,75%))}}
+
+/* White homepage canvas; ready for the next graphic layers. */
+body.os-editorial.page-home{background:#fff}
+body.os-editorial.page-home .rack-section,body.os-editorial.page-home .rack-section.is-depth{background:#fff;color:#202927}
+body.os-editorial.page-home .site-header{background:#fff;color:#202927;border-bottom-color:transparent}
+body.os-editorial.page-home .site-header .wordmark{color:#173b33}
+body.os-editorial.page-home .site-header .site-nav a,body.os-editorial.page-home .header-actions a,body.os-editorial.page-home .mobile-menu-toggle,body.os-editorial.page-home .nav-more{color:#26382e}
+body.os-editorial.page-home .site-header .site-nav a:hover,body.os-editorial.page-home .site-header .site-nav a[aria-current]{color:#173b33}
+body.os-editorial.page-home .nav-more>div{background:#fff;border-color:#c4cec7;box-shadow:0 12px 26px #173b3314}
+body.os-editorial.page-home .rack-navigation button{background:#fff;border-color:#bec9c0;color:#173b33}
+body.os-editorial.page-home .rack-navigation button:hover:not(:disabled){background:#edf2ee}
+body.os-editorial.page-home .rack-track:focus-visible,body.os-editorial.page-home .rack-piece:focus-visible,body.os-editorial.page-home .rack-navigation button:focus-visible,body.os-editorial.page-home .site-header :focus-visible{outline-color:#355b42}
+@media(max-width:800px){body.os-editorial.page-home .site-header .site-nav{background:#fff;border-color:#dce3dd}}

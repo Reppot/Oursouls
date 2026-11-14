@@ -8,7 +8,7 @@ if(root?.querySelector('[data-rack-data]')){
  const q=name=>root.querySelector('[data-rack-'+name+']');
  const form=q('form'),large=q('large'),zoom=root.querySelector('.rack-zoom'),rail=root.querySelector('.rack-rail');
  const reduced=matchMedia('(prefers-reduced-motion: reduce)'),mobile=matchMedia('(max-width: 700px)');
- const variants=new Map(),sizes=new Map(),activePieces=new Set(),preparedPieces=new Set();let warmStamp='',lastBandSize='',lastFrameTime=0,instantTarget=false,wheelDirection=0;let detailsKey='';
+ const variants=new Map(),sizes=new Map(),activePieces=new Set(),preparedPieces=new Set();let warmStamp='',lastFrameTime=0,instantTarget=false,wheelDirection=0;let detailsKey='';
  let phase=0,visualPhase=0,animation=null,previewIndex=0,hovered=-1,picked=false,width=0,height=0,frame=0,drag=null,wheelTimer,suppressClick=false;
 
  if(!q('return')){const button=document.createElement('button');button.type='button';button.className='rack-return';button.dataset.rackReturn='';button.textContent='← Вернуть на вешалку';button.hidden=true;root.querySelector('.rack-wardrobe').append(button)}
@@ -91,11 +91,6 @@ if(root?.querySelector('[data-rack-data]')){
   const startX=front.x-width*.35,startY=front.y-width*.35*slope,length=width*1.28;
   rail.style.cssText=`left:${startX}px;top:${startY}px;width:${length}px;transform:rotate(${Math.atan(slope)*180/Math.PI}deg)`;
   track.style.setProperty('--piece-width',front.pieceWidth+'px');
-  const bandSize=width+':'+height;
-  if(bandSize!==lastBandSize){
-   let bottom=0;for(let i=0;i<10;i++){const p=rackLayout(i,0,width,height);bottom=Math.max(bottom,p.y+p.pieceWidth*1.38*p.scale)}
-   track.style.setProperty('--rack-band-bottom',Math.min(height,bottom+32)+'px');lastBandSize=bandSize;
-  }
   const nearest=Math.round(visualPhase);
   pieces.forEach((piece,i)=>{
    const nearby=i>=Math.floor(visualPhase)-1&&i<=Math.ceil(visualPhase)+9;
