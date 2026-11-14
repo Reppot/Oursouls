@@ -88,7 +88,7 @@ def health():
 
 @app.get('/')
 def home():
-    featured = sorted((p for p in public_products() if p['home_featured']), key=lambda p:p['home_position'])[:12]
+    featured = sorted(public_products(), key=lambda p:(not p['home_featured'], p['home_position'] if p['home_featured'] else p['position']))
     return render_template('home.html', title='Одежда и печать', products=featured)
 
 @app.route('/services/', methods=['GET', 'POST'])

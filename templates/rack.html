@@ -8,12 +8,12 @@
         {% for p in products %}
           <a class="rack-piece {{ 'is-selected' if loop.first }}" href="{{ url_for('product',slug=p.slug) }}" data-rack-index="{{ loop.index0 }}" aria-label="Рассмотреть {{ p.name }}" draggable="false">
             <img class="rack-hanger" src="/static/rack/wood-hanger.webp" alt="" aria-hidden="true" draggable="false">
-            <img src="{{ p.variants[0].rack_image or p.variants[0].images.front }}" alt="{{ p.name }}" width="600" height="700" loading="{{ 'eager' if loop.index < 4 else 'lazy' }}" data-rack-photo draggable="false">
+            <img {% if loop.index < 4 %}src="{{ p.variants[0].rack_image or p.variants[0].images.front }}"{% endif %} alt="{{ p.name }}" width="600" height="700" loading="{{ 'eager' if loop.index < 4 else 'lazy' }}" data-rack-photo draggable="false">
             <span class="rack-piece-name">{{ p.name }}</span>
           </a>
         {% endfor %}
         </div>
-        <div class="rack-navigation"><span data-rack-count role="status" aria-live="polite">1 / {{ products|length }}</span><p class="rack-sr-only">Листай колесом мыши или стрелками</p><div><button type="button" data-rack-prev aria-label="Предыдущая вещь">←</button><button type="button" data-rack-next aria-label="Следующая вещь">→</button></div></div>
+        <div class="rack-navigation"><p class="rack-sr-only">Листай колесом мыши или стрелками</p><div><button type="button" data-rack-prev aria-label="Предыдущая вещь">←</button><button type="button" data-rack-next aria-label="Следующая вещь">→</button></div></div>
         <button class="rack-return" type="button" data-rack-return hidden>← Вернуть на вешалку</button>
       </div>
       <section class="rack-detail" aria-label="Выбранная вещь">

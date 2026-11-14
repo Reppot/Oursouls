@@ -147,6 +147,8 @@ body.page-home .rack-navigation { justify-content:center;border:0;min-height:56p
 .rack-dialog-return { display:block;margin-top:20px;width:100%;min-height:48px;cursor:pointer; }
 @media(max-width:760px) { body.page-home #main { height:calc(100dvh - 65px); } body.page-home .is-depth>.wrap { padding:0 12px; } .rack-mobile-detail .rack-detail { grid-template-columns:1fr;gap:12px; } .rack-mobile-detail .rack-large img { height:38dvh; } }
 
-body.page-home .rack-track{touch-action:none}
+body.page-home .rack-track{touch-action:pinch-zoom}
 
 @media(max-width:800px){body.page-home #main{height:calc(100dvh - 65px)}}
+
+.is-depth .rack-piece[hidden]{display:none}

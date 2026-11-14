@@ -1,4 +1,5 @@
 import os
+import json
 import re
 import tempfile
 import unittest
@@ -18,6 +19,16 @@ class StorefrontTests(unittest.TestCase):
         self.admin.start()
         web.app.testing=True
         self.client=web.app.test_client()
+
+    def test_home_rack_contains_every_published_product_without_counter(self):
+        response=self.client.get('/')
+        html=response.get_data(as_text=True)
+        payload=re.search(r'<script type="application/json" data-rack-data>(.*?)</script>',html,re.S)
+        items=json.loads(payload.group(1))
+        expected={p['id'] for p in web.store.list_products() if p.get('published',True)}
+        self.assertEqual({p['id'] for p in items},expected)
+        self.assertGreater(len(items),12)
+        self.assertNotIn('data-rack-count',html)
 
     def tearDown(self):
         self.admin.stop();self.env.stop();self.folder.cleanup()

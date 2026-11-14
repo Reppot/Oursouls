@@ -2,7 +2,7 @@
 const cache = new Map();
 export async function studioCutout(url, maximum = 1100) {
     const key = url + ':' + maximum;
-    if (cache.has(key)) return cache.get(key);
+    if (cache.has(key)) {const task=cache.get(key);cache.delete(key);cache.set(key,task);return task;}
     const task = (async () => {
         const image = new Image(); image.crossOrigin = 'anonymous'; image.src = url;
         await image.decode();
@@ -26,5 +26,5 @@ export async function studioCutout(url, maximum = 1100) {
         out.getContext('2d').drawImage(canvas,l,t,out.width,out.height,0,0,out.width,out.height);
         return out;
     })();
-    cache.set(key,task);try{return await task}catch(error){cache.delete(key);throw error}
+    cache.set(key,task);while(cache.size>12)cache.delete(cache.keys().next().value);try{return await task}catch(error){cache.delete(key);throw error}
 }

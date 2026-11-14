@@ -8,13 +8,14 @@ if(root?.querySelector('[data-rack-data]')){
  const q=name=>root.querySelector('[data-rack-'+name+']');
  const form=q('form'),large=q('large'),zoom=root.querySelector('.rack-zoom'),rail=root.querySelector('.rack-rail');
  const reduced=matchMedia('(prefers-reduced-motion: reduce)'),mobile=matchMedia('(max-width: 700px)');
- const variants=new Map(),sizes=new Map();let detailsKey='';
+ const variants=new Map(),sizes=new Map(),activePieces=new Set();let detailsKey='';
  let phase=0,visualPhase=0,animation=null,previewIndex=0,hovered=-1,picked=false,width=0,height=0,frame=0,drag=null,wheelTimer,suppressClick=false;
 
  if(!q('return')){const button=document.createElement('button');button.type='button';button.className='rack-return';button.dataset.rackReturn='';button.textContent='← Вернуть на вешалку';button.hidden=true;root.querySelector('.rack-wardrobe').append(button)}
  if(!q('description')){const paragraph=document.createElement('p');paragraph.className='rack-description';paragraph.dataset.rackDescription='';q('price').after(paragraph)}
  const back=q('return');root.querySelector('.rack-navigation').insertBefore(back,root.querySelector('.rack-navigation p'));
  if(!q('gallery')){const gallery=document.createElement('div');gallery.className='rack-gallery';gallery.dataset.rackGallery='';gallery.setAttribute('role','group');gallery.setAttribute('aria-label','Фотографии изделия');q('description').after(gallery)}
+ pieces.forEach(piece=>{piece.hidden=true;piece.tabIndex=-1;piece.classList.remove('is-selected');piece.setAttribute('aria-current','false')});
  root.dataset.enhanced='true';root.classList.add('is-depth');track.prepend(rail);
  const detail=root.querySelector('.rack-detail'),placeholder=document.createComment('rack detail');detail.before(placeholder);
  const dialog=document.createElement('dialog');dialog.className='rack-mobile-detail';dialog.setAttribute('aria-label','Выбранная вещь');
@@ -22,11 +23,22 @@ if(root?.querySelector('[data-rack-data]')){
  const returnToRack=()=>{picked=false;hovered=-1;placeholder.after(detail);schedule();track.focus({preventScroll:true})};close.onclick=()=>dialog.close();dialog.addEventListener('close',returnToRack);const returnButton=document.createElement('button');returnButton.type='button';returnButton.className='button rack-dialog-return';returnButton.textContent='Вернуться к вешалке';returnButton.onclick=()=>dialog.close();dialog.append(returnButton);
  mobile.addEventListener('change',()=>{if(!mobile.matches&&dialog.open)dialog.close();schedule()});
 
+ const cutoutQueue=[];let cutoutActive=0;
+ function drainCutouts(){
+  while(cutoutActive<2&&cutoutQueue.length){
+   const job=cutoutQueue.shift();
+   if(job.image.dataset.source!==job.url){job.resolve(null);continue}
+   cutoutActive++;
+   studioCutout(job.url,1000).then(job.resolve,job.reject).finally(()=>{cutoutActive--;drainCutouts()});
+  }
+ }
+ function cutout(image,url){return new Promise((resolve,reject)=>{cutoutQueue.push({image,url,resolve,reject});drainCutouts()})}
  async function photo(image,url,isCutout=false){
   image.dataset.source=url;image.src=url;
-  try{if(!isCutout){const canvas=await studioCutout(url,1000);if(image.dataset.source!==url)return;image.src=canvas.toDataURL('image/webp',.91)}image.classList.add('is-cutout');}
+  try{if(!isCutout){const canvas=await cutout(image,url);if(!canvas||image.dataset.source!==url)return;image.src=canvas.toDataURL('image/webp',.91)}image.classList.add('is-cutout');}
   catch{if(image.dataset.source!==url)return;image.classList.remove('is-cutout');}
-  image.closest('.rack-piece')?.classList.add('is-ready');
+  if(image.dataset.source!==url)return;
+  image.closest('.rack-piece')?.classList.add('is-ready');schedule();
  }
  function preparePiece(i,variant=products[i].variants[0]){
   const image=pieces[i].querySelector('[data-rack-photo]');if(image.dataset.variant===variant.id)return;image.dataset.variant=variant.id;photo(image,variant.rack_image||variant.images.front,!!variant.rack_image);
@@ -64,31 +76,34 @@ if(root?.querySelector('[data-rack-data]')){
   track.style.setProperty('--piece-width',front.pieceWidth+'px');
   const nearest=Math.round(phase);
   pieces.forEach((piece,i)=>{
+   const nearby=i>=Math.floor(visualPhase)-1&&i<=Math.ceil(visualPhase)+9;
+   if(!nearby){if(activePieces.delete(i)){piece.hidden=true;piece.tabIndex=-1;piece.classList.remove('is-selected');piece.setAttribute('aria-current','false');const image=piece.querySelector('[data-rack-photo]');image.dataset.source='';delete image.dataset.variant;image.removeAttribute('src');piece.classList.remove('is-ready')}return}
+   activePieces.add(i);piece.hidden=false;
    const point=rackLayout(i,visualPhase,width,height,{hovered:i===hovered,picked:picked&&i===nearest});
    piece.style.transform=`translate3d(${point.x}px,${point.y}px,0) rotate(${point.angle}deg) scale(${point.scale}) translate(${-point.hookX}px,${-point.hookY}px)`;
    piece.style.opacity=point.opacity*(picked&&i!==nearest?0:1);piece.style.zIndex=point.zIndex;
-   piece.style.pointerEvents=point.opacity<.1||(picked&&i!==nearest)?'none':'auto';piece.tabIndex=point.opacity<.1||(picked&&i!==nearest)?-1:0;
+   piece.style.pointerEvents=point.opacity<.1||(picked&&i!==nearest)?'none':'auto';piece.tabIndex=point.opacity<.1||!piece.classList.contains('is-ready')||(picked&&i!==nearest)?-1:0;
    piece.classList.toggle('is-selected',i===nearest);piece.setAttribute('aria-current',String(i===nearest));
    if(point.opacity>0&&i>=Math.floor(phase)&&i<=Math.floor(phase)+6)preparePiece(i,products[i].variants.find(v=>v.id===variants.get(products[i].id))||products[i].variants[0]);
   });
-  const count=`${nearest+1} / ${products.length}`;if(q('count').textContent!==count)q('count').textContent=count;q('prev').disabled=nearest===0;q('next').disabled=nearest===products.length-1;
+  q('prev').disabled=nearest===0;q('next').disabled=nearest===products.length-1;
   q('return').hidden=!picked;root.classList.toggle('has-picked',picked);if(animation)frame=requestAnimationFrame(layout);
  }
  function schedule(){if(!frame)frame=requestAnimationFrame(layout)}
  function go(value,{choose=true}={}){
   phase=clampPhase(value,products.length);animation=reduced.matches||Math.abs(phase-visualPhase)<.001?null:{from:visualPhase,to:phase,start:performance.now()};hovered=-1;picked=false;
-  if(choose)updateDetails(Math.round(phase));schedule();
+  if(choose&&dialog.open)updateDetails(Math.round(phase));schedule();
  }
  const observer=new ResizeObserver(entries=>{width=entries[0].contentRect.width;height=entries[0].contentRect.height;schedule()});observer.observe(track);
  q('prev').onclick=()=>go(Math.round(phase)-1);q('next').onclick=()=>go(Math.round(phase)+1);
  q('return').onclick=()=>{if(dialog.open)dialog.close();else returnToRack()};
 
  pieces.forEach((piece,i)=>{
-  piece.addEventListener('mouseenter',()=>{if(!mobile.matches&&!drag&&!picked){hovered=i;updateDetails(i);schedule()}});
+  piece.addEventListener('mouseenter',()=>{if(!mobile.matches&&!drag&&!picked){hovered=i;schedule()}});
 
-  piece.addEventListener('focus',()=>{if(!drag&&!dialog.open){hovered=mobile.matches?-1:i;updateDetails(i);schedule()}});
+  piece.addEventListener('focus',()=>{if(!drag&&!dialog.open){hovered=mobile.matches?-1:i;schedule()}});
   piece.addEventListener('click',event=>{
-   event.preventDefault();if(suppressClick)return;go(i);hovered=-1;
+   event.preventDefault();if(suppressClick)return;go(i);updateDetails(i);hovered=-1;
    picked=false;dialog.insertBefore(detail,returnButton);if(!dialog.open)dialog.showModal();schedule();
   });
  });
@@ -100,7 +115,7 @@ if(root?.querySelector('[data-rack-data]')){
   if(next!==undefined){event.preventDefault();go(next);track.focus({preventScroll:true})}
  });
  track.addEventListener('pointerdown',event=>{
-  if(event.button!==0)return;
+  if(event.button!==0||event.isPrimary===false)return;
   phase=visualPhase;animation=null;root.classList.remove('is-moving');
   drag={id:event.pointerId,x:event.clientX,y:event.clientY,phase,lastX:event.clientX,lastTime:event.timeStamp,velocity:0,moved:false};
  });
@@ -109,7 +124,7 @@ if(root?.querySelector('[data-rack-data]')){
   const dx=event.clientX-drag.x,dy=event.clientY-drag.y;
   if(!drag.moved){if(Math.max(Math.abs(dx),Math.abs(dy))<7)return;drag.axis=Math.abs(dy)>Math.abs(dx)?'y':'x';drag.moved=true;track.setPointerCapture(event.pointerId);root.classList.add('is-dragging');hovered=-1;picked=false;}
   event.preventDefault();const position=drag.axis==='y'?event.clientY:event.clientX;const previous=drag.axis==='y'?(drag.lastY??drag.y):drag.lastX;const dt=Math.max(1,event.timeStamp-drag.lastTime);drag.velocity=(previous-position)/dt;drag.lastX=event.clientX;drag.lastY=event.clientY;drag.lastTime=event.timeStamp;
-  phase=clampPhase(drag.phase-(drag.axis==='y'?dy:dx)/Math.max(70,width*.19),products.length);updateDetails(Math.round(phase));schedule();
+  phase=clampPhase(drag.phase-(drag.axis==='y'?dy:dx)/Math.max(70,width*.19),products.length);schedule();
  });
  function release(event){
   if(!drag||event.pointerId!==drag.id)return;const state=drag;drag=null;root.classList.remove('is-dragging');
