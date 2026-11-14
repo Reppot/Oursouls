@@ -1,8 +1,18 @@
 {% extends 'base.html' %}
 {% block content %}<main id="main" class="section"><div class="wrap"><a href="/catalog/">← Каталог</a>
 <div class="shop-product">
-<div class="shop-gallery"><img src="{{ variant.images.front }}" alt="{{ p.name }}, {{ variant.color_name }}" width="1000" height="1250" fetchpriority="high">{% if variant.images.back %}<img src="{{ variant.images.back }}" alt="{{ p.name }}, спина" width="1000" height="1250" loading="lazy">{% endif %}{% for photo in variant.images.details %}<img src="{{ photo }}" alt="{{ p.name }}, деталь {{ loop.index }}" width="1000" height="1250" loading="lazy">{% endfor %}</div>
-<section><p class="eyebrow">{{ p.category }}</p><h1>{{ p.name }}</h1><p class="shop-description">{{ p.description }}</p>
+{% set photos = namespace(items=[{'url':variant.images.front,'label':'Перед'}]) %}
+{% if variant.images.back %}{% set photos.items = photos.items + [{'url':variant.images.back,'label':'Спина'}] %}{% endif %}
+{% for photo in variant.images.details %}{% set photos.items = photos.items + [{'url':photo,'label':'Деталь ' ~ loop.index}] %}{% endfor %}
+<div class="shop-gallery product-gallery" data-product-gallery>
+  <a class="product-gallery-main" data-gallery-full href="{{ variant.images.front }}" target="_blank" rel="noopener" aria-label="Открыть фотографию изделия">
+    <img data-gallery-image src="{{ variant.images.front }}" alt="{{ p.name }}, {{ variant.color_name }}, перед" width="1000" height="1250" fetchpriority="high">
+  </a>
+  {% if photos.items|length > 1 %}<nav class="product-gallery-thumbs" aria-label="Фотографии изделия">
+    {% for photo in photos.items %}<a data-gallery-thumb href="{{ photo.url }}" data-label="{{ p.name }}, {{ variant.color_name }}, {{ photo.label|lower }}" aria-label="{{ photo.label }}" {% if loop.first %}aria-current="true"{% endif %} target="_blank" rel="noopener"><img src="{{ photo.url }}" alt="" width="120" height="150" loading="lazy"><span>{{ photo.label }}</span></a>{% endfor %}
+  </nav>{% endif %}
+</div>
+<section class="product-summary"><p class="product-category">{{ p.category }}</p><h1>{{ p.name }}</h1><p class="shop-description">{{ p.description }}</p>
 <p class="price">{% if p.sale_price is not none %}<del>{{ p.price|rub }}</del> <strong>{{ p.sale_price|rub }}</strong>{% elif p.price is not none %}{{ p.price|rub }}{% else %}Цена по запросу{% endif %}</p>
 <p>Цвет: <strong>{{ variant.color_name }}</strong></p><div class="product-colors">{% for v in p.variants %}<a href="?variant={{ v.id }}" aria-current="{{ 'true' if v.id==variant.id else 'false' }}"><i style="--swatch:{{ v.color_hex }}" aria-hidden="true"></i>{{ v.color_name }}</a>{% endfor %}</div>
 {% if p.available and variant.availability != 'unavailable' %}<form class="osp-add-form" method="post" action="/cart/" id="product-order"><input type="hidden" name="csrf" value="{{ csrf() }}"><input type="hidden" name="action" value="add"><input type="hidden" name="id" value="{{ p.id }}"><input type="hidden" name="variant_id" value="{{ variant.id }}">
@@ -11,4 +21,4 @@
 <button class="button">В корзину</button><p class="osp-muted">{{ 'В наличии' if variant.availability=='in_stock' else 'Наличие основы, стоимость и срок согласуем в Telegram.' }}</p></form>{% else %}<p>Этот вариант сейчас недоступен.</p>{% endif %}
 <a class="button outline shop-try" id="product-try" href="{{ url_for('constructor', try=p.slug, variant=variant.id) }}">Примерить на фото</a>
 <div class="product-information"><h2>Об изделии</h2>{% if p.material %}<p><strong>Состав:</strong> {{ p.material }}</p>{% endif %}{% if p.care %}<p><strong>Уход:</strong> {{ p.care }}</p>{% endif %}{% if p.get('fit_measurements') %}<h3>Замеры изделия</h3><p>Ширина под мышками, когда вещь лежит ровно.</p><table><thead><tr><th>Размер</th><th>Ширина, см</th></tr></thead><tbody>{% for size,width in p.fit_measurements.items() %}<tr><td>{{ size }}</td><td>{{ width }}</td></tr>{% endfor %}</tbody></table>{% else %}<p>Нужны замеры или помощь с размером? <a href="{{ telegram }}" target="_blank" rel="noopener">Напиши нам в Telegram</a>.</p>{% endif %}<p>Перед изготовлением согласуем основу, размещение принта и стоимость. Печать от одной вещи.</p><a href="/services/">Как заказать печать →</a></div>
-</section></div></div></main><script>document.getElementById('product-order')?.elements.size.addEventListener('change',function(){const a=document.getElementById('product-try'),u=new URL(a.href);u.searchParams.set('size',this.value);a.href=u.href});</script>{% endblock %}
+</section></div></div></main><script type="module" src="/static/theme/product-gallery.js?v=1"></script>{% endblock %}

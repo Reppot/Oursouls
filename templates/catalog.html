@@ -1,14 +1,29 @@
 {% extends 'base.html' %}
-{% block content %}
+{% block content %}<noscript><style>body.os-editorial .catalog-filters{display:block}</style></noscript>
 <main class="section" id="main">
   <div class="wrap">
-    <header class="shop-page-heading"><p class="breadcrumbs"><a href="/">Главная</a> / Каталог</p><p class="eyebrow">Все принты</p><h1>Каталог</h1></header>
-    <div class="catalog-mobile-tools"><button type="button" data-filter-toggle aria-expanded="false" aria-controls="catalog-search">Поиск и фильтры{% if category or search or selected_colors %} · выбраны{% endif %}</button></div>
-    {% if category or search or selected_colors %}<div class="catalog-active">{% if search %}<span>Поиск: {{ search }}</span>{% endif %}{% if category %}<span>{{ category }}</span>{% endif %}{% for color in selected_colors %}<span>{{ color }}</span>{% endfor %}<a href="/catalog/">Сбросить всё ×</a></div>{% endif %}
+    <header class="shop-page-heading"><p class="breadcrumbs"><a href="/">Главная</a> / Каталог</p><h1>Каталог</h1></header>
+    {% if category or search or selected_colors or minimum is not none or maximum is not none %}<div class="catalog-active">{% if search %}<span>Поиск: {{ search }}</span>{% endif %}{% if category %}<span>{{ category }}</span>{% endif %}{% for color in selected_colors %}<span>{{ color }}</span>{% endfor %}{% if minimum is not none %}<span>От {{ minimum }} ₽</span>{% endif %}{% if maximum is not none %}<span>До {{ maximum }} ₽</span>{% endif %}<a href="/catalog/">Сбросить всё ×</a></div>{% endif %}
+        <div class="catalog-tools"><button class="catalog-filter-toggle" type="button" data-filter-toggle aria-expanded="false" aria-controls="catalog-filter-panel">Поиск и фильтры{% if category or search or selected_colors or minimum is not none or maximum is not none %} · выбраны{% endif %}</button>
+        <form method="get" class="catalog-toolbar" action="/catalog/">
+          <input type="hidden" name="q" value="{{ search }}">
+          <input type="hidden" name="category" value="{{ category }}">
+          {% for color in selected_colors %}<input type="hidden" name="color" value="{{ color }}">{% endfor %}
+          {% if minimum is not none %}<input type="hidden" name="min" value="{{ minimum }}">{% endif %}
+          {% if maximum is not none %}<input type="hidden" name="max" value="{{ maximum }}">{% endif %}
+          <div>
+            <select name="sort" aria-label="Сортировка" data-sort>
+              {% for key, label in [('', 'По умолчанию'), ('new', 'Сначала новые'), ('price-up', 'По возрастанию цены'), ('price-down', 'По убыванию цены')] %}
+              {% if has_prices or key not in ['price-up','price-down'] %}<option value="{{ key }}" {{ 'selected' if key == sort }}>{{ label }}</option>{% endif %}
+              {% endfor %}
+            </select>
+            <noscript><button type="submit">Применить</button></noscript>
+          </div>
+          <p class="osp-muted">Товаров: {{ count }}</p>
+        </form></div>
     <div class="osp-catalog">
-      <aside class="catalog-filters">
-        <form id="catalog-search" action="/catalog/" method="get">
-          <h2>Фильтры</h2>
+      <section class="catalog-filters" id="catalog-filter-panel" aria-label="Поиск и фильтры">
+        <form id="catalog-search" class="catalog-filter-form" action="/catalog/" method="get">
           <input type="hidden" name="sort" value="{{ sort }}">
           <label>Поиск<input type="search" name="q" placeholder="Название или артикул" value="{{ search }}" maxlength="100"></label>
           <fieldset>
@@ -33,24 +48,9 @@
           <button class="button" type="submit">Применить фильтры</button>
           <a class="clear-filters" href="/catalog/">Сбросить</a>
         </form>
-      </aside>
-      <div>
-        <form method="get" class="catalog-toolbar" action="/catalog/">
-          <input type="hidden" name="q" value="{{ search }}">
-          <input type="hidden" name="category" value="{{ category }}">
-          {% for color in selected_colors %}<input type="hidden" name="color" value="{{ color }}">{% endfor %}
-          {% if minimum is not none %}<input type="hidden" name="min" value="{{ minimum }}">{% endif %}
-          {% if maximum is not none %}<input type="hidden" name="max" value="{{ maximum }}">{% endif %}
-          <div>
-            <select name="sort" aria-label="Сортировка" data-sort>
-              {% for key, label in [('', 'По умолчанию'), ('new', 'Сначала новые'), ('price-up', 'По возрастанию цены'), ('price-down', 'По убыванию цены')] %}
-              {% if has_prices or key not in ['price-up','price-down'] %}<option value="{{ key }}" {{ 'selected' if key == sort }}>{{ label }}</option>{% endif %}
-              {% endfor %}
-            </select>
-            <noscript><button type="submit">Применить</button></noscript>
-          </div>
-          <p class="osp-muted">Товаров: {{ count }}</p>
-        </form>
+      </section>
+      <div class="catalog-results">
+
         {% include 'cards.html' %}
         {% if pages > 1 %}<nav class="osp-pagination" aria-label="Страницы каталога">{% for n in range(1,pages+1) %}<a class="page-numbers {{ 'current' if n == page }}" {% if n == page %}aria-current="page"{% endif %} href="{{ pagination[n] }}">{{ n }}</a>{% endfor %}</nav>{% endif %}
       </div>

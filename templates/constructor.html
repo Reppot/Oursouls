@@ -8,7 +8,7 @@
     data-sample="/static/studio/example-print.png">
 <div class="os-studio-wrap">
     <header class="os-studio-intro">
-        <div><p class="os-studio-kicker">OUR SOULS / ПЕЧАТЬ НА ЗАКАЗ</p><h1>Конструктор</h1>
+        <div><h1>Конструктор</h1>
         <p>Выбери одежду и примерь свой принт. Перед и спину можно оформить отдельно.</p></div>
             <div class="os-tabs" role="tablist" aria-label="Этапы настройки">
                 <button type="button" id="op-tab-garment" role="tab" data-tab="garment" aria-controls="op-panel-garment" aria-selected="true"><span>01</span>Одежда</button>
@@ -16,7 +16,7 @@
                 <button type="button" id="op-tab-order" role="tab" data-tab="order" aria-controls="op-panel-order" aria-selected="false" tabindex="-1"><span>03</span>Заказ</button>
             </div>
     </header>
-    <div class="os-draft-bar"><button type="button" id="op-undo" disabled>Отменить</button><button type="button" id="op-redo" disabled>Повторить</button><button type="button" id="op-to-cart">Добавить макет в корзину</button><button type="button" id="op-import-button">Открыть проект</button><input type="file" id="op-import-project" accept=".zip,application/zip" hidden><select id="op-import-choice" aria-label="Макет из архива" hidden></select><button type="button" id="op-new-design">Новый макет</button><span id="op-draft-status" role="status">Макет на этом устройстве</span></div>
+    <div class="os-draft-bar"><button type="button" id="op-undo" disabled>Отменить</button><button type="button" id="op-redo" disabled>Повторить</button><span id="op-draft-status" role="status">Макет на этом устройстве</span><details class="os-project-menu"><summary>Проект</summary><div><button type="button" id="op-import-button">Открыть проект</button><button type="button" id="op-new-design">Новый макет</button></div></details><input type="file" id="op-import-project" accept=".zip,application/zip" hidden><select id="op-import-choice" aria-label="Макет из архива" hidden></select></div>
     <div class="os-studio-grid">
             <div id="op-panel-garment" class="os-panel os-garment-rail" role="tabpanel" aria-labelledby="op-tab-garment">
                 <div class="os-panel-title"><h2>Выбери основу</h2><p>Форма, ткань и цвет будущей вещи.</p></div>
@@ -115,6 +115,7 @@
                 <label>Количество<input id="op-qty" type="number" min="1" max="9999" step="1" value="1"></label>
                 <label>Пожелания к заказу<textarea id="op-comment" rows="3" placeholder="Например, хочу печать на своей футболке"></textarea></label>
                 <button type="button" id="op-download-order" class="os-primary os-next">Подготовить заказ <span aria-hidden="true">→</span></button>
+                <button type="button" id="op-to-cart" class="os-secondary os-cart-design">Добавить макет в корзину</button>
                 <p class="os-small">В ZIP будут макет, детали заказа и файлы принтов. Стоимость и наличие согласуем в Telegram.</p>
                 <button type="button" class="os-text-button" data-next="print">← Вернуться к принтам</button>
 
@@ -126,5 +127,5 @@
 {% include "fitting.html" %}
 </section></main>
 
-<script defer src='/static/studio/constructor.js?v=4.2'></script>
+<script defer src='/static/studio/constructor.js?v=4.3'></script>
 {% endblock %}

@@ -115,11 +115,12 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
     }
     function garment(c, which, edit, transparent = false) {
         c.save();
+        const studioSurface=c.canvas===cv||c.canvas===q('review-front')||c.canvas===q('review-back');
         const bg = c.createRadialGradient(300,300,20,300,350,480);
-        bg.addColorStop(0,'#fafaf7'); bg.addColorStop(1,'#e5e5df');
+        bg.addColorStop(0,studioSurface?'#46554d':'#fafaf7'); bg.addColorStop(1,studioSurface?'#2b3730':'#e5e5df');
         if (!transparent) { c.fillStyle = bg; c.fillRect(0,0,600,700); }
         const photo = coloredPhoto(which);
-        c.textAlign = 'center'; c.fillStyle = '#52604d';
+        c.textAlign = 'center'; c.fillStyle = studioSurface?'#e3ebe6':'#52604d';
         if (!photo) {
             c.font = '18px Arial';
             c.fillText(photoError ? 'Макет не загрузился. Обнови страницу.' : 'Готовим студийный макет…',300,350);
@@ -492,6 +493,7 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
         if(!ready())return;q('to-cart').disabled=true;
         try{const project=await packageProject();await drafts.save(project);window.location.href='/cart/'}catch(error){status(error.message||'Не удалось добавить макет. Можно скачать заказ прямо здесь.',true)}finally{q('to-cart').disabled=false}
     };
+    root.querySelector('.os-project-menu')?.addEventListener('click',event=>{if(event.target.closest('button'))event.currentTarget.open=false});
     q('import-project').onchange=async event=>{
         const file=event.target.files[0];if(!file)return;status('Открываем проект…');
         try{const {importDesignArchive}=await import('./project-import.js');const projects=await importDesignArchive(file);
