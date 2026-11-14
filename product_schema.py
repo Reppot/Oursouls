@@ -1,6 +1,12 @@
 """Backward compatible product variants. Prices remain in integer kopecks."""
 from copy import deepcopy
 import re
+import json
+from pathlib import Path
+
+_cutouts=Path(__file__).resolve().parent/'static'/'rack'/'cutouts.json'
+RACK_CUTOUTS=json.loads(_cutouts.read_text(encoding='utf-8')) if _cutouts.exists() else {}
+_derived_cutouts=frozenset(RACK_CUTOUTS.values())
 
 SIZES = ('S', 'M', 'L', 'XL', '2XL', '3XL')
 COLOR_HEX = {'Чёрный':'#202321', 'Белый':'#f7f7f2', 'Тёмно-зелёный':'#294531',
@@ -23,6 +29,12 @@ def normalize_product(doc):
             availability='on_request' if p.get('available') else 'unavailable',
             images=dict(front=photos[0] if photos else '', back=None, details=photos[1:]),
             rack_image=None)]
+    for variant in p['variants']:
+        default=RACK_CUTOUTS.get(variant['images']['front'])
+        if variant.get('rack_image') in _derived_cutouts and variant['rack_image']!=default:
+            variant['rack_image']=None
+        if not variant.get('rack_image') and default:
+            variant['rack_image']=default
     return p
 
 

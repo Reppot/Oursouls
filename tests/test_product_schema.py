@@ -31,6 +31,12 @@ class ProductSchemaTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate_variant_selection(p, 'legacy-11', 'M')
 
+    def test_derived_rack_photo_is_not_reused_after_front_replacement(self):
+        p=normalize_product(self.seed)
+        self.assertTrue(p['variants'][0]['rack_image'].startswith('/static/rack/images/'))
+        p['variants'][0]['images']['front']='/static/new-product-photo.webp'
+        self.assertIsNone(normalize_product(p)['variants'][0]['rack_image'])
+
 
 if __name__ == '__main__':
     unittest.main()
