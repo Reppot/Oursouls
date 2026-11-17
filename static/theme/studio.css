@@ -595,3 +595,9 @@ body.os-editorial .about-banner .center-title :is(h1,h2,p),body.os-editorial .ab
 body.os-editorial :is(.osp-cart-item,.osp-order-summary,.osp-empty-cart,.local-project){color:#111}
 body.os-editorial .osp-empty-cart :is(h2,p){color:#111}
 body.page-constructor #our-print .os-project-menu summary{color:#eee;border-color:#aaa}
+
+body.os-editorial .brand-banner.about-banner .center-title p:not(.eyebrow){color:#e3e3df}
+body.page-constructor #our-print .fit-dialog .fit-preview-label{color:#fff}
+body.page-constructor #our-print .fit-dialog .fit-upload{background:#f3f3ef;border-color:#686862;color:#111}
+body.page-constructor #our-print .fit-dialog input[type=range]::-webkit-slider-thumb{background:#b40020;border-color:#b40020}
+body.page-constructor #our-print .fit-dialog input[type=range]::-moz-range-thumb{background:#b40020;border-color:#b40020}
