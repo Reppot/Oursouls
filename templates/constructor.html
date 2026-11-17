@@ -9,7 +9,7 @@
 <div class="os-studio-wrap">
     <header class="os-studio-intro">
         <div><h1>Конструктор</h1>
-        <p>Выбери одежду и примерь свой принт. Перед и спину можно оформить отдельно.</p></div>
+        <p>Выбери одежду и добавь свой принт. Перед и спину можно оформить отдельно.</p></div>
             <div class="os-tabs" role="tablist" aria-label="Этапы настройки">
                 <button type="button" id="op-tab-garment" role="tab" data-tab="garment" aria-controls="op-panel-garment" aria-selected="true"><span>01</span>Одежда</button>
                 <button type="button" id="op-tab-print" role="tab" data-tab="print" aria-controls="op-panel-print" aria-selected="false" tabindex="-1"><span>02</span>Принт</button>
@@ -41,7 +41,7 @@
             </div>
 
         <section class="os-studio-stage" aria-label="Предпросмотр одежды">
-            <div class="os-stage-top"><span id="op-stage-model">Футболка</span><button class="os-secondary" type="button" id="op-open-fitting">Примерить</button><span id="op-render-mode" class="os-stage-badge">Загрузка…</span></div>
+            <div class="os-stage-top"><span id="op-stage-model">Футболка</span><span id="op-render-mode" class="os-stage-badge">Загрузка…</span></div>
             <div class="os-stage-viewport" id="op-viewport" aria-busy="true">
                 <canvas id="op-canvas" width="600" height="700" tabindex="0" aria-label="Студийный макет одежды"></canvas>
                 <div id="op-touch-target" aria-hidden="true" hidden></div><div id="op-webgl" class="os-webgl" hidden></div>
@@ -59,7 +59,7 @@
         </section>
         <section class="os-studio-settings" aria-label="Настройки конструктора">
             <div id="op-panel-print" class="os-panel" role="tabpanel" aria-labelledby="op-tab-print">
-                <div class="os-panel-title"><h2>Примерь принт</h2><p>До 10 изображений на весь макет. Выбери сторону, затем добавь принты.</p></div>
+                <div class="os-panel-title"><h2>Добавь принт</h2><p>До 10 изображений на весь макет. Выбери сторону, затем добавь принты.</p></div>
                 <div class="os-segment os-side-selector" role="group" aria-label="Сторона для печати"><button type="button" data-side="front" aria-pressed="true">Перед <span data-file-dot="front" hidden></span></button><button type="button" data-side="back" aria-pressed="false">Спина <span data-file-dot="back" hidden></span></button></div>
                 <p class="os-layer-count">Принты на макете <strong id="op-layer-count">0 / 10</strong></p>
                 <label class="os-upload" id="op-drop">
@@ -124,8 +124,7 @@
         </section>
     </div>
 </div>
-{% include "fitting.html" %}
 </section></main>
 
-<script defer src="/static/studio/constructor.js?v=20261117e"></script>
+<script defer src="/static/studio/constructor.js?v=20261117f"></script>
 {% endblock %}

@@ -61,10 +61,10 @@ with TemporaryDirectory(dir=Path.cwd()) as tmp:
     assert client.post('/admin/product/new/',data=data).location == '/admin/'
     p = next(p for p in app.store.list_products() if p['sku']=='TEST-001')
     assert p['fit_measurements'] == {'M':52.5,'L':55}
-    fitting = client.get('/constructor/?try='+p['slug'])
-    assert fitting.status_code == 200 and 'fitting-product' in fitting.get_data(as_text=True)
-    assert '"M": 52.5' in fitting.get_data(as_text=True)
-    assert client.get('/constructor/?try=missing-product').status_code == 404
+    legacy = client.get('/constructor/?try='+p['slug'])
+    assert legacy.status_code == 302 and legacy.location == '/constructor/'
+    assert 'op-fitting' not in client.get('/constructor/').get_data(as_text=True)
+    assert client.get('/constructor/?try=missing-product').location == '/constructor/'
     assert p['price'] == 250000 and p['sale_price'] == 190000 and p['images']
     product = client.get('/product/'+p['slug']+'/')
     assert '1 900 ₽' in product.get_data(as_text=True)
@@ -79,7 +79,7 @@ with TemporaryDirectory(dir=Path.cwd()) as tmp:
     data.update(csrf=token(client.get('/admin/product/'+p['id']+'/')),name='Скрытая футболка')
     assert client.post('/admin/product/'+p['id']+'/',data=data).status_code == 302
     assert client.get('/product/'+p['slug']+'/').status_code == 404
-    assert client.get('/constructor/?try='+p['slug']).status_code == 404
+    assert client.get('/constructor/?try='+p['slug']).location == '/constructor/'
     assert next(x for x in app.store.list_products() if x['id']==p['id'])['fit_measurements'] == {'M':52.5,'L':55}
     data.update(fit_measurements_present='1', fit_M='nan')
     assert client.post('/admin/product/'+p['id']+'/',data=data).status_code == 400

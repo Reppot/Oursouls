@@ -123,18 +123,9 @@ def about():
 
 @app.get('/constructor/')
 def constructor():
-    slug = request.args.get('try', '').strip()
-    fitting_product = None
-    if slug:
-        item = next((p for p in public_products() if p['slug'] == slug), None)
-        if item is None:
-            abort(404)
-        variant = next((v for v in item['variants'] if v['id']==request.args.get('variant')), item['variants'][0])
-        fitting_product = dict(name=item['name'], image=variant['images']['front'],
-                               cutout=variant.get('rack_image'), images=variant['images'], variant=variant['id'], size=request.args.get('size',''),
-                               url=url_for('product', slug=item['slug']),
-                               measurements=item.get('fit_measurements', {}))
-    return render_template('constructor.html', title='Конструктор', fitting_product=fitting_product)
+    if 'try' in request.args:
+        return redirect(url_for('constructor'), code=302)
+    return render_template('constructor.html', title='Конструктор')
 
 @app.get('/catalog/')
 def catalog():

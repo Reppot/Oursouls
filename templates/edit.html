@@ -27,7 +27,7 @@
 <fieldset class="admin-variant"><legend>Вешалка на главной</legend><label class="shop-check"><input type="checkbox" name="home_featured" {% if p.get('home_featured',false) %}checked{% endif %}>Показывать на главной</label><label>Порядок (меньше — раньше)<input name="home_position" type="number" min="0" max="9999" value="{{ p.get('home_position',p.position) }}"></label></fieldset>
 <label class="shop-check"><input type="checkbox" name="published" {% if p.published %}checked{% endif %}> Показывать в каталоге</label>
 <label class="shop-check"><input type="checkbox" name="available" {% if p.available %}checked{% endif %}> В наличии</label>
-<details><summary>Замеры изделия для примерочной</summary>
+<details><summary>Замеры изделия</summary>
 <input type="hidden" name="fit_measurements_present" value="1">
 <p>Ширина вещи в сантиметрах, от подмышки до подмышки, когда изделие лежит ровно. Заполняй только измеренные размеры.</p>
 <div class="shop-pair">{% for size in sizes %}<label>{{ size }}<input name="fit_{{ size }}" type="number" min="25" max="100" step=".1" value="{{ p.get('fit_measurements', {}).get(size, '') }}"></label>{% endfor %}</div>

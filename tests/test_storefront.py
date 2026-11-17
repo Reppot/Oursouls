@@ -52,6 +52,28 @@ class StorefrontTests(unittest.TestCase):
         self.assertIn('Товаров: 60',catalog)
         self.assertEqual(self.client.get('/sitemap.xml').status_code,200)
 
+    def test_photo_fitting_is_removed_and_legacy_links_are_safe(self):
+        product = web.store.list_products()[0]
+        for route in ('/', '/catalog/', '/constructor/', '/services/',
+                      '/product/' + product['slug'] + '/'):
+            response = self.client.get(route)
+            self.assertEqual(response.status_code, 200)
+            html = response.get_data(as_text=True)
+            for marker in ('op-open-fitting', 'op-fitting', 'product-try',
+                           '/static/fitting/', 'Примерить на фото'):
+                self.assertNotIn(marker, html, route)
+        response = self.client.get('/constructor/?try=old-product&variant=old&size=M')
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.location, '/constructor/')
+        for path in ('/static/fitting/photo-fitting.js',
+                     '/static/fitting/pose/worker.js',
+                     '/static/fitting/pose/pose_landmarker_lite.task'):
+            self.assertEqual(self.client.get(path).status_code, 404)
+        self.login()
+        html = self.client.get('/admin/product/' + product['id'] + '/').get_data(as_text=True)
+        self.assertIn('Замеры изделия', html)
+        self.assertNotIn('для примерочной', html)
+
     def test_admin_variants_and_stale_cart(self):
         self.login()
         self.assertEqual(self.client.get('/admin/product/new/').status_code,200)

@@ -150,12 +150,6 @@ body.os-editorial .shop-gallery img {
   object-fit:contain;
   background:#e9e8e1
 }
-body.os-editorial .shop-try {
-  margin-top:14px;
-  background:transparent;
-  color:var(--forest);
-  border:1px solid #8c9e80
-}
 .shop-photo-list img {
   object-fit:contain
 }
@@ -565,9 +559,6 @@ body.page-constructor #our-print .os-stage-viewport canvas[data-mode=print] {
 }
 .os-import-label:focus-within {
   outline:2px solid #355d31
-}
-.fit-preview canvas {
-  touch-action:none
 }
 .shared-order-dialog [hidden] {
   display:none!important

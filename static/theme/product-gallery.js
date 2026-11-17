@@ -20,8 +20,6 @@ orderForm?.addEventListener('change',event=>{
  if(event.target.name!=='size')return;
  const size=new FormData(orderForm).get('size');
  if(mobileOrder)mobileOrder.textContent='В корзину · '+size;
- const link=document.getElementById('product-try');if(!link)return;
- const url=new URL(link.href);url.searchParams.set('size',size);link.href=url.href;
 });
 mobileOrder?.addEventListener('click',()=>{
  if(new FormData(orderForm).get('size')){orderForm.requestSubmit();return}

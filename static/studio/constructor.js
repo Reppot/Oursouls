@@ -512,29 +512,6 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
             const im = new Image(); im.onload=()=>{atlasImage=im;draw();}; im.onerror=()=>{photoError=true;draw();}; im.src=root.dataset.atlas;
         }
     }
-    let fittingRoom;
-    const openFitting = q('open-fitting');
-    openFitting.onclick = async () => {
-        openFitting.disabled = true;
-        try {
-            if (!fittingRoom) {
-                const {createFittingRoom} = await import('../fitting/photo-fitting.js?v=2');
-                fittingRoom = createFittingRoom(q('fitting'), {
-                    side: () => side,
-                    kind: () => q('garment').value,
-                    garment(which) {
-                        if (!atlasImage) throw new Error('Предпросмотр одежды загружается. Попробуй ещё раз.');
-                        const preview = canvasLayer();
-                        garment(preview.getContext('2d'), which, false, true);
-                        return preview;
-                    },
-                });
-            }
-            await fittingRoom.open();
-        } catch { status('Примерочная пока недоступна. Попробуй ещё раз.', true); }
-        finally { openFitting.disabled = false; }
-    };
-    if (document.getElementById('fitting-product')) openFitting.click();
     setColor(fabricColor);
     function fitCanvas(){const box=q('viewport'),w=Math.min(box.clientWidth,box.clientHeight*6/7);cv.style.width=w+'px';cv.style.height=w*7/6+'px';syncTouchTarget();}
     new ResizeObserver(fitCanvas).observe(q('viewport'));fitCanvas();

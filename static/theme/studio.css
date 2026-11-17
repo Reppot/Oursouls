@@ -24,7 +24,7 @@ body.os-editorial .header-actions a{color:var(--os-text-secondary)}
 body.os-editorial .header-cart span{background:var(--os-raised);color:var(--os-text-secondary)}
 body.os-editorial .button{background:var(--os-action);color:var(--os-action-text);border:1px solid var(--os-action);border-radius:5px;min-height:46px;font-size:14px;font-weight:650;padding:12px 20px;box-shadow:none;transition:background .16s,border-color .16s}
 body.os-editorial .button:hover{background:var(--os-focus);border-color:var(--os-focus)}
-body.os-editorial .button.outline,body.os-editorial .shop-try{background:transparent;color:var(--os-text-secondary);border-color:var(--os-control-border)}
+body.os-editorial .button.outline{background:transparent;color:var(--os-text-secondary);border-color:var(--os-control-border)}
 body.os-editorial .button.outline:hover{background:var(--os-control-border);border-color:var(--os-action)}
 body.os-editorial .shop-page-heading{padding-top:0;margin-bottom:30px}
 body.os-editorial .shop-page-heading h1{font:650 clamp(40px,5vw,68px)/1 Onest,Arial,sans-serif;letter-spacing:-.04em;text-transform:none;margin-top:16px}
@@ -188,13 +188,7 @@ body.page-constructor #our-print .os-upload svg{color:var(--os-text-secondary)}
 body.page-constructor #our-print .os-review-pair button{background:var(--os-raised);border-color:var(--os-control-border)!important;color:var(--os-text-secondary)!important}
 body.page-constructor #our-print .os-review-details dt{color:var(--os-text-secondary)}
 body.page-constructor #our-print .os-review-details dd{color:var(--os-text)}
-body.page-constructor #our-print :is(.fit-dialog,.fit-header,#op-send-dialog){background:var(--os-surface);color:var(--os-text);color-scheme:light;font-family:Onest,Arial,sans-serif}
-body.page-constructor #our-print :is(.fit-preview,.fit-modes){background:var(--os-raised);border-color:var(--os-control-border)}
-body.page-constructor #our-print :is(.fit-controls label,.fit-note,.fit-preview p){color:var(--os-text-secondary)}
-body.page-constructor #our-print .fit-dialog button{background:var(--os-raised);color:var(--os-text-secondary);border-color:var(--os-control-border);font-family:inherit}
-body.page-constructor #our-print .fit-dialog button[aria-pressed=true]{background:var(--os-action);color:var(--os-action-text);border-color:var(--os-action)}
-body.page-constructor #our-print .fit-controls :is(select,input:not([type=range]):not([type=file])){background:var(--os-raised);color:var(--os-text);border-color:var(--os-control-border);font-family:inherit}
-body.page-constructor #our-print .fit-preview-label{background:#561624e6;color:var(--os-text-secondary);border-color:var(--os-control-border)}
+body.page-constructor #our-print #op-send-dialog{background:var(--os-surface);color:var(--os-text);color-scheme:light;font-family:Onest,Arial,sans-serif}
 
 @media(max-width:1100px){
  body.os-editorial .catalog-filters .catalog-filter-form{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -360,7 +354,7 @@ body.os-editorial .mobile-menu-toggle{color:var(--os-light-ink)}
 body.os-editorial .site-header .site-nav a:hover,
 body.os-editorial .site-header .site-nav a[aria-current]{color:var(--os-action)}
 body.os-editorial .header-cart span{background:var(--os-action);color:var(--os-action-text)}
-body.os-editorial .button.outline,body.os-editorial .shop-try{color:var(--os-light-ink)}
+body.os-editorial .button.outline{color:var(--os-light-ink)}
 body.os-editorial .button:not(.outline):hover{background:var(--os-action-hover);color:var(--os-action-text);border-color:var(--os-action-hover)}
 body.os-editorial .shop-page-heading::after{content:"";display:block;height:14px;margin-top:24px;background:var(--os-bands)}
 body.os-editorial .site-footer{background:var(--os-raised);border:0;border-top:14px solid; border-image:var(--os-bands) 1}
@@ -572,13 +566,7 @@ body.os-editorial .request-grid label{color:#eee}
 body.page-constructor #main #our-print.os-print-studio{color:#eee}
 body.page-constructor #our-print .os-studio-intro h1,body.page-constructor #our-print .os-studio-intro p:not(.os-studio-kicker),body.page-constructor #our-print .os-draft-bar #op-draft-status,body.page-constructor #our-print .os-stage-top{color:#eee}
 body.page-constructor #our-print .os-stage-viewport{background:#f4f4f0}
-body.page-constructor #our-print .os-garment-rail,body.page-constructor #our-print .os-studio-settings,body.page-constructor #our-print .fit-dialog{color:#111}
-body.page-constructor #our-print .fit-dialog :is(h2,p,label,span,output,summary){color:#111}
-body.page-constructor #our-print .fit-dialog .fit-note{color:#444}
-body.page-constructor #our-print .fit-dialog .fit-preview-label{background:#111;color:#fff;border-color:#111}
-body.page-constructor #our-print .fit-dialog input[type=range]{accent-color:#b40020}
-body.page-constructor #our-print .fit-arms{display:flex;align-items:center;gap:8px;margin-top:12px}
-body.page-constructor #our-print .fit-arms input{min-height:24px;width:24px}
+body.page-constructor #our-print .os-garment-rail,body.page-constructor #our-print .os-studio-settings{color:#111}
 body.os-editorial .manifesto{color:#eee}
 body.os-editorial .manifesto p,body.os-editorial .about-facts span{color:#ccc}
 @media(max-width:800px){
@@ -588,8 +576,6 @@ body.os-editorial .manifesto p,body.os-editorial .about-facts span{color:#ccc}
 }
 
 body.os-editorial .brand-banner .services-hero-copy .center-title p:not(.eyebrow){color:#e3e3df}
-body.page-constructor #our-print .fit-controls label.fit-arms{display:flex;align-items:center;justify-content:flex-start;gap:10px;font-size:12px;font-weight:500}
-body.page-constructor #our-print .fit-controls label.fit-arms input[data-fit-arms]{appearance:auto;width:22px;height:22px;min-height:22px;max-width:22px;padding:0;margin:0;flex:0 0 22px;accent-color:#b40020}
 
 body.os-editorial .about-banner .center-title :is(h1,h2,p),body.os-editorial .about-facts strong{color:#f3f3ef}
 body.os-editorial :is(.osp-cart-item,.osp-order-summary,.osp-empty-cart,.local-project){color:#111}
@@ -597,10 +583,6 @@ body.os-editorial .osp-empty-cart :is(h2,p){color:#111}
 body.page-constructor #our-print .os-project-menu summary{color:#eee;border-color:#aaa}
 
 body.os-editorial .brand-banner.about-banner .center-title p:not(.eyebrow){color:#e3e3df}
-body.page-constructor #our-print .fit-dialog .fit-preview-label{color:#fff}
-body.page-constructor #our-print .fit-dialog .fit-upload{background:#f3f3ef;border-color:#686862;color:#111}
-body.page-constructor #our-print .fit-dialog input[type=range]::-webkit-slider-thumb{background:#b40020;border-color:#b40020}
-body.page-constructor #our-print .fit-dialog input[type=range]::-moz-range-thumb{background:#b40020;border-color:#b40020}
 
 /* Clothing occludes the lower wooden arms; only hook and neck support stay visible. */
 body.page-home .is-depth .rack-piece>.rack-hanger{clip-path:inset(0 0 40% 0)}
