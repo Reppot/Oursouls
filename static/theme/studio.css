@@ -601,3 +601,8 @@ body.page-constructor #our-print .fit-dialog .fit-preview-label{color:#fff}
 body.page-constructor #our-print .fit-dialog .fit-upload{background:#f3f3ef;border-color:#686862;color:#111}
 body.page-constructor #our-print .fit-dialog input[type=range]::-webkit-slider-thumb{background:#b40020;border-color:#b40020}
 body.page-constructor #our-print .fit-dialog input[type=range]::-moz-range-thumb{background:#b40020;border-color:#b40020}
+
+/* Clothing occludes the lower wooden arms; only hook and neck support stay visible. */
+body.page-home .is-depth .rack-piece>.rack-hanger{clip-path:inset(0 0 40% 0)}
+/* The scene uses the full dark ribbon field, without the obsolete bottom colour strip. */
+body.page-home .rack-section::after{content:none;display:none;animation:none}

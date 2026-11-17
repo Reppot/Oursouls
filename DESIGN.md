@@ -17,3 +17,5 @@ Latest user direction (17 November2026): connect the brand to black and horror; 
 Dark scene field now dominates interior pages: charcoal ribbons and red slashes, white readable control panels. Product/gallery/service front images use existing transparent rack_image assets; source photos remain for production/other real angles. Product image must fit viewport. Print-service inset demonstrates actual artwork.
 
 Photo fitting automatically registers cropped alpha artwork to shoulders/hips; independent length control and optional exposed-hand restoration. It is local2D registration, never advertised as neural cloth replacement or accurate sizing. Keep original photos out of order archives. Details and limitations: docs/qa/dark-photo-fitting-fixes.md.
+
+Rack finish: lower wooden hanger arms are clipped beneath the garment (bottom40% of the hanger layer); hook and central wooden support stay visible. Home has no separate bottom palette strip: the fixed dark ribbon field fills the viewport to its bottom edge.
