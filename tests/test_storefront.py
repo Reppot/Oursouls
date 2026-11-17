@@ -47,6 +47,12 @@ class StorefrontTests(unittest.TestCase):
         studio=self.client.get('/constructor/').get_data(as_text=True)
         self.assertNotIn('data-viewer=',studio)
         self.assertNotIn('data-fit-mode="avatar"',studio)
+        for obsolete in ('op-example', 'op-print-png', 'op-move-mode',
+                         'op-zoom-tools', 'op-webgl', 'op-render-mode'):
+            self.assertNotIn(obsolete, studio)
+        for essential in ('op-file', 'op-effects-panel', 'op-download-order',
+                          'op-import-project', 'op-undo', 'op-to-cart'):
+            self.assertIn(essential, studio)
         catalog=self.client.get('/catalog/?sort=price-up&min=100').get_data(as_text=True)
         self.assertNotIn('<option value="price-up"',catalog)
         self.assertIn('Товаров: 60',catalog)

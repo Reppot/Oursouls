@@ -168,7 +168,7 @@ body.page-constructor #our-print :is(.os-garment-rail,.os-studio-settings){--os-
 body.page-constructor #our-print .os-stage-viewport{background:radial-gradient(ellipse at 48% 35%,var(--os-raised),var(--os-raised));border:1px solid var(--os-control-border);border-radius:8px}
 body.page-constructor #our-print :is(.os-stage-top,.os-stage-toolbar,.os-stage-foot){background:transparent;color:var(--os-text-secondary)}
 body.page-constructor #our-print :is(.os-stage-foot p,#op-position,.os-draft-bar span,.os-panel-title p,.os-field-heading span){color:var(--os-text-secondary)}
-body.page-constructor #our-print :is(.os-stage-badge,.os-studio-tag){background:var(--os-raised);color:var(--os-text-secondary);border-color:var(--os-control-border)}
+body.page-constructor #our-print .os-studio-tag{background:var(--os-raised);color:var(--os-text-secondary);border-color:var(--os-control-border)}
 body.page-constructor #our-print .os-draft-bar button{background:var(--os-raised);color:var(--os-text-secondary);border-color:var(--os-control-border);border-radius:4px;font-size:13px}
 body.page-constructor #our-print :is(.os-tabs,.os-segment,.os-disclosure,.os-layer-picker,.os-upload,.os-secondary,.os-nudge button,.os-sizes button,.os-layer-thumbs button,.os-order-summary){background:var(--os-raised);border-color:var(--os-control-border);color:var(--os-text-secondary);border-radius:5px;box-shadow:none}
 body.page-constructor #our-print :is(.os-tabs button,.os-segment button,.os-disclosure summary,.os-text-button,.os-small,.os-upload small,.os-nudge span,.os-studio-status,.os-range output,.os-panel-title p){color:var(--os-text-secondary)}
@@ -188,7 +188,6 @@ body.page-constructor #our-print .os-upload svg{color:var(--os-text-secondary)}
 body.page-constructor #our-print .os-review-pair button{background:var(--os-raised);border-color:var(--os-control-border)!important;color:var(--os-text-secondary)!important}
 body.page-constructor #our-print .os-review-details dt{color:var(--os-text-secondary)}
 body.page-constructor #our-print .os-review-details dd{color:var(--os-text)}
-body.page-constructor #our-print #op-send-dialog{background:var(--os-surface);color:var(--os-text);color-scheme:light;font-family:Onest,Arial,sans-serif}
 
 @media(max-width:1100px){
  body.os-editorial .catalog-filters .catalog-filter-form{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -588,3 +587,7 @@ body.os-editorial .brand-banner.about-banner .center-title p:not(.eyebrow){color
 body.page-home .is-depth .rack-piece>.rack-hanger{clip-path:inset(0 0 40% 0)}
 /* The scene uses the full dark ribbon field, without the obsolete bottom colour strip. */
 body.page-home .rack-section::after{content:none;display:none;animation:none}
+
+/* Keep the garment label legible when the print editor uses a light stage. */
+body.page-constructor #our-print .os-stage-top{background:#111;color:#f3f3ef}
+body.page-constructor #our-print .os-segment [data-file-dot]{background:var(--os-action)}

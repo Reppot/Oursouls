@@ -21,7 +21,7 @@
     const effectKeys = ['mode','tint','from','to','gradientType','gradientAngle','amount','brightness','contrast','saturation','opacity'];
     const sideName = key => key === 'front' ? 'Перед' : 'Спина';
     const bounded = (value, min, max) => Math.max(min, Math.min(max, value));
-    let side = 'front', tab = 'garment', mode = 'orbit', viewer = null, fallback = false, drag = null;
+    let side = 'front', tab = 'garment', mode = 'view', drag = null;
     let fabricColor = q('color').value;
 
     function defaults() { return {mode:'original',tint:'#e85a65',from:'#355d31',to:'#9b2f45',gradientType:'linear',gradientAngle:90,amount:100,brightness:100,contrast:100,saturation:100,opacity:100,flipX:false,flipY:false}; }
@@ -113,12 +113,12 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
         c.drawImage(renderPrint(s), -d.w / 2, -d.h / 2, d.w, d.h);
         c.restore();
     }
-    function garment(c, which, edit, transparent = false) {
+    function garment(c, which, edit) {
         c.save();
         const studioSurface=c.canvas===cv||c.canvas===q('review-front')||c.canvas===q('review-back');
         const bg = c.createRadialGradient(300,300,20,300,350,480);
-        bg.addColorStop(0,studioSurface?'#fafaf7':'#fafaf7'); bg.addColorStop(1,studioSurface?'#e5e5df':'#e5e5df');
-        if(studioSurface)c.clearRect(0,0,600,700);else if (!transparent) { c.fillStyle = bg; c.fillRect(0,0,600,700); }
+        bg.addColorStop(0,'#fafaf7'); bg.addColorStop(1,'#e5e5df');
+        if(studioSurface)c.clearRect(0,0,600,700);else { c.fillStyle = bg; c.fillRect(0,0,600,700); }
         const photo = coloredPhoto(which);
         c.textAlign = 'center'; c.fillStyle = '#343434';
         if (!photo) {
@@ -128,7 +128,7 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
             return;
         }
         c.save();
-        if (!transparent) { c.shadowColor = 'rgba(25,29,24,.18)'; c.shadowBlur = 18; c.shadowOffsetY = 12; }
+        { c.shadowColor = 'rgba(25,29,24,.18)'; c.shadowBlur = 18; c.shadowOffsetY = 12; }
         c.drawImage(photo.canvas,0,0); c.restore();
         if (layers[which].length) {
             const pc = printLayer.getContext('2d'), mc = printMask.getContext('2d');
@@ -150,7 +150,7 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
             }
         }
         c.font = '16px Arial';
-        if (!transparent) c.fillText(which === 'front' ? 'ПЕРЕД' : 'СПИНА',300,670);
+        c.fillText(which === 'front' ? 'ПЕРЕД' : 'СПИНА',300,670);
         c.restore();
     }
 
@@ -158,13 +158,11 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
         all(selector).forEach(button => button.setAttribute('aria-pressed', String(button.dataset[key] === value)));
     }
     function setMode(next) {
-        mode = next === 'print' && sides[side].img ? 'print' : 'orbit';
-        if (viewer) viewer.setMode(mode);
+        mode = next === 'print' && sides[side].img ? 'print' : 'view';
         cv.dataset.mode = mode;
-        q('move-mode').setAttribute('aria-pressed', String(mode === 'print'));
-        q('gesture').textContent = mode === 'print' ? 'Перетащи принт по ткани. Стрелки помогают двигать точнее.' : viewer ? 'Потяни модель, чтобы повернуть. Кнопки + и − меняют масштаб.' : 'Выбери перед или спину для студийного просмотра.';
+        q('gesture').textContent = mode === 'print' ? 'Перетащи принт по ткани. Стрелки помогают двигать точнее.' : 'Выбери перед или спину для студийного просмотра.';
     }
-    function syncPreview() {if(fallback)garment(ctx,side,mode==='print');syncTouchTarget();}
+    function syncPreview() {garment(ctx,side,mode==='print');syncTouchTarget();}
     let reviewStamp='';
     function draw() {
         const s = sides[side], e = s.effects;
@@ -179,7 +177,7 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
         q('file-info').hidden = !s.img; q('file-name').textContent = s.name;
         const capacity = count() + pending >= limit;
         q('upload-title').textContent = capacity ? 'Достигнут лимит принтов' : 'Добавить принт';
-        q('file').disabled = capacity; q('example').disabled = capacity;
+        q('file').disabled = capacity;
         q('layer-count').textContent = count() + ' / ' + limit;
         const list = q('layers');
         const signature = layers[side].map(layer => layer.id).join(',') + ':' + selected[side];
@@ -211,12 +209,11 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
         q('position').textContent = s.img ? `${sideName(side)} · ${s.scale}% · ${s.angle}°` : sideName(side);
         syncPreview();
     }
-    function selectSide(next, orient = true) {
-        if (next === side && !orient) return;
+    function selectSide(next) {
+        if (next === side) return;
         side = next; q('file').value = '';
         setMode(mode); status(''); draw();
     }
-    const narrowStudio = matchMedia('(max-width: 850px)');
     function syncPanels() {
         root.dataset.step=tab;
         q('panel-garment').hidden = tab !== 'garment';
@@ -224,7 +221,6 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
         q('panel-order').hidden = tab !== 'order';
         q('panel-print').closest('.os-studio-settings').hidden = tab === 'garment';
     }
-    narrowStudio.addEventListener('change', syncPanels);
     syncPanels();
     function openTab(next, focus = false) {
         const changed=tab!==next;tab = next;root.dataset.step=next;
@@ -234,7 +230,7 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
 
         }
         syncPanels();
-        setMode(next === 'print' ? 'print' : 'orbit');
+        setMode(next === 'print' ? 'print' : 'view');
         if (focus) q('tab-'+next).focus({preventScroll:true});
         status(''); draw();
         const panel=q('panel-'+next);
@@ -252,7 +248,7 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
         const s = sides[key]; if (!s.img) return;
         s.x = x; s.y = y; clamp(s); syncPreview();scheduleSave();
     }
-    async function loadFile(file, key, sample = false) {
+    async function loadFile(file, key) {
         if (!file) return;
         if (!['image/jpeg','image/png'].includes(file.type) || file.size > 20*1024*1024) {
             status('Выбери JPEG или PNG размером до 20 МБ.', true); q('file').value = ''; return;
@@ -270,12 +266,10 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
             const preview=document.createElement('canvas'), factor=Math.min(1,720/Math.max(im.width,im.height));
             preview.width=Math.round(im.width*factor);preview.height=Math.round(im.height*factor);preview.getContext('2d').drawImage(im,0,0,preview.width,preview.height);
             const assetId=crypto.randomUUID();sources.set(assetId,file);
-            const layer = Object.assign(fresh(), {id:++nextId,assetId,img:preview,file,name:sample ? 'Пример — мотылёк.png' : file.name});
+            const layer = Object.assign(fresh(), {id:++nextId,assetId,img:preview,file,name:file.name});
             if (layers[key].length) {
                 const slot = layers[key].length - 1;
                 layer.x = 215 + slot % 3 * 85; layer.y = 265 + Math.floor(slot / 3) * 85; layer.scale = 42;
-            } else if (sample) {
-                layer.y = key === 'front' ? 280 : 326; layer.scale = key === 'front' ? 92 : 140;
             }
             layers[key].push(layer); selected[key] = layer.id;
             if (side === key && tab !== 'order') { if (tab !== 'print') openTab('print'); setMode('print'); }
@@ -321,16 +315,6 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
     drop.ondragover = event => { event.preventDefault(); drop.classList.add('is-drop'); };
     drop.ondragleave = () => drop.classList.remove('is-drop');
     drop.ondrop = event => { event.preventDefault(); drop.classList.remove('is-drop'); addFiles(event.dataTransfer.files,side); };
-    q('example').onclick = async () => {
-        const key = side, button = q('example'); button.disabled = true;
-        status('Загружаем пример…');
-        try {
-            const response = await fetch(root.dataset.sample);
-            if (!response.ok) throw new Error('Example not available');
-            await loadFile(await response.blob(),key,true);
-        } catch (error) { status('Пример не загрузился. Можно выбрать свой файл.',true); }
-        finally { draw(); }
-    };
     q('scale').oninput = event => { sides[side].scale = +event.target.value; draw(); };
     q('angle').oninput = event => { sides[side].angle = +event.target.value; draw(); };
     q('reset').onclick = () => { Object.assign(sides[side],{x:300,y:340,scale:65,angle:0}); draw(); };
@@ -350,19 +334,12 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
     }
     q('layer-up').onclick = () => reorder(1);
     q('layer-down').onclick = () => reorder(-1);
-    q('move-mode').onclick = () => setMode(mode === 'print' ? 'orbit' : 'print');
     const direction = {left:[-1,0],up:[0,-1],down:[0,1],right:[1,0]};
     all('[data-nudge]').forEach(button => { button.onclick = () => { const [x,y] = direction[button.dataset.nudge], s=sides[side]; move(side,s.x+x*5,s.y+y*5); }; });
     effectKeys.forEach(k => { q('effect-'+k).oninput = event => { const e = sides[side].effects; e[k] = typeof e[k] === 'number' ? +event.target.value : event.target.value; draw(); }; });
     for (const k of ['X','Y']) q('flip'+k).onclick = () => { const e = sides[side].effects; e['flip'+k] = !e['flip'+k]; draw(); };
     q('reset-effects').onclick = () => { sides[side].effects = defaults(); draw(); };
-    q('zoom-in').onclick = () => viewer?.zoomBy(1.15); q('zoom-out').onclick = () => viewer?.zoomBy(1/1.15); q('reset-view').onclick = () => viewer?.reset();
 
-    function save(blob,name) {
-        if (!blob) { status('Файл не удалось сохранить. Попробуй ещё раз.',true); return; }
-        const url = URL.createObjectURL(blob), a = document.createElement('a'); a.href=url; a.download=name; a.click();
-        setTimeout(() => URL.revokeObjectURL(url),10000);
-    }
     function ready() {
         if (!validColor()) return false;
         if (!count()) { status('Сначала добавь принт во вкладке «Принт».',true); return false; }
@@ -400,7 +377,6 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
         try{await persistCurrent();const project=await packageProject();const {prepareOrder}=await import('./order-export.js?v=2');await prepareOrder(document.querySelector('input[name=csrf]')?.value||root.dataset.csrf,project);status('')}
         catch(error){status(error.message||'Не удалось подготовить заказ. Макет сохранён.',true)}finally{button.disabled=false}
     };
-    q('print-png').onclick = () => { const key=side, s=sides[key]; if (s.img) renderPrint(s).toBlob(blob=>save(blob,`our-souls-print-${key}.png`),'image/png'); };
 
     function flatPoint(event) { const r=cv.getBoundingClientRect();return {x:(event.clientX-r.left)*600/r.width,y:(event.clientY-r.top)*700/r.height}; }
     cv.onpointerdown = event => {
@@ -505,8 +481,7 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
     q('comment').addEventListener('input',scheduleSave);q('qty').addEventListener('input',()=>{renderReview();scheduleSave()});
     document.addEventListener('keydown',event=>{if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='z'&&!['INPUT','TEXTAREA'].includes(event.target.tagName)){event.preventDefault();(event.shiftKey?q('redo'):q('undo')).click()}});
     function usePhoto() {
-        viewer=null; fallback=true; q('webgl').hidden=true; cv.hidden=false; q('zoom-tools').hidden=true;
-        q('render-mode').textContent='Фотографический 2D'; q('loading').hidden=true; q('viewport').setAttribute('aria-busy','false');
+        q('loading').hidden=true; q('viewport').setAttribute('aria-busy','false');
         setMode(mode); draw();
         if (!atlasImage && root.dataset.atlas) {
             const im = new Image(); im.onload=()=>{atlasImage=im;draw();}; im.onerror=()=>{photoError=true;draw();}; im.src=root.dataset.atlas;
