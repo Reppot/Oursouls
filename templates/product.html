@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 {% block content %}<main id="main" class="section"><div class="wrap"><a href="/catalog/" data-catalog-return>← Каталог</a>
 <div class="shop-product">
-{% set photos = namespace(items=[{'url':variant.images.front,'label':'Перед'}]) %}
+{% set photos = namespace(items=[{'url':variant.rack_image or variant.images.front,'label':'Перед'}]) %}
 {% if variant.images.back %}{% set photos.items = photos.items + [{'url':variant.images.back,'label':'Спина'}] %}{% endif %}
 {% for photo in variant.images.details %}{% set photos.items = photos.items + [{'url':photo,'label':'Деталь ' ~ loop.index}] %}{% endfor %}
 <div class="shop-gallery product-gallery" data-product-gallery>
-  <a class="product-gallery-main" data-gallery-full href="{{ variant.images.front }}" target="_blank" rel="noopener" aria-label="Открыть фотографию изделия">
-    <img data-gallery-image src="{{ variant.images.front }}" alt="{{ p.name }}, {{ variant.color_name }}, перед" width="1000" height="1250" fetchpriority="high">
+  <a class="product-gallery-main" data-gallery-full href="{{ variant.rack_image or variant.images.front }}" target="_blank" rel="noopener" aria-label="Открыть фотографию изделия">
+    <img data-gallery-image src="{{ variant.rack_image or variant.images.front }}" alt="{{ p.name }}, {{ variant.color_name }}, перед" width="1000" height="1250" fetchpriority="high">
   </a>
   {% if photos.items|length > 1 %}<nav class="product-gallery-thumbs" aria-label="Фотографии изделия">
     {% for photo in photos.items %}<a data-gallery-thumb href="{{ photo.url }}" data-label="{{ p.name }}, {{ variant.color_name }}, {{ photo.label|lower }}" aria-label="{{ photo.label }}" {% if loop.first %}aria-current="true"{% endif %} target="_blank" rel="noopener"><img src="{{ photo.url }}" alt="" width="120" height="150" loading="lazy"><span>{{ photo.label }}</span></a>{% endfor %}

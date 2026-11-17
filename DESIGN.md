@@ -11,3 +11,9 @@ Latest user direction (17 November2026): connect the brand to black and horror; 
 - Constructor: photo-based 2D, ten prints, front/back, custom HEX/RGB, import/export, honest fitting limits. Light upload/layer/transform controls with dark text; red artwork handles. Preview before controls on mobile.
 - Motion: native WAAPI catalog arrivals, dialog opening300ms and editor-step220ms. Content visible if scripts fail. No scroll hijack or dependency added. Colour feedback remains under reduced motion.
 - Detailed benchmark audit, evidence and remaining gaps: docs/qa/benchmark-audit-2026-11-17.md. Free-host cold start, actual product specifications and missing realistic fitting assets are separate limitations.
+
+## Dark imagery and fitting
+
+Dark scene field now dominates interior pages: charcoal ribbons and red slashes, white readable control panels. Product/gallery/service front images use existing transparent rack_image assets; source photos remain for production/other real angles. Product image must fit viewport. Print-service inset demonstrates actual artwork.
+
+Photo fitting automatically registers cropped alpha artwork to shoulders/hips; independent length control and optional exposed-hand restoration. It is local2D registration, never advertised as neural cloth replacement or accurate sizing. Keep original photos out of order archives. Details and limitations: docs/qa/dark-photo-fitting-fixes.md.

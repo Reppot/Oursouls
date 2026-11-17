@@ -118,7 +118,7 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
         const studioSurface=c.canvas===cv||c.canvas===q('review-front')||c.canvas===q('review-back');
         const bg = c.createRadialGradient(300,300,20,300,350,480);
         bg.addColorStop(0,studioSurface?'#fafaf7':'#fafaf7'); bg.addColorStop(1,studioSurface?'#e5e5df':'#e5e5df');
-        if (!transparent) { c.fillStyle = bg; c.fillRect(0,0,600,700); }
+        if(studioSurface)c.clearRect(0,0,600,700);else if (!transparent) { c.fillStyle = bg; c.fillRect(0,0,600,700); }
         const photo = coloredPhoto(which);
         c.textAlign = 'center'; c.fillStyle = '#343434';
         if (!photo) {
@@ -518,7 +518,7 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
         openFitting.disabled = true;
         try {
             if (!fittingRoom) {
-                const {createFittingRoom} = await import('../fitting/photo-fitting.js?v=1');
+                const {createFittingRoom} = await import('../fitting/photo-fitting.js?v=2');
                 fittingRoom = createFittingRoom(q('fitting'), {
                     side: () => side,
                     kind: () => q('garment').value,

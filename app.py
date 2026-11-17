@@ -15,7 +15,7 @@ from PIL import Image, ImageOps, UnidentifiedImageError
 from werkzeug.security import check_password_hash
 
 import catalog_store as store
-from product_schema import normalize_product, validate_variant_selection, valid_hex, cart_variant_id
+from product_schema import RACK_CUTOUTS, normalize_product, validate_variant_selection, valid_hex, cart_variant_id
 
 app = Flask(__name__)
 deployed = bool(os.getenv('RENDER'))
@@ -115,7 +115,7 @@ def services():
             if form['details']:
                 message += '\nОписание: ' + form['details']
             return redirect(TELEGRAM + '?' + urlencode({'text': message}), code=303)
-    return render_template('services.html', title='Печать', kinds=kinds, form=form, error=error,field_errors=field_errors), 400 if error else 200
+    return render_template('services.html', title='Печать', kinds=kinds, form=form, error=error,field_errors=field_errors, service_cutout=RACK_CUTOUTS.get('/static/catalog/12.webp','/static/catalog/12.webp')), 400 if error else 200
 
 @app.get('/about/')
 def about():

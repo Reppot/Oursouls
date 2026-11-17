@@ -28,13 +28,15 @@
           <button type="button" data-fit-reset>Сбросить положение</button><button type="button" data-fit-clear>Убрать фото</button>
         </div>
         <label>Сторона изделия<select data-fit-side><option value="front">Перед</option><option value="back">Спина</option></select></label>
-        <button type="button" class="fit-primary fit-auto" data-fit-auto disabled>Найти плечи на фото</button>
+        <button type="button" class="fit-primary fit-auto" data-fit-auto disabled>Подогнать по фигуре</button>
         <div class="fit-sliders" data-fit-sliders hidden>
           <label><span>Размер одежды<output data-fit-value="scale"></output></span><input type="range" data-fit-adjust="scale" min="10" max="155" value="53"></label>
+          <label><span>Длина одежды<output data-fit-value="height"></output></span><input type="range" data-fit-adjust="height" min="60" max="160" value="100"></label>
           <label><span>Поворот<output data-fit-value="angle"></output></span><input type="range" data-fit-adjust="angle" min="-45" max="45" value="0"></label>
           <label><span>По горизонтали<output data-fit-value="x"></output></span><input type="range" data-fit-adjust="x" min="0" max="100" value="50"></label>
           <label><span>По вертикали<output data-fit-value="y"></output></span><input type="range" data-fit-adjust="y" min="0" max="100" value="39"></label>
         </div>
+        <label class="fit-arms"><input type="checkbox" data-fit-arms checked> Показывать кисти и открытые руки поверх одежды</label>
       </div>
       {% if fitting_product %}
       <details class="fit-size"><summary>Подобрать размер</summary>

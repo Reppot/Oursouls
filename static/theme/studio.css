@@ -542,3 +542,56 @@ body.os-editorial .mobile-product-action{border-top-color:#111}
 body.page-constructor #our-print .os-tabs.os-tabs{background:#111}
 body.page-home .rack-section{height:100%;padding:0}
 body.page-home [data-ready] .rack-piece:first-child{transition-property:transform}
+
+/* Dark storefront around light, truthful garment surfaces. */
+body.os-editorial{background:#101012;color:#f3f3ef}
+body.os-editorial::before{background:repeating-linear-gradient(118deg,#101012 0 180px,#19191c 180px 280px,#242428 280px 315px,#101012 315px 480px,#570615 480px 489px,#090909 489px 500px,#101012 500px 640px)}
+body.os-editorial::after{background:linear-gradient(112deg,transparent 22%,#8e102015 32%,#a3354520 43%,#ffffff06 52%,#a3354515 61%,transparent 74%);opacity:.55}
+body.os-editorial .shop-page-heading h1,body.os-editorial .breadcrumbs,body.os-editorial .breadcrumbs a{color:#f3f3ef}
+body.os-editorial .catalog-category-nav a{color:#c5c5c1}
+body.os-editorial .catalog-category-nav a[aria-current]{color:#fff;border-color:#e4324c}
+body.os-editorial .catalog-tools{background:#101012;border-color:#777;color:#eee}
+body.os-editorial .catalog-toolbar .osp-muted,body.os-editorial .product-info .price{color:#c5c5c1}
+body.os-editorial .product-info h3{color:#fff}
+body.os-editorial .product-summary{padding:28px;background:#fff;color:#111;border-top:4px solid #b40020}
+body.os-editorial .product-summary h1{color:#111}
+body.page-product .shop-gallery .product-gallery-main{height:clamp(300px,calc(100dvh - 220px),720px);background:transparent}
+body.page-product .shop-gallery .product-gallery-main>img{height:100%;width:100%;max-height:100%;background:transparent;object-fit:contain;aspect-ratio:auto;filter:drop-shadow(0 12px 22px #0008)}
+body.page-product .shop-gallery{background:radial-gradient(ellipse,#3b393e 0%,#101012 72%)}
+body.os-editorial .rack-mobile-detail .rack-large,body.os-editorial .rack-large img{background:transparent}
+body.os-editorial .rack-mobile-detail .rack-detail h2,body.os-editorial .rack-mobile-detail{color:#111}
+body.os-editorial .rack-large{background:transparent}
+body.os-editorial .services-hero-copy h1,body.os-editorial .services-hero-copy .center-title p,body.os-editorial .service-types h3,body.os-editorial .center-title h2,body.os-editorial .center-title p{color:#f3f3ef}
+body.os-editorial .service-types p{color:#c5c5c1}
+body.os-editorial .services-print-detail{background:radial-gradient(ellipse,#39373c 0%,transparent 72%)}
+body.os-editorial .services-print-detail img{object-fit:contain;background:transparent}
+body.os-editorial .services-print-detail::after{display:none}
+body.os-editorial .service-print-closeup{position:absolute;right:0;bottom:0;width:42%;aspect-ratio:1;overflow:hidden;border:2px solid #eee;background:#141416;box-shadow:0 10px 28px #0008}
+body.os-editorial .service-print-closeup img{position:absolute;left:50%;top:50%;width:300%;max-width:none;max-height:none;height:auto;aspect-ratio:4/5;object-fit:contain;transform:translate(-50%,-44%)}
+body.os-editorial .request-grid label{color:#eee}
+body.page-constructor #main #our-print.os-print-studio{color:#eee}
+body.page-constructor #our-print .os-studio-intro h1,body.page-constructor #our-print .os-studio-intro p:not(.os-studio-kicker),body.page-constructor #our-print .os-draft-bar #op-draft-status,body.page-constructor #our-print .os-stage-top{color:#eee}
+body.page-constructor #our-print .os-stage-viewport{background:#f4f4f0}
+body.page-constructor #our-print .os-garment-rail,body.page-constructor #our-print .os-studio-settings,body.page-constructor #our-print .fit-dialog{color:#111}
+body.page-constructor #our-print .fit-dialog :is(h2,p,label,span,output,summary){color:#111}
+body.page-constructor #our-print .fit-dialog .fit-note{color:#444}
+body.page-constructor #our-print .fit-dialog .fit-preview-label{background:#111;color:#fff;border-color:#111}
+body.page-constructor #our-print .fit-dialog input[type=range]{accent-color:#b40020}
+body.page-constructor #our-print .fit-arms{display:flex;align-items:center;gap:8px;margin-top:12px}
+body.page-constructor #our-print .fit-arms input{min-height:24px;width:24px}
+body.os-editorial .manifesto{color:#eee}
+body.os-editorial .manifesto p,body.os-editorial .about-facts span{color:#ccc}
+@media(max-width:800px){
+ body.page-product .shop-gallery .product-gallery-main{height:min(54dvh,480px);min-height:260px}
+ body.os-editorial .product-summary{padding:20px}
+ body.os-editorial .services-print-detail img{background:transparent}
+}
+
+body.os-editorial .brand-banner .services-hero-copy .center-title p:not(.eyebrow){color:#e3e3df}
+body.page-constructor #our-print .fit-controls label.fit-arms{display:flex;align-items:center;justify-content:flex-start;gap:10px;font-size:12px;font-weight:500}
+body.page-constructor #our-print .fit-controls label.fit-arms input[data-fit-arms]{appearance:auto;width:22px;height:22px;min-height:22px;max-width:22px;padding:0;margin:0;flex:0 0 22px;accent-color:#b40020}
+
+body.os-editorial .about-banner .center-title :is(h1,h2,p),body.os-editorial .about-facts strong{color:#f3f3ef}
+body.os-editorial :is(.osp-cart-item,.osp-order-summary,.osp-empty-cart,.local-project){color:#111}
+body.os-editorial .osp-empty-cart :is(h2,p){color:#111}
+body.page-constructor #our-print .os-project-menu summary{color:#eee;border-color:#aaa}
