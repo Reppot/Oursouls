@@ -1,3 +1,4 @@
+import './motion.js?v=1';
 const toggle=document.querySelector('.mobile-menu-toggle'), nav=document.querySelector('#main-navigation');
 toggle?.addEventListener('click',()=>{const open=toggle.getAttribute('aria-expanded')!=='true';toggle.setAttribute('aria-expanded',String(open));nav.classList.toggle('is-open',open);if(open&&matchMedia('(max-width:800px)').matches){const more=nav.querySelector('.nav-more');if(more)more.open=true}});
 nav?.addEventListener('click',e=>{if(e.target.closest('a')){nav.classList.remove('is-open');toggle.setAttribute('aria-expanded','false')}});

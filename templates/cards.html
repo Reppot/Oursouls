@@ -3,7 +3,7 @@
 {%- endmacro %}
 {% if products %}<div class="products-grid">
 {% for p in products %}
-<article class="product-card"><a class="product-card-link" href="{{ url_for('product',slug=p.slug) }}" aria-label="{{ p.name }}"><img class="product-image" loading="lazy" width="800" height="1000" src="{{ p.images[0] }}" alt="">
+<article class="product-card"><a class="product-card-link" href="{{ url_for('product',slug=p.slug) }}" aria-label="{{ p.name }}"><span class="product-media"><img class="product-image" loading="{{ 'eager' if loop.index <= 4 else 'lazy' }}" decoding="async" {% if loop.first %}fetchpriority="high"{% endif %} width="800" height="1000" src="{{ p.images[0] }}" alt=""></span>
 <div class="product-info"><h3>{{ p.name }}</h3>
 <div class="price">{% if p.price is not none %}{{ price(p) }}{% else %}Цена по запросу{% endif %}</div>
 </div></a></article>

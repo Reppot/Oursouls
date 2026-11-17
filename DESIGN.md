@@ -20,3 +20,9 @@ Updated 17 November 2026 at the user's request. This direction supersedes the fo
 | Secondary | #76535a / #f5e9e7 | 5.61:1 |
 | Button | #ffffff / #b32132 | 6.60:1 |
 | Control border | #9f6d73 / #f5e9e7 | 3.60:1 |
+
+## Motion and visual hierarchy
+
+The rack is the focal experience. Keep palette bands legible but economical:4px header,5px heading signature,6px footer; the home bottom band stays broad. Prioritise product photography over framed panels. Services use a real catalog example, not a claim about a production facility.
+
+Native WAAPI in static/theme/motion.js: short row arrivals after decode (520ms, capped120ms stagger), dialog opening300ms, editor step acknowledgement220ms. Home ink-pass700ms once. No animation dependency, scroll hijack or hidden content when scripts fail. Motion preference changes cancel active animations; reduced-motion retains colour feedback without spatial movement. Pointer hover effects are limited to hover-capable devices. Editor animation never intercepts form or canvas input.

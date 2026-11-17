@@ -2,9 +2,10 @@
 {% block content %}
 <main id="main">
   <section class="brand-banner services-banner">
-    <div class="wrap">
-      <header class="center-title"><p class="eyebrow">Услуги печати</p><h1>Печать на твоей одежде</h1><p>От одной вещи. Макет и стоимость согласуем до печати.</p></header>
-      <a class="button" href="#print-request">Оставить заявку</a>
+    <div class="wrap services-hero-layout">
+      <div class="services-hero-copy"><header class="center-title"><h1>Печать на твоей одежде</h1><p>От одной вещи. Макет и стоимость согласуем до печати.</p></header>
+      <a class="button" href="#print-request">Оставить заявку</a></div>
+      <figure class="services-print-detail"><img src="/static/catalog/12.webp" width="800" height="1000" fetchpriority="high" alt="Футболка с принтом Our Souls"></figure>
     </div>
   </section>
   <section class="section">
@@ -24,7 +25,7 @@
   </section>
   <section class="section print-request" id="print-request">
     <div class="wrap">
-      <header class="center-title"><p class="eyebrow">Оставить заявку</p><h2>Готовы обсудить ваш проект</h2><p>Заполни форму. Откроется Telegram с текстом заявки.</p></header>
+      <header class="center-title"><h2>Готовы обсудить ваш проект</h2><p>Заполни форму. Откроется Telegram с текстом заявки.</p></header>
       {% if error %}<p class="shop-error" role="alert">{{ error }}</p>{% endif %}
       <form method="post" action="/services/#print-request" class="request-grid">
         <input type="hidden" name="csrf" value="{{ csrf() }}">
