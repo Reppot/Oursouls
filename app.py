@@ -178,7 +178,7 @@ def catalog():
         factor = 1 if sort == 'price-up' else -1
         filtered.sort(key=lambda p: (current_price(p) is None, factor * (current_price(p) or 0)))
 
-    per_page = 9
+    per_page = 12
     pages = max(1, (len(filtered) + per_page - 1) // per_page)
     page = min(pages, max(1, request.args.get('catalog_page', 1, type=int)))
     params = [(key, value) for key, value in (

@@ -1,5 +1,5 @@
 import {drafts} from '../studio/draft-store.js';
-import {prepareOrder} from '../studio/order-export.js';
+import {prepareOrder} from '../studio/order-export.js?v=2';
 const host=document.querySelector('[data-local-projects]'),csrf=document.querySelector('[data-cart-csrf]').value;
 const objectUrls=[];let lastRemoved=null;
 async function render(){

@@ -5,7 +5,7 @@ export function orderManifest(items,projects){
  const unknown=projects.length>0||items.some(i=>i.price===null||i.price===undefined);
  return {version:7,createdAt:new Date().toISOString(),items,designs:projects.map(p=>({id:p.id,name:p.name,color:p.color,design:p.snapshot})),
   total:unknown?null:items.reduce((n,i)=>n+i.price*i.quantity,0),placementAgreementRequired:projects.length>0,
-  instructions:'Стоимость, наличие и размещение согласуем перед печатью. Прикрепите архив в Telegram @oursouls33.'};
+  instructions:projects.length?'Стоимость, наличие и размещение согласуем перед печатью. Прикрепите архив в Telegram @oursouls33.':'Стоимость и наличие согласуем перед заказом в Telegram @oursouls33.'};
 }
 export async function buildOrder(items,projects){
  const manifest=orderManifest(items,projects),files=[];
@@ -32,8 +32,14 @@ export async function prepareOrder(csrf,currentProject=null){
   if(!items.length&&!projects.length)throw new Error('Добавь товар или свой макет в корзину.');
   const result=await buildOrder(items,projects);
   const download=q('download');if(download.dataset.url)URL.revokeObjectURL(download.dataset.url);download.href=download.dataset.url=URL.createObjectURL(result.blob);
-  q('text').value=result.text;q('telegram').href='https://t.me/oursouls33?text='+encodeURIComponent(result.text.slice(0,3500));q('state').textContent='Файл подготовлен. Скачай его и прикрепи в Telegram.';
+  q('text').value=result.text;q('telegram').href='https://t.me/oursouls33?text='+encodeURIComponent(result.text.slice(0,3500));q('state').textContent=projects.length?'Макет готов. Сначала скачай файл, затем отправь его в Telegram.':'Состав готов. Открой Telegram и отправь сообщение, чтобы согласовать заказ.';
   for(const key of ['download','telegram','copy','text','help'])q(key).hidden=false;
+  q('telegram').className=projects.length?'button outline':'button';
+  download.className=projects.length?'button':'button outline';
+  download.textContent=projects.length?'1. Скачать макет и заказ':'Скачать копию заказа';
+  q('telegram').textContent=projects.length?'2. Открыть Telegram ↗':'Отправить заказ в Telegram ↗';
+  const actions=q('telegram').parentElement;actions.insertBefore(projects.length?download:q('telegram'),actions.firstChild);
+  q('help').textContent=projects.length?'После скачивания прикрепи our-souls-order.zip в переписке с @oursouls33. Файл нужно отправить вручную.':'В Telegram откроется состав заказа. Проверь его и нажми «Отправить». Сообщение не отправляется автоматически.';
   q('copy').onclick=async()=>{try{await navigator.clipboard.writeText(result.text);q('state').textContent='Состав заказа скопирован.'}catch{q('text').focus();q('text').select();q('state').textContent='Выдели и скопируй состав заказа вручную.'}};
  }catch(error){if(error.cart)q('cart').hidden=false;q('state').textContent=error.message||'Не удалось собрать заказ. Закрой окно и повтори. Макет остаётся на устройстве.'}
 }

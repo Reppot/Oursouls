@@ -117,10 +117,10 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
         c.save();
         const studioSurface=c.canvas===cv||c.canvas===q('review-front')||c.canvas===q('review-back');
         const bg = c.createRadialGradient(300,300,20,300,350,480);
-        bg.addColorStop(0,studioSurface?'#46554d':'#fafaf7'); bg.addColorStop(1,studioSurface?'#2b3730':'#e5e5df');
+        bg.addColorStop(0,studioSurface?'#fafbf8':'#fafaf7'); bg.addColorStop(1,studioSurface?'#e8ebe5':'#e5e5df');
         if (!transparent) { c.fillStyle = bg; c.fillRect(0,0,600,700); }
         const photo = coloredPhoto(which);
-        c.textAlign = 'center'; c.fillStyle = studioSurface?'#e3ebe6':'#52604d';
+        c.textAlign = 'center'; c.fillStyle = '#52604d';
         if (!photo) {
             c.font = '18px Arial';
             c.fillText(photoError ? 'Макет не загрузился. Обнови страницу.' : 'Готовим студийный макет…',300,350);
@@ -397,7 +397,7 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
     }
     q('download-order').onclick=async()=>{
         if(!ready()||pending)return;const button=q('download-order');button.disabled=true;status('Подготавливаем макет…');
-        try{await persistCurrent();const project=await packageProject();const {prepareOrder}=await import('./order-export.js');await prepareOrder(document.querySelector('input[name=csrf]')?.value||root.dataset.csrf,project);status('')}
+        try{await persistCurrent();const project=await packageProject();const {prepareOrder}=await import('./order-export.js?v=2');await prepareOrder(document.querySelector('input[name=csrf]')?.value||root.dataset.csrf,project);status('')}
         catch(error){status(error.message||'Не удалось подготовить заказ. Макет сохранён.',true)}finally{button.disabled=false}
     };
     q('print-png').onclick = () => { const key=side, s=sides[key]; if (s.img) renderPrint(s).toBlob(blob=>save(blob,`our-souls-print-${key}.png`),'image/png'); };
