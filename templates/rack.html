@@ -1,4 +1,5 @@
 <section class="rack-section" id="catalog" aria-labelledby="rack-heading" data-rack>
+  {% if products %}<div class="rack-boot-cover"><a href="{{ url_for('product',slug=products[0].slug) }}" aria-label="Рассмотреть {{ products[0].name }}"><img src="{{ products[0].variants[0].rack_image or products[0].variants[0].images.front }}" width="600" height="700" fetchpriority="high" alt="{{ products[0].name }}"></a></div>{% endif %}
   <div class="wrap">
     <h1 id="rack-heading" class="rack-sr-only">Каталог Our Souls</h1>
     {% if products %}

@@ -117,10 +117,10 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
         c.save();
         const studioSurface=c.canvas===cv||c.canvas===q('review-front')||c.canvas===q('review-back');
         const bg = c.createRadialGradient(300,300,20,300,350,480);
-        bg.addColorStop(0,studioSurface?'#fffaf9':'#fafaf7'); bg.addColorStop(1,studioSurface?'#ede5e3':'#e5e5df');
+        bg.addColorStop(0,studioSurface?'#fafaf7':'#fafaf7'); bg.addColorStop(1,studioSurface?'#e5e5df':'#e5e5df');
         if (!transparent) { c.fillStyle = bg; c.fillRect(0,0,600,700); }
         const photo = coloredPhoto(which);
-        c.textAlign = 'center'; c.fillStyle = '#76535a';
+        c.textAlign = 'center'; c.fillStyle = '#343434';
         if (!photo) {
             c.font = '18px Arial';
             c.fillText(photoError ? 'Макет не загрузился. Обнови страницу.' : 'Готовим студийный макет…',300,350);
@@ -142,9 +142,9 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
             if (edit && s.img) {
                 const d = dimensions(s);
                 c.save(); c.translate(s.x,s.y); c.rotate(s.angle*Math.PI/180);
-                c.strokeStyle='rgba(70,87,61,.65)'; c.setLineDash([7,6]); c.lineWidth=1.3;
+                c.strokeStyle='rgba(151,21,43,.7)'; c.setLineDash([7,6]); c.lineWidth=1.3;
                 c.strokeRect(-d.w/2-4,-d.h/2-4,d.w+8,d.h+8);
-                c.setLineDash([]);c.fillStyle='#f5f7ed';c.strokeStyle='#355d31';c.lineWidth=2;
+                c.setLineDash([]);c.fillStyle='#fff8f9';c.strokeStyle='#97152b';c.lineWidth=2;
                 for(const x of [-d.w/2,d.w/2])for(const y of [-d.h/2,d.h/2]){c.beginPath();c.arc(x,y,5,0,Math.PI*2);c.fill();c.stroke()}
                 c.beginPath();c.moveTo(0,-d.h/2);c.lineTo(0,-d.h/2-28);c.stroke();c.beginPath();c.arc(0,-d.h/2-28,6,0,Math.PI*2);c.fill();c.stroke();c.restore();
             }

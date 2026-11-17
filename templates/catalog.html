@@ -3,6 +3,7 @@
 <main class="section" id="main">
   <div class="wrap">
     <header class="shop-page-heading"><p class="breadcrumbs"><a href="/">Главная</a> / Каталог</p><h1>Каталог</h1></header>
+    <nav class="catalog-category-nav" aria-label="Категории принтов"><a href="{{ url_for('catalog',q=search,sort=sort,color=selected_colors,min=minimum,max=maximum) }}" {% if not category %}aria-current="page"{% endif %}>Все принты</a>{% for name in categories %}<a href="{{ url_for('catalog',category=name,q=search,sort=sort,color=selected_colors,min=minimum,max=maximum) }}" {% if category==name %}aria-current="page"{% endif %}>{{ name }}</a>{% endfor %}</nav>
     {% if category or search or selected_colors or minimum is not none or maximum is not none %}<div class="catalog-active">{% if search %}<span>Поиск: {{ search }}</span>{% endif %}{% if category %}<span>{{ category }}</span>{% endif %}{% for color in selected_colors %}<span>{{ color }}</span>{% endfor %}{% if minimum is not none %}<span>От {{ minimum }} ₽</span>{% endif %}{% if maximum is not none %}<span>До {{ maximum }} ₽</span>{% endif %}<a href="/catalog/">Сбросить всё ×</a></div>{% endif %}
         <div class="catalog-tools"><button class="catalog-filter-toggle" type="button" data-filter-toggle aria-expanded="false" aria-controls="catalog-filter-panel">Поиск и фильтры{% if category or search or selected_colors or minimum is not none or maximum is not none %} · выбраны{% endif %}</button>
         <form method="get" class="catalog-toolbar" action="/catalog/">

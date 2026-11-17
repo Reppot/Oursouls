@@ -15,7 +15,16 @@ if(gallery){
   });
  });
 }
-document.getElementById('product-order')?.elements.size.addEventListener('change',function(){
+const orderForm=document.getElementById('product-order'),mobileOrder=document.querySelector('[data-mobile-product-order]');
+orderForm?.addEventListener('change',event=>{
+ if(event.target.name!=='size')return;
+ const size=new FormData(orderForm).get('size');
+ if(mobileOrder)mobileOrder.textContent='В корзину · '+size;
  const link=document.getElementById('product-try');if(!link)return;
- const url=new URL(link.href);url.searchParams.set('size',this.value);link.href=url.href;
+ const url=new URL(link.href);url.searchParams.set('size',size);link.href=url.href;
 });
+mobileOrder?.addEventListener('click',()=>{
+ if(new FormData(orderForm).get('size')){orderForm.requestSubmit();return}
+ const first=orderForm.querySelector('input[name=size]');first?.scrollIntoView({block:'center',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});first?.focus({preventScroll:true});
+});
+try{const previous=new URL(sessionStorage.getItem('os-catalog-return')||'/catalog/',location.origin);if(previous.origin===location.origin&&previous.pathname==='/catalog/'){const back=document.querySelector('[data-catalog-return]');if(back)back.href=previous.pathname+previous.search}}catch{}

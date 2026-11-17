@@ -1,10 +1,9 @@
 import {rackLayout,clampPhase} from './layout.mjs';
 import {advanceRack,wheelDistance} from './motion.mjs';
-import {mountHalftone} from './halftone.js?v=2';
 
 const root=document.querySelector('[data-rack]');
 if(root?.querySelector('[data-rack-data]')){
- const ambient=mountHalftone(root);
+ let ambientBusy=false;const ambient={setBusy(value){if(ambientBusy===Boolean(value))return;ambientBusy=Boolean(value);document.body.classList.toggle('rack-is-busy',ambientBusy)}};
  const products=JSON.parse(root.querySelector('[data-rack-data]').textContent);
  const pieces=[...root.querySelectorAll('[data-rack-index]')],track=root.querySelector('.rack-track');
  const q=name=>root.querySelector('[data-rack-'+name+']');
@@ -40,7 +39,7 @@ if(root?.querySelector('[data-rack-data]')){
   try{if(!isCutout){const canvas=await cutout(image,url);if(!canvas||image.dataset.source!==url)return;image.src=canvas.toDataURL('image/webp',.91)}image.classList.add('is-cutout');}
   catch{if(image.dataset.source!==url)return;image.classList.remove('is-cutout');}
   if(image.dataset.source!==url)return;
-  try{await image.decode()}catch{if(image.dataset.source!==url)return}
+  try{await image.decode();const hanger=image.closest('.rack-piece')?.querySelector('.rack-hanger');if(hanger)await hanger.decode()}catch{if(image.dataset.source!==url)return}
   if(image.dataset.source!==url)return;
   image.closest('.rack-piece')?.classList.add('is-ready');schedule();
  }
@@ -106,6 +105,7 @@ if(root?.querySelector('[data-rack-data]')){
    piece.classList.toggle('is-selected',i===nearest);piece.setAttribute('aria-current',String(i===nearest));
   });
   q('prev').disabled=nearest===0;q('next').disabled=nearest===products.length-1;
+  if(pieces[nearest]?.classList.contains('is-ready'))root.dataset.ready='true';
   q('return').hidden=!picked;root.classList.toggle('has-picked',picked);if(animation&&canMove)frame=requestAnimationFrame(layout);else lastFrameTime=0;
  }
  function schedule(){if(!frame)frame=requestAnimationFrame(layout)}

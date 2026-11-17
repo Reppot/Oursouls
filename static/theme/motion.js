@@ -30,3 +30,15 @@ const studio=document.querySelector('#our-print');
 if(studio){
  new MutationObserver(records=>{if(!records.some(record=>record.oldValue))return;play(document.getElementById('op-panel-'+studio.dataset.step),[{opacity:.55,transform:'translateX(8px)'},{opacity:1,transform:'none'}],{duration:220})}).observe(studio,{attributes:true,attributeFilter:['data-step'],attributeOldValue:true});
 }
+
+// One composited sheen for the whole page; freeze it while editing or dragging.
+let backdropHeld=false;
+function syncBackdrop(){document.body.classList.toggle('ambient-paused',document.hidden||reduced.matches||backdropHeld||!!document.querySelector('dialog[open]')||!!document.activeElement?.matches('input,select,textarea'))}
+document.addEventListener('visibilitychange',syncBackdrop);
+document.addEventListener('pointerdown',()=>{backdropHeld=true;syncBackdrop()},{passive:true});
+for(const event of ['pointerup','pointercancel'])window.addEventListener(event,()=>{backdropHeld=false;syncBackdrop()},{passive:true});
+window.addEventListener('blur',()=>{backdropHeld=false;syncBackdrop()});
+document.addEventListener('focusin',syncBackdrop);document.addEventListener('focusout',()=>queueMicrotask(syncBackdrop));
+reduced.addEventListener('change',syncBackdrop);
+new MutationObserver(syncBackdrop).observe(document.body,{subtree:true,attributes:true,attributeFilter:['open']});
+syncBackdrop();

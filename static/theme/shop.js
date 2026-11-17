@@ -1,4 +1,4 @@
-import './motion.js?v=1';
+import './motion.js?v=2';
 const toggle=document.querySelector('.mobile-menu-toggle'), nav=document.querySelector('#main-navigation');
 toggle?.addEventListener('click',()=>{const open=toggle.getAttribute('aria-expanded')!=='true';toggle.setAttribute('aria-expanded',String(open));nav.classList.toggle('is-open',open);if(open&&matchMedia('(max-width:800px)').matches){const more=nav.querySelector('.nav-more');if(more)more.open=true}});
 nav?.addEventListener('click',e=>{if(e.target.closest('a')){nav.classList.remove('is-open');toggle.setAttribute('aria-expanded','false')}});
@@ -18,3 +18,8 @@ if(cartLink){import('../studio/draft-store.js').then(async({drafts})=>{const cou
 const more=document.querySelector('.nav-more');
 document.addEventListener('click',event=>{if(more?.open&&!more.contains(event.target)&&!toggle?.contains(event.target))more.open=false});
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&more?.open){more.open=false;more.querySelector('summary').focus()}});
+
+// Preserve the exact catalog context through the explicit product return link.
+if(location.pathname==='/catalog/'){
+ try{sessionStorage.setItem('os-catalog-return',location.pathname+location.search)}catch{}
+}
