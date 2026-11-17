@@ -1,6 +1,6 @@
 import {rackLayout,clampPhase} from './layout.mjs';
 import {advanceRack,wheelDistance} from './motion.mjs';
-import {mountHalftone} from './halftone.js?v=1';
+import {mountHalftone} from './halftone.js?v=2';
 
 const root=document.querySelector('[data-rack]');
 if(root?.querySelector('[data-rack-data]')){

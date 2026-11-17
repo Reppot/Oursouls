@@ -21,7 +21,7 @@ export function mountHalftone(root){
     const y=p.y+(layer?1.5:0)*scale;
     ctx.moveTo(x+radius,y);ctx.arc(x,y,radius,0,Math.PI*2);
    }
-   ctx.fillStyle=layer?`rgba(122,39,58,${strength*.13})`:`rgba(33,65,45,${strength*.34})`;
+   ctx.fillStyle=layer?`rgba(177,43,63,${strength*.13})`:`rgba(144,30,49,${strength*.34})`;
    ctx.fill();
   }
   ctx.save();ctx.globalCompositeOperation='destination-out';

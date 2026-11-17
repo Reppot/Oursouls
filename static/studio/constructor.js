@@ -117,10 +117,10 @@ function coloredPhoto(which){var key=q('garment').value+'-'+which,view=photoView
         c.save();
         const studioSurface=c.canvas===cv||c.canvas===q('review-front')||c.canvas===q('review-back');
         const bg = c.createRadialGradient(300,300,20,300,350,480);
-        bg.addColorStop(0,studioSurface?'#fafbf8':'#fafaf7'); bg.addColorStop(1,studioSurface?'#e8ebe5':'#e5e5df');
+        bg.addColorStop(0,studioSurface?'#fffaf9':'#fafaf7'); bg.addColorStop(1,studioSurface?'#ede5e3':'#e5e5df');
         if (!transparent) { c.fillStyle = bg; c.fillRect(0,0,600,700); }
         const photo = coloredPhoto(which);
-        c.textAlign = 'center'; c.fillStyle = '#52604d';
+        c.textAlign = 'center'; c.fillStyle = '#76535a';
         if (!photo) {
             c.font = '18px Arial';
             c.fillText(photoError ? 'Макет не загрузился. Обнови страницу.' : 'Готовим студийный макет…',300,350);
