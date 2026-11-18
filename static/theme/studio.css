@@ -591,3 +591,29 @@ body.page-home .rack-section::after{content:none;display:none;animation:none}
 /* Keep the garment label legible when the print editor uses a light stage. */
 body.page-constructor #our-print .os-stage-top{background:#111;color:#f3f3ef}
 body.page-constructor #our-print .os-segment [data-file-dot]{background:var(--os-action)}
+
+/* A readable order sheet; the contents use the remaining dialog height. */
+body.os-editorial .shared-order-dialog{
+  box-sizing:border-box;width:min(1120px,calc(100vw - 48px));
+  max-width:calc(100vw - 48px);height:min(820px,calc(100dvh - 48px));
+  max-height:calc(100dvh - 48px);padding:clamp(24px,3vw,40px);overflow:auto;
+}
+body.os-editorial .shared-order-dialog[open]{display:flex;flex-direction:column}
+body.os-editorial .shared-order-dialog .dialog-close{position:absolute;top:24px;right:24px;float:none;flex:none}
+body.os-editorial .shared-order-dialog h2{margin:0 56px 12px 0;flex:none}
+body.os-editorial .shared-order-dialog [data-order-state]{margin:0 0 16px;flex:none}
+body.os-editorial #shared-order-dialog textarea[data-order-text]{
+  box-sizing:border-box;display:block;width:100%;flex:1 1 320px;height:auto;
+  min-height:180px;max-height:none;margin:0 0 20px;padding:18px;
+  font-size:16px;line-height:1.6;resize:none;overflow:auto;
+}
+body.os-editorial .shared-order-dialog .actions{flex:none}
+body.os-editorial .shared-order-dialog [data-order-help]{margin:16px 0 0;flex:none}
+@media(max-width:600px){
+  body.os-editorial .shared-order-dialog{width:calc(100vw - 24px);max-width:calc(100vw - 24px);height:calc(100dvh - 24px);max-height:calc(100dvh - 24px);padding:20px}
+  body.os-editorial .shared-order-dialog .dialog-close{top:16px;right:16px}
+  body.os-editorial .shared-order-dialog h2{font-size:30px;min-height:44px;margin-right:48px}
+  body.os-editorial #shared-order-dialog textarea[data-order-text]{min-height:140px;padding:14px;margin-bottom:16px}
+  body.os-editorial .shared-order-dialog .actions{display:grid;grid-template-columns:1fr}
+  body.os-editorial .shared-order-dialog .actions>*{width:100%;text-align:center;justify-content:center}
+}
