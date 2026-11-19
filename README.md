@@ -1,4 +1,5 @@
 # Our Souls на Render
+https://our-souls-shop.onrender.com
 
 Витрина, 60 опубликованных товаров, 67 фотографий, страницы печати и бренда, корзина с заявкой в Telegram и конструктор с десятью принтами. Исходные фото лежат в static/catalog. Новые товары и правки сохраняются в Supabase Postgres, новые фото в Supabase Storage.
 
